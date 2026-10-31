@@ -1,5 +1,5 @@
 // Pont sécurisé : expose window.photon à l'interface, rien d'autre.
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import type { PhotonApi } from '../shared/api'
 
 function listen<T>(channel: string) {
@@ -14,12 +14,20 @@ const photon: PhotonApi = {
   load: () => ipcRenderer.invoke('photon:load'),
   ready: () => ipcRenderer.send('photon:ready'),
   saveSettings: (patch) => ipcRenderer.invoke('photon:saveSettings', patch),
+  saveTheme: (theme) => ipcRenderer.invoke('photon:saveTheme', theme),
   saveProfile: (profile) => ipcRenderer.invoke('photon:saveProfile', profile),
   hide: (reason) => ipcRenderer.send('photon:hide', reason),
   shown: () => ipcRenderer.send('photon:shown'),
   onShow: listen('photon:show'),
   onHide: listen('photon:hide'),
-  onSettings: listen('photon:settings')
+  onSettings: listen('photon:settings'),
+  cpuRam: () => ipcRenderer.invoke('photon:cpuRam'),
+  disks: () => ipcRenderer.invoke('photon:disks'),
+  fileIcon: (path) => ipcRenderer.invoke('photon:fileIcon', path),
+  launch: (path) => ipcRenderer.invoke('photon:launch', path),
+  pickApps: () => ipcRenderer.invoke('photon:pickApps'),
+  pathForFile: (file) => webUtils.getPathForFile(file),
+  pickImage: () => ipcRenderer.invoke('photon:pickImage')
 }
 
 contextBridge.exposeInMainWorld('photon', photon)

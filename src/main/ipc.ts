@@ -2,7 +2,9 @@
 import { ipcMain, type IpcMainEvent, type IpcMainInvokeEvent } from 'electron'
 import type { AppState } from '../shared/api'
 import type { Settings } from '../shared/model'
-import { data, saveProfile } from './data'
+import { pickImage } from './background'
+import { data, saveProfile, saveTheme } from './data'
+import { cpuRam, disks, fileIcon, launch, pickApps } from './system'
 import { hideWindow, logShown, ownsSender } from './window'
 
 interface IpcActions {
@@ -40,7 +42,19 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:load', (): AppState => ({ ...data }))
   on('photon:ready', actions.ready)
   handle('photon:saveSettings', (patch) => actions.updateSettings(editable(patch)))
+  handle('photon:saveTheme', (raw) => saveTheme(raw)) // validé par parseTheme
   handle('photon:saveProfile', (raw) => saveProfile(raw)) // validé par parseProfile
   on('photon:hide', (reason) => hideWindow(typeof reason === 'string' ? reason : 'interface'))
   on('photon:shown', logShown)
+  handle('photon:cpuRam', cpuRam)
+  handle('photon:disks', disks)
+  handle('photon:fileIcon', (path) => (typeof path === 'string' ? fileIcon(path) : null))
+  // Lancer une app depuis Photon le cache, seulement si Windows a pu l'ouvrir.
+  handle('photon:launch', async (path) => {
+    const launched = typeof path === 'string' && (await launch(path))
+    if (launched) hideWindow('app lancée')
+    return launched
+  })
+  handle('photon:pickApps', pickApps)
+  handle('photon:pickImage', pickImage)
 }

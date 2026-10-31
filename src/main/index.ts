@@ -1,6 +1,7 @@
 // Démarrage de Photon : instance unique, données, fenêtre cachée, zone de notification, raccourci.
 import { app, globalShortcut } from 'electron'
 import type { Settings } from '../shared/model'
+import { registerBackgroundScheme, serveBackgrounds } from './background'
 import { data, loadAll, saveSettings } from './data'
 import { registerIpc } from './ipc'
 import { registerShortcut } from './shortcut'
@@ -55,9 +56,11 @@ if (!app.requestSingleInstanceLock()) {
 } else {
   app.on('before-quit', allowQuit)
   app.on('will-quit', () => globalShortcut.unregisterAll())
+  registerBackgroundScheme() // doit précéder app.whenReady()
 
   void app.whenReady().then(async () => {
     await loadAll()
+    serveBackgrounds()
     registerIpc({ ready: onRendererReady, updateSettings })
     createWindow()
     // Branché après la fenêtre : un 2e lancement pendant le démarrage ne trouve pas de fenêtre vide.
