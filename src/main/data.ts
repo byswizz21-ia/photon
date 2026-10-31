@@ -38,16 +38,16 @@ export async function loadAll(): Promise<void> {
 
 export async function saveSettings(patch: Partial<Settings>): Promise<Settings> {
   data.settings = parseSettings({ ...data.settings, ...patch })
-  await writeJson(settingsFile(), data.settings)
+  await writeJson(settingsFile(), data.settings, parseSettings)
   return data.settings
 }
 
 export async function saveTheme(raw: unknown): Promise<void> {
   data.theme = parseTheme(raw)
-  await writeJson(themeFile(themeName()), data.theme)
+  await writeJson(themeFile(themeName()), data.theme, parseTheme)
 }
 
 export async function saveProfile(raw: unknown): Promise<void> {
   data.profile = parseProfile(raw)
-  await writeJson(profileFile(data.settings.activeProfile), data.profile)
+  await writeJson(profileFile(data.settings.activeProfile), data.profile, parseProfile)
 }

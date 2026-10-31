@@ -10,6 +10,22 @@ export const app = $state({
   profile: defaultProfile()
 })
 
+let saveTimer: ReturnType<typeof setTimeout> | undefined
+
+// Sauvegarde le profil peu après le dernier changement : une écriture par rafale.
+export function saveProfile(): void {
+  clearTimeout(saveTimer)
+  saveTimer = setTimeout(flushProfile, 250)
+}
+
+// Écrit tout de suite s'il reste une sauvegarde en attente (appelé à la fermeture de Photon).
+export function flushProfile(): void {
+  if (saveTimer === undefined) return
+  clearTimeout(saveTimer)
+  saveTimer = undefined
+  void window.photon.saveProfile($state.snapshot(app.profile))
+}
+
 // Réglage « réduire les animations » de Photon, ou celui de Windows.
 export const reducedMotion = (): boolean =>
   app.settings.reduceMotion || prefersReducedMotion.current

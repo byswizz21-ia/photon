@@ -2,7 +2,7 @@
 import { ipcMain, type IpcMainEvent, type IpcMainInvokeEvent } from 'electron'
 import type { AppState } from '../shared/api'
 import type { Settings } from '../shared/model'
-import { data } from './data'
+import { data, saveProfile } from './data'
 import { hideWindow, logShown, ownsSender } from './window'
 
 interface IpcActions {
@@ -12,6 +12,15 @@ interface IpcActions {
 
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v)
+
+// Réglages modifiables depuis l'interface. Profil et thème actifs : pas de bascule avant la V3
+// (changer de fichier sans recharger écraserait le nouveau profil avec l'ancien).
+const EDITABLE: readonly string[] = ['shortcut', 'mode', 'alwaysOnTop', 'reduceMotion']
+
+const editable = (patch: unknown): Partial<Settings> =>
+  isObject(patch)
+    ? Object.fromEntries(Object.entries(patch).filter(([key]) => EDITABLE.includes(key)))
+    : {}
 
 // Seule la fenêtre de Photon peut appeler le pont.
 function handle(channel: string, run: (...args: unknown[]) => unknown): void {
@@ -30,7 +39,8 @@ function on(channel: string, run: (...args: unknown[]) => void): void {
 export function registerIpc(actions: IpcActions): void {
   handle('photon:load', (): AppState => ({ ...data }))
   on('photon:ready', actions.ready)
-  handle('photon:saveSettings', (patch) => actions.updateSettings(isObject(patch) ? patch : {}))
+  handle('photon:saveSettings', (patch) => actions.updateSettings(editable(patch)))
+  handle('photon:saveProfile', (raw) => saveProfile(raw)) // validé par parseProfile
   on('photon:hide', (reason) => hideWindow(typeof reason === 'string' ? reason : 'interface'))
   on('photon:shown', logShown)
 }

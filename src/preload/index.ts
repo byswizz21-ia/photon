@@ -14,6 +14,7 @@ const photon: PhotonApi = {
   load: () => ipcRenderer.invoke('photon:load'),
   ready: () => ipcRenderer.send('photon:ready'),
   saveSettings: (patch) => ipcRenderer.invoke('photon:saveSettings', patch),
+  saveProfile: (profile) => ipcRenderer.invoke('photon:saveProfile', profile),
   hide: (reason) => ipcRenderer.send('photon:hide', reason),
   shown: () => ipcRenderer.send('photon:shown'),
   onShow: listen('photon:show'),

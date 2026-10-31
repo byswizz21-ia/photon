@@ -24,31 +24,41 @@ beforeEach(async () => {
 })
 
 const read = (): Promise<Doc> => readJson(file, parse, fallback)
+const write = (value: number): Promise<void> => writeJson(file, { value }, parse)
+const readBak = async (): Promise<unknown> => JSON.parse(await fs.readFile(`${file}.bak`, 'utf8'))
 
 describe('writeJson', () => {
   test('écrit puis relit les mêmes données, sans laisser de .tmp', async () => {
-    await writeJson(file, { value: 1 })
+    await write(1)
     expect(await read()).toEqual({ value: 1 })
     await expect(fs.access(`${file}.tmp`)).rejects.toThrow()
   })
 
   test('garde la version précédente dans le .bak', async () => {
-    await writeJson(file, { value: 1 })
-    await writeJson(file, { value: 2 })
-    expect(JSON.parse(await fs.readFile(`${file}.bak`, 'utf8'))).toEqual({ value: 1 })
+    await write(1)
+    await write(2)
+    expect(await readBak()).toEqual({ value: 1 })
   })
 
   test('ne copie jamais un fichier corrompu dans le .bak', async () => {
-    await writeJson(file, { value: 1 })
-    await writeJson(file, { value: 2 }) // .bak = 1
+    await write(1)
+    await write(2) // .bak = 1
     await fs.writeFile(file, '{ cassé', 'utf8')
-    await writeJson(file, { value: 3 })
-    expect(JSON.parse(await fs.readFile(`${file}.bak`, 'utf8'))).toEqual({ value: 1 })
+    await write(3)
+    expect(await readBak()).toEqual({ value: 1 })
     expect(await read()).toEqual({ value: 3 })
   })
 
+  test('ne copie pas dans le .bak un JSON lisible mais rejeté par le modèle', async () => {
+    await write(1)
+    await write(2) // .bak = 1
+    await fs.writeFile(file, '[]', 'utf8')
+    await write(3)
+    expect(await readBak()).toEqual({ value: 1 })
+  })
+
   test('les écritures simultanées passent dans l’ordre : la dernière gagne', async () => {
-    await Promise.all([1, 2, 3, 4, 5].map((value) => writeJson(file, { value })))
+    await Promise.all([1, 2, 3, 4, 5].map(write))
     expect(await read()).toEqual({ value: 5 })
   })
 })
@@ -59,21 +69,21 @@ describe('readJson', () => {
   })
 
   test('fichier corrompu : reprise du .bak', async () => {
-    await writeJson(file, { value: 1 })
-    await writeJson(file, { value: 2 })
+    await write(1)
+    await write(2)
     await fs.writeFile(file, '{ cassé', 'utf8')
     expect(await read()).toEqual({ value: 1 })
   })
 
   test('JSON valide mais contenu invalide : reprise du .bak', async () => {
-    await writeJson(file, { value: 1 })
-    await writeJson(file, { value: 2 })
+    await write(1)
+    await write(2)
     await fs.writeFile(file, '[]', 'utf8')
     expect(await read()).toEqual({ value: 1 })
   })
 
   test('fichier et .bak corrompus : valeur par défaut', async () => {
-    await writeJson(file, { value: 1 })
+    await write(1)
     await fs.writeFile(file, 'null', 'utf8')
     await fs.writeFile(`${file}.bak`, '', 'utf8')
     expect(await read()).toEqual({ value: -1 })

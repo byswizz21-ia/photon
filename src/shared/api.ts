@@ -16,6 +16,7 @@ export interface PhotonApi {
   load(): Promise<AppState>
   ready(): void // interface montée : la fenêtre peut s'afficher
   saveSettings(patch: Partial<Settings>): Promise<Settings>
+  saveProfile(profile: Profile): Promise<void>
   hide(reason: string): void // raison écrite dans le log
   shown(): void // première image après affichage (mesure du délai)
   onShow(callback: (event: ShowEvent) => void): () => void

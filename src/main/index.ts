@@ -53,7 +53,6 @@ function onRendererReady(): void {
 if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
-  app.on('second-instance', showWindow)
   app.on('before-quit', allowQuit)
   app.on('will-quit', () => globalShortcut.unregisterAll())
 
@@ -61,6 +60,8 @@ if (!app.requestSingleInstanceLock()) {
     await loadAll()
     registerIpc({ ready: onRendererReady, updateSettings })
     createWindow()
+    // Branché après la fenêtre : un 2e lancement pendant le démarrage ne trouve pas de fenêtre vide.
+    app.on('second-instance', showWindow)
     activeShortcut = registerShortcut(data.settings.shortcut, toggleWindow)
     console.log(`[photon] raccourci actif : ${activeShortcut ?? 'aucun'}`)
     const update = (patch: Partial<Settings>): void => void updateSettings(patch)

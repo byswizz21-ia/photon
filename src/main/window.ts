@@ -1,7 +1,15 @@
 // Fenêtre unique de Photon : créée cachée au démarrage, ensuite seulement affichée ou cachée.
 // Plein écran = fenêtre sans bordure à la taille de l'écran (pas le fullscreen natif) ;
 // mode fenêtre = fenêtre libre redimensionnable, position mémorisée.
-import { BrowserWindow, screen, type Display, type Rectangle, type WebContents } from 'electron'
+import {
+  app,
+  BrowserWindow,
+  Menu,
+  screen,
+  type Display,
+  type Rectangle,
+  type WebContents
+} from 'electron'
 import { join } from 'node:path'
 import icon from '../../assets/icon.ico?asset'
 import { data, saveSettings } from './data'
@@ -40,6 +48,11 @@ export function createWindow(): BrowserWindow {
   })
   // Arrêt ou déconnexion de Windows : laisser fermer, sinon Photon bloquerait l'arrêt.
   win.on('session-end', allowQuit)
+  // L'interface ne quitte jamais sa page (fichier lâché, lien) et n'ouvre aucune fenêtre.
+  win.webContents.on('will-navigate', (event) => event.preventDefault())
+  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
+  // App installée : pas de menu, donc pas de Ctrl+R, DevTools, zoom ni F11.
+  if (app.isPackaged) Menu.setApplicationMenu(null)
   win.on('blur', () => {
     const fullscreen = data.settings.mode === 'fullscreen'
     if (fullscreen && modals === 0 && !win.webContents.isDevToolsFocused())
@@ -49,7 +62,7 @@ export function createWindow(): BrowserWindow {
   win.on('resized', rememberBounds)
   applyMode()
   const devUrl = process.env['ELECTRON_RENDERER_URL']
-  if (devUrl) void win.loadURL(devUrl)
+  if (devUrl && !app.isPackaged) void win.loadURL(devUrl)
   else void win.loadFile(join(__dirname, '../renderer/index.html'))
   return win
 }

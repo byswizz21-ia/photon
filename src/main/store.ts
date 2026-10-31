@@ -21,14 +21,15 @@ export async function readJson<T>(
 // Les écritures d'un même fichier passent l'une après l'autre (pas de course sur le .tmp).
 const queues = new Map<string, Promise<void>>()
 
-export function writeJson(file: string, data: unknown): Promise<void> {
-  const run = (): Promise<void> => write(file, JSON.stringify(data, null, 2))
+// `parse` valide l'ancienne version avant d'en faire la copie de secours.
+export function writeJson<T>(file: string, data: T, parse: (raw: unknown) => T): Promise<void> {
+  const run = (): Promise<void> => write(file, JSON.stringify(data, null, 2), parse)
   const next = (queues.get(file) ?? Promise.resolve()).then(run, run)
   queues.set(file, next)
   return next
 }
 
-async function write(file: string, json: string): Promise<void> {
+async function write(file: string, json: string, parse: (raw: unknown) => unknown): Promise<void> {
   await fs.mkdir(dirname(file), { recursive: true })
   const tmp = `${file}.tmp`
   const handle = await fs.open(tmp, 'w')
@@ -38,17 +39,19 @@ async function write(file: string, json: string): Promise<void> {
   } finally {
     await handle.close()
   }
-  // Le .bak garde la dernière version lisible : on n'y copie jamais un fichier corrompu.
-  if (await isValidJson(file)) await fs.copyFile(file, `${file}.bak`)
+  await backup(file, parse)
   await renameWithRetry(tmp, file)
 }
 
-async function isValidJson(file: string): Promise<boolean> {
+// Le .bak garde la dernière version valide : jamais un fichier corrompu ou rejeté par le modèle.
+// Copie « au mieux » : un .bak verrouillé ne doit pas faire échouer la sauvegarde.
+async function backup(file: string, parse: (raw: unknown) => unknown): Promise<void> {
   try {
-    JSON.parse(await fs.readFile(file, 'utf8'))
-    return true
+    const current = await fs.readFile(file, 'utf8')
+    parse(JSON.parse(current))
+    await fs.writeFile(`${file}.bak`, current, 'utf8')
   } catch {
-    return false
+    // pas d'ancienne version valide, ou .bak indisponible : on garde l'ancien .bak
   }
 }
 

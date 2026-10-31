@@ -1,7 +1,11 @@
 <script lang="ts">
+  import CheckIcon from 'phosphor-svelte/lib/CheckIcon'
+  import PencilSimpleIcon from 'phosphor-svelte/lib/PencilSimpleIcon'
+  import AddMenu from './grid/AddMenu.svelte'
+  import Grid from './grid/Grid.svelte'
   import Logo from './lib/Logo.svelte'
   import { reveal } from './reveal'
-  import { app, reducedMotion } from './state.svelte'
+  import { app, flushProfile, reducedMotion } from './state.svelte'
 
   let root: HTMLElement
 
@@ -14,7 +18,11 @@
       // Mesure : deux images après l'affichage ≈ fenêtre réellement à l'écran.
       requestAnimationFrame(() => requestAnimationFrame(() => window.photon.shown()))
     })
-    const offHide = window.photon.onHide(() => (app.visible = false))
+    const offHide = window.photon.onHide(() => {
+      app.visible = false
+      app.editing = false
+      flushProfile()
+    })
     const offSettings = window.photon.onSettings((settings) => (app.settings = settings))
     window.photon.ready()
     return () => {
@@ -22,6 +30,11 @@
       offHide()
       offSettings()
     }
+  })
+
+  // « Réduire les animations » (Photon ou Windows) coupe toutes les transitions CSS.
+  $effect(() => {
+    document.documentElement.toggleAttribute('data-reduce-motion', reducedMotion())
   })
 
   // Échap : quitte d'abord le mode édition, sinon ferme Photon.
@@ -40,7 +53,12 @@
   }
 </script>
 
-<svelte:window onkeydown={onKeydown} />
+<!-- Un fichier lâché hors d'un widget qui l'accepte ne fait rien (pas de navigation). -->
+<svelte:window
+  onkeydown={onKeydown}
+  ondragover={(event) => event.preventDefault()}
+  ondrop={(event) => event.preventDefault()}
+/>
 
 <!-- Le clic dans le vide est un raccourci souris : au clavier, Échap ferme déjà. -->
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
@@ -51,7 +69,27 @@
     <header class="bar" data-reveal class:drag={!fullscreen}>
       <Logo size={28} />
       <span class="name">Photon</span>
+      <div class="actions">
+        {#if app.editing}
+          <AddMenu />
+          <button type="button" class="action primary" onclick={() => (app.editing = false)}>
+            <CheckIcon size={16} weight="bold" aria-hidden="true" />
+            Terminé
+          </button>
+        {:else}
+          <button
+            type="button"
+            class="action icon"
+            aria-label="Modifier la grille"
+            title="Modifier la grille"
+            onclick={() => (app.editing = true)}
+          >
+            <PencilSimpleIcon size={18} weight="duotone" aria-hidden="true" />
+          </button>
+        {/if}
+      </div>
     </header>
+    <Grid />
   </main>
 </div>
 
@@ -140,5 +178,14 @@
     font-size: 18px;
     font-weight: 600;
     letter-spacing: -0.01em;
+  }
+
+  /* Boutons de la barre : cliquables même dans la zone qui déplace la fenêtre. */
+  .actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    -webkit-app-region: no-drag;
   }
 </style>
