@@ -57,6 +57,10 @@ export interface Profile {
 export const SHORTCUTS = ['Super+Alt+Space', 'Super+Shift+Space', 'Ctrl+Alt+Space'] as const
 export const DEFAULT_ACCENT = '#7CC4FF'
 
+// 'Super+Alt+Space' → 'Win+Alt+Espace'
+export const shortcutLabel = (accelerator: string): string =>
+  accelerator.replace('Super', 'Win').replace('Shift', 'Maj').replace('Space', 'Espace')
+
 export const defaultSettings = (): Settings => ({
   shortcut: SHORTCUTS[0],
   mode: 'fullscreen',
