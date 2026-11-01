@@ -14,6 +14,7 @@ import { join } from 'node:path'
 import icon from '../../assets/icon.ico?asset'
 import { data, saveSettings } from './data'
 import { screensKey, targetDisplay } from './screens'
+import { liveBlurOn } from './backdrop'
 
 const DEFAULT_SIZE = { width: 1100, height: 720 }
 const MIN_SIZE = { width: 380, height: 320 }
@@ -70,6 +71,8 @@ export function createWindow(): BrowserWindow {
   })
   win.on('moved', rememberBounds)
   win.on('resized', rememberBounds)
+  win.on('move', sendPlace)
+  win.on('resize', sendPlace)
   applyMode()
   const devUrl = process.env['ELECTRON_RENDERER_URL']
   if (devUrl && !app.isPackaged) void win.loadURL(devUrl)
@@ -95,6 +98,7 @@ export function applyMode(): void {
   win.setResizable(!fullscreen)
   win.setSkipTaskbar(fullscreen)
   win.setAlwaysOnTop(fullscreen || data.settings.alwaysOnTop)
+  win.setContentProtection(liveBlurOn()) // hors des captures, dont la sienne (flou réglable)
   win.setMinimumSize(fullscreen ? 0 : MIN_SIZE.width, fullscreen ? 0 : MIN_SIZE.height)
   if (win.isVisible()) place(screen.getDisplayMatching(win.getBounds()))
 }
@@ -199,6 +203,21 @@ function place(display: Display): void {
   win.setBounds(target)
   // Entre deux écrans d'échelles différentes, Electron peut se tromper au premier essai.
   if (!sameRect(win.getBounds(), target)) win.setBounds(target)
+  sendPlace()
+}
+
+// Flou réglable : où se trouve l'écran par rapport à la fenêtre, pour y caler sa capture.
+function sendPlace(): void {
+  if (mini || !liveBlurOn()) return
+  const bounds = win.getBounds()
+  const display = screen.getDisplayMatching(bounds)
+  send('photon:place', {
+    id: display.id,
+    x: display.bounds.x - bounds.x,
+    y: display.bounds.y - bounds.y,
+    width: display.bounds.width,
+    height: display.bounds.height
+  })
 }
 
 // Mode fenêtre : position mémorisée ; sur un autre écran, même position relative, bornée.

@@ -24,6 +24,7 @@ import {
   toggleWindow
 } from './window'
 import { startScreens } from './screens'
+import { startBackdrop } from './backdrop'
 import { leaveFocus } from './focus'
 import { startAuto } from './auto'
 
@@ -80,7 +81,8 @@ if (!app.requestSingleInstanceLock()) {
     await Promise.all([loadAll(), loadClaude(), loadSearch()])
     serveBackgrounds()
     registerIpc({ ready: onRendererReady, updateSettings })
-    createWindow().on('hide', leaveBypass) // Bypass ne survit pas à la fermeture de Photon
+    const win = createWindow().on('hide', leaveBypass) // Bypass ne survit pas à la fermeture
+    startBackdrop(win)
     // Branché après la fenêtre : un 2e lancement pendant le démarrage ne trouve pas de fenêtre vide.
     app.on('second-instance', showWindow)
     activeShortcut = registerShortcut('photon', data.settings.shortcut, SHORTCUTS, toggleWindow)

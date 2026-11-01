@@ -12,17 +12,22 @@
   import { app, flushProfile, flushTheme, reducedMotion, switchProfile } from './state.svelte'
   import { useTheme } from './theme/apply.svelte'
   import Background from './theme/Background.svelte'
+  import LiveBackdrop from './theme/LiveBackdrop.svelte'
   import SettingsPanel from './theme/SettingsPanel.svelte'
+  import type { Placement } from '../shared/api'
 
   let root: HTMLElement
   let gear = $state<HTMLButtonElement>()
   let settingsOpen = $state(false)
   let pressedVoid = false // le clic a commencé dans le vide (sinon : curseur glissé hors d'un contrôle)
   let claudeBusy = $state(false) // le logo tourne en continu pendant une réponse de Claude
+  let place = $state<Placement | null>(null) // écran sous la fenêtre (flou réglable)
+  const display = $derived(place?.id ?? 0) // ne change qu'en passant d'un écran à l'autre
 
   useTheme()
 
   const fullscreen = $derived(app.settings.mode === 'fullscreen')
+  const liveBlur = $derived(!fullscreen && app.settings.liveBlur)
 
   $effect(() => {
     const offShow = window.photon.onShow(({ origin, mini }) => {
@@ -42,12 +47,14 @@
     })
     const offSettings = window.photon.onSettings((settings) => (app.settings = settings))
     const offSwitch = window.photon.onSwitchTo(switchProfile) // bascule auto
+    const offPlace = window.photon.onPlace((next) => (place = next))
     window.photon.ready()
     return () => {
       offShow()
       offHide()
       offSettings()
       offSwitch()
+      offPlace()
     }
   })
 
@@ -131,6 +138,7 @@
   class="root"
   class:fullscreen={fullscreen && !app.mini}
   class:mini={app.mini}
+  class:live={liveBlur}
   bind:this={root}
   onpointerdown={(event) => (pressedVoid = isVoid(event))}
   onclick={onClick}
@@ -142,6 +150,7 @@
     <div class="backdrop" aria-hidden="true">
       <!-- Plein écran seulement : en mode fenêtre, le flou acrylic de Windows fait le verre. -->
       {#if fullscreen}<Background />{/if}
+      {#if liveBlur && app.visible && place}<LiveBackdrop {place} {display} />{/if}
       <div class="veil"></div>
     </div>
     <div class="light" aria-hidden="true"></div>
@@ -265,6 +274,11 @@
     overflow: auto;
     background: var(--grain), var(--panel-light), var(--panel-sheen), var(--panel-tint);
     box-shadow: var(--panel-rim);
+  }
+
+  /* Flou réglable (mode fenêtre) : le panneau floute la capture de l'écran posée derrière lui. */
+  .live .panel {
+    backdrop-filter: var(--panel-filter);
   }
 
   /* Bord en dégradé accent → violet : anneau de 1 px découpé par masque. */

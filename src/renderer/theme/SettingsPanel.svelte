@@ -225,7 +225,7 @@
 
   <section>
     <h3>Verre</h3>
-    <!-- En mode fenêtre, le flou est celui de Windows (acrylic) : intensité fixe. -->
+    <!-- Mode fenêtre : flou de Windows (acrylic, fixe), sauf avec le flou réglable. -->
     {@render range(
       'Flou du verre',
       app.theme.blur,
@@ -234,13 +234,25 @@
       1,
       px,
       (blur) => patchTheme({ blur }),
-      app.settings.mode === 'window'
-        ? 'Plein écran uniquement : en mode fenêtre, Windows floute'
+      app.settings.mode === 'window' && !app.settings.liveBlur
+        ? 'En mode fenêtre : activer « Flou réglable » ci-dessous'
         : undefined
     )}
     {@render range('Opacité du verre', app.theme.opacity, 0, 1, 0.01, percent, (opacity) =>
       patchTheme({ opacity })
     )}
+    <label class="check">
+      <input
+        type="checkbox"
+        checked={app.settings.liveBlur}
+        onchange={(event) => setting({ liveBlur: event.currentTarget.checked })}
+      />
+      <span>Flou réglable en mode fenêtre</span>
+      <small>
+        Photon filme l'écran derrière lui (≈ 2 % de CPU, seulement ouvert) et n'apparaît plus dans
+        les captures d'écran
+      </small>
+    </label>
     {@render range('Arrondi', app.theme.radius, 0, 40, 1, px, (radius) => patchTheme({ radius }))}
     <div class="field">
       <span class="line" aria-hidden="true">Densité</span>

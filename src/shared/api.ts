@@ -14,6 +14,16 @@ export type ProfileSource = string
 
 // Position du curseur dans la fenêtre au moment de l'ouverture : origine de la révélation.
 // mini : seulement la barre de commande, petite et centrée (2e raccourci).
+// Écran sous la fenêtre, en coordonnées de la fenêtre : où poser sa capture pour qu'elle tombe
+// juste derrière Photon (src/main/backdrop.ts).
+export interface Placement {
+  id: number
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 export interface ShowEvent {
   origin: { x: number; y: number }
   mini: boolean
@@ -230,6 +240,7 @@ export interface PhotonApi {
   onHide(callback: () => void): () => void
   onSettings(callback: (settings: Settings) => void): () => void
   onSwitchTo(callback: (profileId: string) => void): () => void // bascule auto (src/main/auto.ts)
+  onPlace(callback: (place: Placement) => void): () => void // écran sous la fenêtre (flou réglable)
   // Système, pour les widgets : à lire seulement fenêtre visible (lib/poll.svelte.ts)
   cpuRam(): Promise<CpuRam>
   temperatures(): Promise<Temperatures>

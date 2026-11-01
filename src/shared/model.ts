@@ -23,6 +23,7 @@ export interface Settings {
   theme: string // thème global, nom de fichier dans themes/
   reduceMotion: boolean
   autoProfiles: boolean // bascule automatique selon les règles des profils
+  liveBlur: boolean // mode fenêtre : flou fait par Photon (capture de l'écran), réglable
 }
 
 export type Background =
@@ -100,7 +101,8 @@ export const defaultSettings = (): Settings => ({
   activeProfile: 'default',
   theme: 'default',
   reduceMotion: false,
-  autoProfiles: false
+  autoProfiles: false,
+  liveBlur: false
 })
 
 export const defaultTheme = (): Theme => ({
@@ -185,7 +187,8 @@ export function parseSettings(raw: unknown): Settings {
     activeProfile: isName(v.activeProfile) ? v.activeProfile : d.activeProfile,
     theme: isName(v.theme) ? v.theme : d.theme,
     reduceMotion: typeof v.reduceMotion === 'boolean' ? v.reduceMotion : d.reduceMotion,
-    autoProfiles: v.autoProfiles === true
+    autoProfiles: v.autoProfiles === true,
+    liveBlur: v.liveBlur === true
   }
 }
 

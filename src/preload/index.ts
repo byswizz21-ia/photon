@@ -25,6 +25,7 @@ const photon: PhotonApi = {
   onHide: listen('photon:hide'),
   onSettings: listen('photon:settings'),
   onSwitchTo: listen('photon:switchTo'),
+  onPlace: listen('photon:place'),
   cpuRam: () => ipcRenderer.invoke('photon:cpuRam'),
   temperatures: () => ipcRenderer.invoke('photon:temperatures'),
   displays: () => ipcRenderer.invoke('photon:displays'),
