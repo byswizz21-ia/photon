@@ -23,7 +23,7 @@ Dans `%APPDATA%\Photon\`, en JSON lisible et modifiable à la main :
 
 - `settings.json` : raccourci, mode (plein écran / fenêtre), profil actif, thème global
 - `themes/default.json` : fond, accent, flou, opacité, arrondi, densité
-- `profiles/default.json` : widgets du profil (type, position, taille, réglages)
+- `profiles/<id>.json` : un fichier par profil (nom, widgets : type, position, taille, réglages) ; un profil supprimé devient `<id>.json.deleted`
 
 Chaque fichier est écrit de façon atomique avec une copie `.bak`. Un fichier abîmé est remplacé par
 sa copie, puis par les valeurs par défaut. Les fichiers sont créés au premier changement.

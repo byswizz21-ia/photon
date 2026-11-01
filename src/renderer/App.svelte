@@ -6,8 +6,9 @@
   import AddMenu from './grid/AddMenu.svelte'
   import Grid from './grid/Grid.svelte'
   import Logo from './lib/Logo.svelte'
+  import Profiles from './profiles/Profiles.svelte'
   import { reveal } from './reveal'
-  import { app, flushProfile, flushTheme, reducedMotion } from './state.svelte'
+  import { app, flushProfile, flushTheme, reducedMotion, switchProfile } from './state.svelte'
   import { useTheme } from './theme/apply.svelte'
   import Background from './theme/Background.svelte'
   import SettingsPanel from './theme/SettingsPanel.svelte'
@@ -61,6 +62,7 @@
       settingsOpen = false
       app.editing = true
     } else if (id === 'ui:settings') settingsOpen = true
+    else if (id.startsWith('ui:profile:')) switchProfile(id.slice('ui:profile:'.length))
   }
 
   // Une lettre tapée hors d'un champ part dans la barre de commande : ouvrir Photon puis taper.
@@ -72,9 +74,19 @@
       document.querySelector<HTMLInputElement>('[data-command-input]')?.focus()
   }
 
+  // Ctrl+1…9 : profil n° 1 à 9, dans l'ordre des pastilles.
+  function profileShortcut(event: KeyboardEvent): void {
+    if (!event.ctrlKey || event.altKey || event.shiftKey || !/^[1-9]$/.test(event.key)) return
+    const profile = app.profiles[Number(event.key) - 1]
+    if (!profile) return
+    event.preventDefault()
+    switchProfile(profile.id)
+  }
+
   // Échap : ferme d'abord les réglages, puis quitte le mode édition, sinon ferme Photon.
   function onKeydown(event: KeyboardEvent): void {
     typeToSearch(event)
+    profileShortcut(event)
     if (event.key !== 'Escape') return
     if (settingsOpen) closeSettings()
     else if (app.editing) app.editing = false
@@ -122,6 +134,7 @@
       <header class="bar" data-reveal class:drag={!fullscreen}>
         <Logo size={28} />
         <span class="name">Photon</span>
+        <Profiles />
         <CommandBar onaction={runAction} />
         <div class="actions">
           {#if app.editing}
@@ -158,7 +171,8 @@
           {/if}
         </div>
       </header>
-      <Grid />
+      <!-- Nouvelle grille à chaque profil : gridstack repart de zéro, rien de l'ancien ne reste. -->
+      {#key app.settings.activeProfile}<Grid />{/key}
     </main>
     {#if settingsOpen}<SettingsPanel onclose={closeSettings} />{/if}
   {/if}

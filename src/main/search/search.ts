@@ -7,6 +7,7 @@ import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import type { SearchResult } from '../../shared/api'
+import { data } from '../data'
 import { readJson, writeJson } from '../store'
 import { fileIcon, launch } from '../system'
 import { launchStoreApp, listApps, startApps, type AppEntry } from './apps'
@@ -116,7 +117,7 @@ function commandCandidate(command: Command, score: number): Candidate {
     title: command.title,
     subtitle: command.confirm ? 'Commande · Entrée deux fois' : 'Commande',
     confirm: command.confirm,
-    score,
+    score: score + 15, // comme une app : devant un fichier au nom proche
     path: null,
     run: () => {
       command.run()
@@ -124,6 +125,21 @@ function commandCandidate(command: Command, score: number): Candidate {
     }
   }
 }
+
+// Un profil (autre que l'actif) = une commande « Profil Travail », exécutée par l'interface.
+const profileCommands = (): Command[] =>
+  data.profiles
+    .filter((p) => p.id !== data.settings.activeProfile)
+    .map((p) => ({
+      id: `profile:${p.id}`,
+      title: `Profil ${p.name}`,
+      keywords: 'profil changer basculer',
+      confirm: false,
+      ui: true,
+      run: () => {}
+    }))
+
+const allCommands = (): Command[] => [...COMMANDS, ...profileCommands()]
 
 const fixed = (
   id: string,
@@ -177,7 +193,7 @@ function favorites(now: number): Candidate[] {
   const known = new Map<string, Candidate>()
   for (const entry of listApps())
     known.set(`app:${entry.path ?? entry.appId ?? ''}`, appCandidate(entry, 0))
-  for (const command of COMMANDS) {
+  for (const command of allCommands()) {
     const candidate = commandCandidate(command, 0)
     known.set(candidate.key, candidate)
   }
@@ -215,7 +231,7 @@ function collect(query: string): Candidate[] {
     score: c.score + usageBoost(usage[c.key], now)
   })
   if (prefix !== '/') {
-    for (const command of COMMANDS) {
+    for (const command of allCommands()) {
       if (command.available && !command.available()) continue
       const score = Math.max(
         matchScore(command.title, text, true),

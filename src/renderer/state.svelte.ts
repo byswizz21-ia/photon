@@ -1,6 +1,7 @@
 // État global de l'interface, partagé par l'app, la grille, le thème et les widgets.
 import { prefersReducedMotion } from 'svelte/motion'
-import { defaultProfile, defaultSettings, defaultTheme } from '../shared/model'
+import type { AppState } from '../shared/api'
+import { defaultProfile, defaultSettings, defaultTheme, type ProfileInfo } from '../shared/model'
 
 export const app = $state({
   visible: false, // fenêtre affichée : les widgets ne lisent le système que dans cet état
@@ -8,7 +9,8 @@ export const app = $state({
   mini: false, // mini-mode : la barre de commande seule (2e raccourci)
   settings: defaultSettings(),
   theme: defaultTheme(),
-  profile: defaultProfile()
+  profile: defaultProfile(),
+  profiles: [] as ProfileInfo[]
 })
 
 let saveTimer: ReturnType<typeof setTimeout> | undefined
@@ -45,4 +47,18 @@ export function flushTheme(): void {
   clearTimeout(themeTimer)
   themeTimer = undefined
   void window.photon.saveTheme($state.snapshot(app.theme))
+}
+
+// Bascule, création, suppression de profil : les sauvegardes en attente partent d'abord (elles
+// visent l'ancien profil), puis l'interface prend tout l'état du nouveau (grille remontée).
+export async function changeProfile(request: () => Promise<AppState | null>): Promise<boolean> {
+  flushProfile()
+  flushTheme()
+  const state = await request()
+  if (state) Object.assign(app, state)
+  return state !== null
+}
+
+export function switchProfile(id: string): void {
+  if (id !== app.settings.activeProfile) void changeProfile(() => window.photon.switchProfile(id))
 }

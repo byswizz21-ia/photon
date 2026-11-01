@@ -27,6 +27,7 @@ describe('parseProfile', () => {
     })
     expect(profile).toEqual({
       name: 'Principal',
+      createdAt: 0,
       theme: null,
       widgets: [{ id: 'a', type: 'clock', x: 0, y: 3, w: 12, h: 1, settings: { seconds: true } }]
     })

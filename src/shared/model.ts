@@ -50,9 +50,18 @@ export interface WidgetInstance {
 
 export interface Profile {
   name: string
+  createdAt: number // ms ; ordre des pastilles et de Ctrl+1, Ctrl+2…
   theme: string | null // thème attaché au profil, sinon thème global
   widgets: WidgetInstance[]
 }
+
+// Profil vu dans la liste : id = nom du fichier dans profiles/, sans .json.
+export interface ProfileInfo {
+  id: string
+  name: string
+}
+
+export const MAX_PROFILE_NAME = 40
 
 // Win+Shift+Espace est réservé par Windows (changement de langue) : register() échoue, testé.
 export const SHORTCUTS = ['Super+Alt+Space', 'Super+Shift+Space', 'Ctrl+Alt+Space'] as const
@@ -87,6 +96,7 @@ export const defaultTheme = (): Theme => ({
 
 export const defaultProfile = (): Profile => ({
   name: 'Principal',
+  createdAt: 0,
   theme: null,
   widgets: [
     { id: 'clock', type: 'clock', x: 0, y: 0, w: 6, h: 2, settings: {} },
@@ -100,7 +110,7 @@ type Json = Record<string, unknown>
 
 const isObject = (v: unknown): v is Json => typeof v === 'object' && v !== null && !Array.isArray(v)
 const isHex = (v: unknown): v is string => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v)
-const isName = (v: unknown): v is string => typeof v === 'string' && /^[\w-]{1,64}$/.test(v)
+export const isName = (v: unknown): v is string => typeof v === 'string' && /^[\w-]{1,64}$/.test(v)
 
 function num(v: unknown, min: number, max: number, fallback: number): number {
   return typeof v === 'number' && Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : fallback
@@ -187,7 +197,11 @@ export function parseProfile(raw: unknown): Profile {
   // Un id en double casserait la grille : on garde la première occurrence.
   const unique = widgets.filter((w, i) => widgets.findIndex((o) => o.id === w.id) === i)
   return {
-    name: typeof v.name === 'string' && v.name ? v.name : 'Principal',
+    name:
+      typeof v.name === 'string' && v.name.trim()
+        ? v.name.trim().slice(0, MAX_PROFILE_NAME)
+        : 'Principal',
+    createdAt: num(v.createdAt, 0, Number.MAX_SAFE_INTEGER, 0),
     theme: isName(v.theme) ? v.theme : null,
     widgets: unique
   }

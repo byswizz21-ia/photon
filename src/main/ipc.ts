@@ -15,7 +15,7 @@ import {
   stopAnswer,
   validFiles
 } from './claude'
-import { data, saveProfile, saveTheme } from './data'
+import { createProfile, data, deleteProfile, saveProfile, saveTheme, switchProfile } from './data'
 import { musicControl, musicSeek, musicState, musicVolume, openMusic, syncMusic } from './music'
 import { openResult, resultIcon, search } from './search/search'
 import { cpuRam, disks, fileIcon, launch, pickApps } from './system'
@@ -31,8 +31,8 @@ const MAX_TEXT = 100_000 // caractères : question, presse-papier
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v)
 
-// Réglages modifiables depuis l'interface. Profil et thème actifs : pas de bascule avant la V3
-// (changer de fichier sans recharger écraserait le nouveau profil avec l'ancien).
+// Réglages modifiables depuis l'interface. Profil actif : seulement par switchProfile (il
+// recharge profil et thème), sinon l'interface écraserait le nouveau profil avec l'ancien.
 const EDITABLE: readonly string[] = [
   'shortcut',
   'barShortcut',
@@ -70,6 +70,16 @@ export function registerIpc(actions: IpcActions): void {
     onProfileSaved()
     syncMusic()
   })
+  // Profil changé : agendas et lecteur YT Music suivent les widgets du nouveau profil.
+  const switched = (ok: boolean): AppState | null => {
+    if (!ok) return null
+    onProfileSaved()
+    syncMusic()
+    return { ...data }
+  }
+  handle('photon:switchProfile', async (id) => switched(await switchProfile(id)))
+  handle('photon:createProfile', async (source) => switched(await createProfile(source)))
+  handle('photon:deleteProfile', async () => switched(await deleteProfile()))
   on('photon:hide', (reason) => hideWindow(typeof reason === 'string' ? reason : 'interface'))
   on('photon:shown', logShown)
   handle('photon:cpuRam', cpuRam)

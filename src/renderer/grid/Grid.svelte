@@ -38,9 +38,13 @@
   // Seuls les widgets dont le dossier existe s'affichent ; les autres restent dans le profil.
   const items = $derived(app.profile.widgets.filter((w) => Object.hasOwn(widgets, w.type)))
 
+  // Profil affiché par cette grille : remontée à chaque bascule (App.svelte). Pendant son
+  // démontage, gridstack signale le retrait des cartes : rien à sauver, le profil a changé.
+  const owner = untrack(() => app.profile)
+
   // Glisser, redimensionner, ajouter, supprimer : on relit la disposition 12 colonnes et on sauve.
   function persist(): void {
-    if (!grid) return
+    if (!grid || app.profile !== owner) return
     applyLayout(
       app.profile.widgets,
       grid.save(false, false, undefined, COLUMNS) as GridStackWidget[]
@@ -157,6 +161,17 @@
     border-bottom: 2px solid var(--accent);
     border-bottom-right-radius: var(--radius);
     opacity: 0.8;
+  }
+
+  /* Bascule de profil : la nouvelle grille apparaît en fondu. */
+  .grid-stack {
+    animation: fade-in 220ms var(--ease-out);
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
   }
 
   .empty {

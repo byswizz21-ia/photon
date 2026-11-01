@@ -41,41 +41,4 @@
   .add {
     position: relative;
   }
-
-  .menu {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 8px);
-    z-index: 10;
-    min-width: 200px;
-    margin: 0;
-    padding: 6px;
-    list-style: none;
-    border-radius: 14px;
-    background: var(--glass-sheen), rgb(20 22 29 / 0.6);
-    backdrop-filter: blur(24px) saturate(1.7);
-    border: 1px solid var(--glass-edge);
-    box-shadow:
-      var(--glass-rim),
-      0 16px 40px -16px rgb(0 0 0 / 0.6);
-  }
-
-  .menu button {
-    width: 100%;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0 12px;
-    border: 0;
-    border-radius: 10px;
-    background: transparent;
-    text-align: left;
-    cursor: pointer;
-  }
-
-  .menu button:hover,
-  .menu button:focus-visible {
-    background: rgb(255 255 255 / 0.06);
-  }
 </style>

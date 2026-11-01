@@ -29,6 +29,10 @@ export function writeJson<T>(file: string, data: T, parse: (raw: unknown) => T):
   return next
 }
 
+// Attend la fin des écritures en cours d'un fichier (avant de le déplacer).
+export const pending = (file: string): Promise<void> =>
+  (queues.get(file) ?? Promise.resolve()).catch(() => undefined)
+
 async function write(file: string, json: string, parse: (raw: unknown) => unknown): Promise<void> {
   await fs.mkdir(dirname(file), { recursive: true })
   const tmp = `${file}.tmp`

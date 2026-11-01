@@ -1,11 +1,16 @@
 // Contrat du pont : seules ces fonctions passent entre l'interface et Windows (window.photon).
-import type { Profile, Settings, Theme } from './model'
+import type { Profile, ProfileInfo, Settings, Theme } from './model'
 
 export interface AppState {
   settings: Settings
   theme: Theme
-  profile: Profile
+  profile: Profile // profil actif
+  profiles: ProfileInfo[] // tous, du plus ancien au plus récent
 }
+
+// Création d'un profil : 'blank' (vierge), 'duplicate' (copie du profil actif) ou id d'un modèle
+// (shared/templates.ts).
+export type ProfileSource = string
 
 // Position du curseur dans la fenêtre au moment de l'ouverture : origine de la révélation.
 // mini : seulement la barre de commande, petite et centrée (2e raccourci).
@@ -116,6 +121,11 @@ export interface PhotonApi {
   saveSettings(patch: Partial<Settings>): Promise<Settings>
   saveTheme(theme: Theme): Promise<void>
   saveProfile(profile: Profile): Promise<void>
+  // Profils : null si refusé ; sinon tout l'état du profil devenu actif. Avant d'appeler,
+  // l'interface envoie ses sauvegardes en attente (elles visent encore l'ancien profil).
+  switchProfile(id: string): Promise<AppState | null>
+  createProfile(source: ProfileSource): Promise<AppState | null>
+  deleteProfile(): Promise<AppState | null> // le profil actif, jamais le dernier
   hide(reason: string): void // raison écrite dans le log
   shown(): void // première image après affichage (mesure du délai)
   onShow(callback: (event: ShowEvent) => void): () => void
