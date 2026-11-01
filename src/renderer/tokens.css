@@ -20,6 +20,15 @@
   --accent-orange: #ffb86b;
   --accent-mint: #6ef2c2;
 
+  /* Fond « Lumineux » (theme) : scène colorée que le verre fumé floute et sature */
+  --scene-from: #1d4a63;
+  --scene-mid: #0e1a2c;
+  --scene-to: #241a55;
+  --scene-stripe: rgb(255 255 255 / 0.05);
+  --orb-blue: #2c5fd0;
+  --orb-orange: #d9742f;
+  --orb-violet: #8a3fd0;
+
   /* Danger : suppression, Bypass, erreurs */
   --danger: #ff4d5e;
   --danger-text: #ff9aa8;

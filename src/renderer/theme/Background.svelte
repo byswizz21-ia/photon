@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Calque de fond (plein écran) : fond d'écran Windows, image ou dégradé, flouté. Si l'image
+  // Calque de fond : fond d'écran Windows, image ou dégradé, flouté par le panneau. Si l'image
   // ne charge pas, le calque disparaît : on voit le flou acrylic de Windows et le voile.
   import { app } from '../state.svelte'
   import { backgroundUrl } from './apply.svelte'
@@ -8,7 +8,13 @@
   const url = $derived(backgroundUrl(bg))
 </script>
 
-{#if bg.type === 'gradient'}
+{#if bg.type === 'glow'}
+  <div class="layer glow">
+    <span class="orb blue"></span>
+    <span class="orb orange"></span>
+    <span class="orb violet"></span>
+  </div>
+{:else if bg.type === 'gradient'}
   <div class="layer" style:background="linear-gradient(135deg, {bg.from}, {bg.to})"></div>
 {:else if url}
   <!-- Recréée à chaque nouvelle adresse : une erreur précédente ne masque pas la suivante. -->
@@ -31,5 +37,42 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  /* Scène nette (le verre la floute) : rayures fines sur un dégradé bleu nuit → indigo et trois
+     disques de couleur, placés pour rester visibles même dans une petite fenêtre centrée. */
+  .glow {
+    overflow: hidden;
+    background:
+      repeating-linear-gradient(120deg, var(--scene-stripe) 0 1px, transparent 1px 28px),
+      linear-gradient(135deg, var(--scene-from), var(--scene-mid) 45%, var(--scene-to));
+  }
+
+  .orb {
+    position: absolute;
+    aspect-ratio: 1;
+    border-radius: var(--radius-pill);
+    transform: translate(-50%, -50%);
+  }
+
+  .blue {
+    left: 68%;
+    top: 24%;
+    width: 26%;
+    background: var(--orb-blue);
+  }
+
+  .orange {
+    left: 30%;
+    top: 80%;
+    width: 22%;
+    background: var(--orb-orange);
+  }
+
+  .violet {
+    left: 60%;
+    top: 84%;
+    width: 15%;
+    background: var(--orb-violet);
   }
 </style>

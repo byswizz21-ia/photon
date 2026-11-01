@@ -70,6 +70,8 @@ export function createWindow(): BrowserWindow {
   })
   win.on('moved', rememberBounds)
   win.on('resized', rememberBounds)
+  win.on('move', sendPlace)
+  win.on('resize', sendPlace)
   applyMode()
   const devUrl = process.env['ELECTRON_RENDERER_URL']
   if (devUrl && !app.isPackaged) void win.loadURL(devUrl)
@@ -199,6 +201,21 @@ function place(display: Display): void {
   win.setBounds(target)
   // Entre deux écrans d'échelles différentes, Electron peut se tromper au premier essai.
   if (!sameRect(win.getBounds(), target)) win.setBounds(target)
+  sendPlace()
+}
+
+// Le fond (fond d'écran du thème) est dessiné dans la fenêtre, calé sur l'écran : en mode
+// fenêtre, il reste immobile quand on déplace Photon, comme vu à travers du verre.
+function sendPlace(): void {
+  if (mini) return
+  const bounds = win.getBounds()
+  const display = screen.getDisplayMatching(bounds).bounds
+  send('photon:place', {
+    x: display.x - bounds.x,
+    y: display.y - bounds.y,
+    width: display.width,
+    height: display.height
+  })
 }
 
 // Mode fenêtre : position mémorisée ; sur un autre écran, même position relative, bornée.

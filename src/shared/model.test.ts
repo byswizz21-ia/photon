@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { defaultProfile, parseProfile, parseSettings } from './model'
+import { defaultProfile, parseProfile, parseSettings, parseTheme } from './model'
 
 describe('parseProfile', () => {
   test('aller-retour JSON sans perte', () => {
@@ -45,4 +45,9 @@ test('réglages multi-écran : valeurs invalides → défaut', () => {
   expect(s.screen).toBe('mouse')
   expect(s.windowBoundsByScreens).toEqual({ a: bounds })
   expect(parseSettings({ screen: '2779098405' }).screen).toBe('2779098405')
+})
+
+test("fond « Lumineux » conservé, type inconnu → fond d'écran", () => {
+  expect(parseTheme({ background: { type: 'glow' } }).background).toEqual({ type: 'glow' })
+  expect(parseTheme({ background: { type: 'nope' } }).background).toEqual({ type: 'wallpaper' })
 })

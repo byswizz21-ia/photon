@@ -16,6 +16,7 @@
   let { onclose }: { onclose: () => void } = $props()
 
   const TABS = [
+    ['glow', 'Lumineux'],
     ['wallpaper', "Fond d'écran"],
     ['image', 'Image'],
     ['gradient', 'Dégradé']
@@ -79,9 +80,9 @@
   }
 
   function pickTab(id: string): void {
-    if (id === 'wallpaper') {
-      tab = 'wallpaper'
-      patchTheme({ background: { type: 'wallpaper' } })
+    if (id === 'wallpaper' || id === 'glow') {
+      tab = id
+      patchTheme({ background: { type: id } })
     } else if (id === 'gradient') {
       tab = 'gradient'
       setGradient({})

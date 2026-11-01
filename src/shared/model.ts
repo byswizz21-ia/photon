@@ -29,13 +29,14 @@ export type Background =
   | { type: 'wallpaper' }
   | { type: 'image'; path: string }
   | { type: 'gradient'; from: string; to: string }
+  | { type: 'glow' } // scène colorée de Photon (Background.svelte)
 
 export type Density = 'compact' | 'comfortable'
 
 export interface Theme {
   background: Background
   accent: 'auto' | string // 'auto' = extraite du fond, sinon '#rrggbb'
-  blur: number // px, flou du panneau de verre en plein écran
+  blur: number // px, flou du panneau de verre
   opacity: number // 0..1, opacité du verre
   radius: number // px, arrondi des cartes
   density: Density
@@ -195,6 +196,7 @@ function parseBackground(v: unknown): Background {
     if (v.type === 'gradient' && isHex(v.from) && isHex(v.to)) {
       return { type: 'gradient', from: v.from, to: v.to }
     }
+    if (v.type === 'glow') return { type: 'glow' }
   }
   return { type: 'wallpaper' }
 }
