@@ -3,6 +3,7 @@ import { app, globalShortcut } from 'electron'
 import type { Settings } from '../shared/model'
 import { registerBackgroundScheme, serveBackgrounds } from './background'
 import { startCalendars } from './calendar'
+import { loadClaude } from './claude'
 import { data, loadAll, saveSettings } from './data'
 import { registerIpc } from './ipc'
 import { registerShortcut } from './shortcut'
@@ -60,7 +61,7 @@ if (!app.requestSingleInstanceLock()) {
   registerBackgroundScheme() // doit précéder app.whenReady()
 
   void app.whenReady().then(async () => {
-    await loadAll()
+    await Promise.all([loadAll(), loadClaude()])
     serveBackgrounds()
     registerIpc({ ready: onRendererReady, updateSettings })
     createWindow()

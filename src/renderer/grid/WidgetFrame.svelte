@@ -128,8 +128,9 @@
     will-change: transform;
   }
 
-  /* Appui : 97 % puis retour en ressort (le ressort vient de la transition de base). */
-  .card:active {
+  /* Appui : 97 % puis retour en ressort (le ressort vient de la transition de base).
+     Pas pour les widgets où l'on tape et sélectionne du texte (data-no-press). */
+  .card:active:not(:has([data-no-press])) {
     transform: translateY(-1px) scale(0.97);
     transition-duration: 120ms;
     transition-timing-function: var(--ease-out);

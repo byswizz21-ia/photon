@@ -39,6 +39,30 @@ export interface CalendarFeed {
   error: string | null // échec de la dernière lecture (les événements précédents restent)
 }
 
+// Barre Claude : Claude Code lancé côté Windows (src/main/claude.ts), conversation gardée par Photon.
+export interface ClaudeMessage {
+  role: 'user' | 'assistant'
+  text: string // Markdown pour Claude ; se remplit mot par mot pendant la réponse
+  files?: string[] // fichiers joints (chemins Windows)
+  status?: string // activité en cours (« Lecture de notes.txt… ») ; absent une fois fini
+  error?: string // réponse en échec ou interrompue
+}
+
+export interface Conversation {
+  id: string // UUID, aussi identifiant de session Claude Code (--session-id puis --resume)
+  title: string // début de la première question
+  updatedAt: number
+  started: boolean // Claude Code a créé la session : les questions suivantes la reprennent
+  messages: ClaudeMessage[]
+}
+
+export interface ClaudeState {
+  available: boolean // claude.exe trouvé côté Windows
+  busy: boolean // une réponse est en cours
+  current: Conversation
+  history: { id: string; title: string; updatedAt: number }[] // plus récentes d'abord
+}
+
 // Images de fond servies par le protocole photon:// (src/main/background.ts).
 export const WALLPAPER_URL = 'photon://wallpaper'
 export const IMAGE_URL = 'photon://image'
@@ -65,6 +89,16 @@ export interface PhotonApi {
   pathForFile(file: File): string // chemin d'un fichier glissé-déposé ; '' si inconnu
   // Agenda : cache seulement, aucun appel réseau ; null si l'adresse n'est pas en https/webcal
   calendar(url: string): Promise<CalendarFeed | null>
+  // Barre Claude : l'état complet arrive par onClaude à chaque changement
+  claudeState(): Promise<ClaudeState>
+  onClaude(callback: (state: ClaudeState) => void): () => void
+  claudeAsk(text: string, files: string[]): Promise<boolean> // false si occupé ou indisponible
+  claudeStop(): void
+  claudeNew(): void
+  claudeOpen(id: string): void
+  claudeImage(png: Uint8Array): Promise<string | null> // capture collée → fichier temporaire
+  clipboardText(): Promise<string>
+  copyText(text: string): void
   // Thème
   pickImage(): Promise<string | null> // boîte de dialogue ; null si annulée
 }

@@ -1,9 +1,18 @@
 // Côté Windows du pont : un canal par fonction de window.photon, entrées validées ici.
-import { ipcMain, type IpcMainEvent, type IpcMainInvokeEvent } from 'electron'
+import { clipboard, ipcMain, type IpcMainEvent, type IpcMainInvokeEvent } from 'electron'
 import type { AppState } from '../shared/api'
 import type { Settings } from '../shared/model'
 import { pickImage } from './background'
 import { calendar, onProfileSaved } from './calendar'
+import {
+  ask,
+  claudeState,
+  newConversation,
+  openConversation,
+  saveImage,
+  stopAnswer,
+  validFiles
+} from './claude'
 import { data, saveProfile, saveTheme } from './data'
 import { cpuRam, disks, fileIcon, launch, pickApps } from './system'
 import { hideWindow, logShown, ownsSender } from './window'
@@ -12,6 +21,8 @@ interface IpcActions {
   ready: () => void
   updateSettings: (patch: Partial<Settings>) => Promise<Settings>
 }
+
+const MAX_TEXT = 100_000 // caractères : question, presse-papier
 
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v)
@@ -61,5 +72,17 @@ export function registerIpc(actions: IpcActions): void {
   })
   handle('photon:pickApps', pickApps)
   handle('photon:calendar', calendar)
+  handle('photon:claudeState', claudeState)
+  handle('photon:claudeAsk', (text, files) =>
+    typeof text === 'string' && text.length <= MAX_TEXT ? ask(text, validFiles(files)) : false
+  )
+  on('photon:claudeStop', stopAnswer)
+  on('photon:claudeNew', newConversation)
+  on('photon:claudeOpen', openConversation)
+  handle('photon:claudeImage', saveImage) // PNG vérifié, 10 Mo au plus
+  handle('photon:clipboardText', async () => (await clipboard.readText()).slice(0, MAX_TEXT))
+  on('photon:copyText', (text) => {
+    if (typeof text === 'string') void clipboard.writeText(text.slice(0, MAX_TEXT))
+  })
   handle('photon:pickImage', pickImage)
 }

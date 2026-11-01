@@ -28,6 +28,15 @@ const photon: PhotonApi = {
   pickApps: () => ipcRenderer.invoke('photon:pickApps'),
   pathForFile: (file) => webUtils.getPathForFile(file),
   calendar: (url) => ipcRenderer.invoke('photon:calendar', url),
+  claudeState: () => ipcRenderer.invoke('photon:claudeState'),
+  onClaude: listen('photon:claude'),
+  claudeAsk: (text, files) => ipcRenderer.invoke('photon:claudeAsk', text, files),
+  claudeStop: () => ipcRenderer.send('photon:claudeStop'),
+  claudeNew: () => ipcRenderer.send('photon:claudeNew'),
+  claudeOpen: (id) => ipcRenderer.send('photon:claudeOpen', id),
+  claudeImage: (png) => ipcRenderer.invoke('photon:claudeImage', png),
+  clipboardText: () => ipcRenderer.invoke('photon:clipboardText'),
+  copyText: (text) => ipcRenderer.send('photon:copyText', text),
   pickImage: () => ipcRenderer.invoke('photon:pickImage')
 }
 
