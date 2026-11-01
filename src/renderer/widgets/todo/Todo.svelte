@@ -1,14 +1,14 @@
 <script lang="ts">
-  // Tâches partagées entre profils. Entrée ajoute ; cocher range la tâche en bas de la liste.
+  // Tâches partagées entre profils (ou propres au profil). Entrée ajoute ; cocher range la tâche
+  // en bas de la liste.
   import CheckIcon from 'phosphor-svelte/lib/CheckIcon'
   import XIcon from 'phosphor-svelte/lib/XIcon'
-  import { shared } from '../../lib/shared.svelte'
+  import OwnToggle from '../../lib/OwnToggle.svelte'
+  import { profileKey, shared } from '../../lib/shared.svelte'
   import type { WidgetProps } from '../types'
   import type { TodoSettings } from './manifest'
 
-  // Aucun réglage : props déclarées pour le type seulement (voir System.svelte).
-  // eslint-disable-next-line no-empty-pattern
-  let {}: WidgetProps<TodoSettings> = $props()
+  let { settings, editing, save }: WidgetProps<TodoSettings> = $props()
 
   interface Task {
     id: string
@@ -19,7 +19,7 @@
   const MAX_TASKS = 200
   const MAX_TEXT = 300
 
-  const todo = shared('todo', (raw) => {
+  const parse = (raw: unknown): { tasks: Task[] } => {
     const items = (raw as { tasks?: unknown } | null)?.tasks
     const tasks = Array.isArray(items)
       ? items
@@ -31,7 +31,8 @@
           .map(({ id, text, done }) => ({ id, text: text.slice(0, MAX_TEXT), done }))
       : []
     return { tasks }
-  })
+  }
+  const todo = $derived(shared(profileKey('todo', settings.own === true), parse))
 
   let draft = $state('')
 
@@ -64,7 +65,9 @@
 <div class="widget">
   <div class="head">
     <span class="label">To-do</span>
-    {#if todo.value.tasks.length}<span class="count">{left} à faire</span>{/if}
+    {#if editing}
+      <OwnToggle checked={settings.own === true} onchange={(own) => save({ ...settings, own })} />
+    {:else if todo.value.tasks.length}<span class="count">{left} à faire</span>{/if}
   </div>
   <ul>
     {#each sorted as task (task.id)}

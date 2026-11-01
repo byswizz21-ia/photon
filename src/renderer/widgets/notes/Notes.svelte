@@ -1,22 +1,27 @@
 <script lang="ts">
-  // Bloc-notes partagé entre profils : enregistré peu après la dernière frappe.
-  import { shared } from '../../lib/shared.svelte'
+  // Bloc-notes partagé entre profils (ou propre au profil) : enregistré peu après la dernière frappe.
+  import OwnToggle from '../../lib/OwnToggle.svelte'
+  import { profileKey, shared } from '../../lib/shared.svelte'
   import type { WidgetProps } from '../types'
   import type { NotesSettings } from './manifest'
 
-  // Aucun réglage : props déclarées pour le type seulement (voir System.svelte).
-  // eslint-disable-next-line no-empty-pattern
-  let {}: WidgetProps<NotesSettings> = $props()
+  let { settings, editing, save }: WidgetProps<NotesSettings> = $props()
 
   const MAX_CHARS = 100_000
-  const notes = shared('notes', (raw) => {
+  const parse = (raw: unknown): { text: string } => {
     const text = (raw as { text?: unknown } | null)?.text
     return { text: typeof text === 'string' ? text.slice(0, MAX_CHARS) : '' }
-  })
+  }
+  const notes = $derived(shared(profileKey('notes', settings.own === true), parse))
 </script>
 
 <div class="widget">
-  <span class="label" aria-hidden="true">Notes</span>
+  <div class="head">
+    <span class="label" aria-hidden="true">Notes</span>
+    {#if editing}
+      <OwnToggle checked={settings.own === true} onchange={(own) => save({ ...settings, own })} />
+    {/if}
+  </div>
   <textarea
     bind:value={notes.value.text}
     oninput={() => notes.save()}
@@ -34,6 +39,13 @@
     padding: clamp(12px, 9cqmin, 20px);
     display: flex;
     flex-direction: column;
+    gap: 8px;
+  }
+
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     gap: 8px;
   }
 
