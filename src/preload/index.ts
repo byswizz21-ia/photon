@@ -27,6 +27,7 @@ const photon: PhotonApi = {
   launch: (path) => ipcRenderer.invoke('photon:launch', path),
   pickApps: () => ipcRenderer.invoke('photon:pickApps'),
   pathForFile: (file) => webUtils.getPathForFile(file),
+  calendar: (url) => ipcRenderer.invoke('photon:calendar', url),
   pickImage: () => ipcRenderer.invoke('photon:pickImage')
 }
 

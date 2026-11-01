@@ -3,6 +3,7 @@ import { ipcMain, type IpcMainEvent, type IpcMainInvokeEvent } from 'electron'
 import type { AppState } from '../shared/api'
 import type { Settings } from '../shared/model'
 import { pickImage } from './background'
+import { calendar, onProfileSaved } from './calendar'
 import { data, saveProfile, saveTheme } from './data'
 import { cpuRam, disks, fileIcon, launch, pickApps } from './system'
 import { hideWindow, logShown, ownsSender } from './window'
@@ -43,7 +44,10 @@ export function registerIpc(actions: IpcActions): void {
   on('photon:ready', actions.ready)
   handle('photon:saveSettings', (patch) => actions.updateSettings(editable(patch)))
   handle('photon:saveTheme', (raw) => saveTheme(raw)) // validé par parseTheme
-  handle('photon:saveProfile', (raw) => saveProfile(raw)) // validé par parseProfile
+  handle('photon:saveProfile', async (raw) => {
+    await saveProfile(raw) // validé par parseProfile
+    onProfileSaved()
+  })
   on('photon:hide', (reason) => hideWindow(typeof reason === 'string' ? reason : 'interface'))
   on('photon:shown', logShown)
   handle('photon:cpuRam', cpuRam)
@@ -56,5 +60,6 @@ export function registerIpc(actions: IpcActions): void {
     return launched
   })
   handle('photon:pickApps', pickApps)
+  handle('photon:calendar', calendar)
   handle('photon:pickImage', pickImage)
 }

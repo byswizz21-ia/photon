@@ -2,6 +2,7 @@
 import { app, globalShortcut } from 'electron'
 import type { Settings } from '../shared/model'
 import { registerBackgroundScheme, serveBackgrounds } from './background'
+import { startCalendars } from './calendar'
 import { data, loadAll, saveSettings } from './data'
 import { registerIpc } from './ipc'
 import { registerShortcut } from './shortcut'
@@ -70,5 +71,6 @@ if (!app.requestSingleInstanceLock()) {
     const update = (patch: Partial<Settings>): void => void updateSettings(patch)
     createTray({ toggle: toggleWindow, update, quit: () => app.quit() }, activeShortcut)
     enableLaunchAtLogin()
+    startCalendars()
   })
 }

@@ -24,6 +24,21 @@ export interface Disk {
   free: number // octets disponibles
 }
 
+// Agenda : événements à venir d'une adresse iCal, lus en fond par Photon (src/main/calendar.ts).
+export interface CalendarEvent {
+  title: string
+  start: number // ms depuis 1970
+  end: number // ms, exclue (un événement « journée » finit à minuit le lendemain)
+  allDay: boolean
+  location: string
+}
+
+export interface CalendarFeed {
+  events: CalendarEvent[] // pas encore finis, sur 14 jours, triés
+  updatedAt: number | null // dernière lecture réussie ; null = jamais
+  error: string | null // échec de la dernière lecture (les événements précédents restent)
+}
+
 // Images de fond servies par le protocole photon:// (src/main/background.ts).
 export const WALLPAPER_URL = 'photon://wallpaper'
 export const IMAGE_URL = 'photon://image'
@@ -48,6 +63,8 @@ export interface PhotonApi {
   launch(path: string): Promise<boolean> // ouvre puis cache Photon ; false si Windows échoue
   pickApps(): Promise<string[]> // boîte de dialogue ; [] si annulée
   pathForFile(file: File): string // chemin d'un fichier glissé-déposé ; '' si inconnu
+  // Agenda : cache seulement, aucun appel réseau ; null si l'adresse n'est pas en https/webcal
+  calendar(url: string): Promise<CalendarFeed | null>
   // Thème
   pickImage(): Promise<string | null> // boîte de dialogue ; null si annulée
 }
