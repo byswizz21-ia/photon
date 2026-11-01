@@ -6,6 +6,7 @@ import { startCalendars } from './calendar'
 import { loadClaude } from './claude'
 import { data, loadAll, saveSettings } from './data'
 import { registerIpc } from './ipc'
+import { loadMusic } from './music'
 import { registerShortcut } from './shortcut'
 import { createTray, refreshTray } from './tray'
 import {
@@ -73,5 +74,6 @@ if (!app.requestSingleInstanceLock()) {
     createTray({ toggle: toggleWindow, update, quit: () => app.quit() }, activeShortcut)
     enableLaunchAtLogin()
     startCalendars()
+    loadMusic()
   })
 }

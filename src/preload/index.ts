@@ -37,6 +37,11 @@ const photon: PhotonApi = {
   claudeImage: (png) => ipcRenderer.invoke('photon:claudeImage', png),
   clipboardText: () => ipcRenderer.invoke('photon:clipboardText'),
   copyText: (text) => ipcRenderer.send('photon:copyText', text),
+  music: () => ipcRenderer.invoke('photon:music'),
+  musicControl: (command) => ipcRenderer.invoke('photon:musicControl', command),
+  musicSeek: (seconds) => ipcRenderer.invoke('photon:musicSeek', seconds),
+  musicVolume: (volume) => ipcRenderer.invoke('photon:musicVolume', volume),
+  musicOpen: () => ipcRenderer.send('photon:musicOpen'),
   pickImage: () => ipcRenderer.invoke('photon:pickImage')
 }
 

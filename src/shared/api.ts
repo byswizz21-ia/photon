@@ -63,6 +63,25 @@ export interface ClaudeState {
   history: { id: string; title: string; updatedAt: number }[] // plus récentes d'abord
 }
 
+// YT Music : lecteur caché piloté par Photon (src/main/music.ts).
+export type MusicCommand = 'toggle' | 'next' | 'previous'
+
+export interface MusicTrack {
+  title: string
+  artist: string
+  artwork: string // data URL ; '' tant que la pochette n'est pas téléchargée
+  playing: boolean
+  time: number // secondes
+  duration: number // secondes
+  volume: number // 0 à 100
+}
+
+export interface MusicState {
+  ready: boolean // page YT Music chargée (false aussi sans widget YT Music)
+  signedIn: boolean
+  track: MusicTrack | null // null : rien en cours
+}
+
 // Images de fond servies par le protocole photon:// (src/main/background.ts).
 export const WALLPAPER_URL = 'photon://wallpaper'
 export const IMAGE_URL = 'photon://image'
@@ -99,6 +118,12 @@ export interface PhotonApi {
   claudeImage(png: Uint8Array): Promise<string | null> // capture collée → fichier temporaire
   clipboardText(): Promise<string>
   copyText(text: string): void
+  // YT Music : état lu dans la page cachée, sans appel réseau
+  music(): Promise<MusicState>
+  musicControl(command: MusicCommand): Promise<void>
+  musicSeek(seconds: number): Promise<void>
+  musicVolume(volume: number): Promise<void> // 0 à 100
+  musicOpen(): void // interface complète de YT Music (navigation, connexion Google)
   // Thème
   pickImage(): Promise<string | null> // boîte de dialogue ; null si annulée
 }

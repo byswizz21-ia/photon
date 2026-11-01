@@ -14,6 +14,7 @@ import {
   validFiles
 } from './claude'
 import { data, saveProfile, saveTheme } from './data'
+import { musicControl, musicSeek, musicState, musicVolume, openMusic, syncMusic } from './music'
 import { cpuRam, disks, fileIcon, launch, pickApps } from './system'
 import { hideWindow, logShown, ownsSender } from './window'
 
@@ -58,6 +59,7 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:saveProfile', async (raw) => {
     await saveProfile(raw) // validé par parseProfile
     onProfileSaved()
+    syncMusic()
   })
   on('photon:hide', (reason) => hideWindow(typeof reason === 'string' ? reason : 'interface'))
   on('photon:shown', logShown)
@@ -83,6 +85,14 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:clipboardText', async () => (await clipboard.readText()).slice(0, MAX_TEXT))
   on('photon:copyText', (text) => {
     if (typeof text === 'string') void clipboard.writeText(text.slice(0, MAX_TEXT))
+  })
+  handle('photon:music', musicState)
+  handle('photon:musicControl', musicControl) // commandes, nombres : validés dans music.ts
+  handle('photon:musicSeek', musicSeek)
+  handle('photon:musicVolume', musicVolume)
+  on('photon:musicOpen', () => {
+    hideWindow('YT Music ouvert')
+    openMusic()
   })
   handle('photon:pickImage', pickImage)
 }
