@@ -53,10 +53,10 @@ test("fond « Lumineux » conservé, type inconnu → fond d'écran", () => {
 })
 
 test('police du thème : défaut si absente, nom sans guillemet, bornes', () => {
-  expect(parseTheme({}).font).toEqual({ family: '', weight: 0, italic: false, scale: 1 })
+  expect(parseTheme({}).font).toEqual({ family: '', weight: 0, scale: 1 })
   expect(
     parseTheme({ font: { family: ' Inter ', weight: 1000, italic: true, scale: 0.1 } }).font
-  ).toEqual({ family: 'Inter', weight: 300, italic: true, scale: 0.8 })
+  ).toEqual({ family: 'Inter', weight: 300, scale: 0.8 })
   expect(parseTheme({ font: { family: 'x"; } body { color: red' } }).font.family).toBe('')
   expect(parseTheme({ font: { weight: 120 } }).font.weight).toBe(100)
 })

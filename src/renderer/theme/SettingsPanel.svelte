@@ -126,8 +126,9 @@
     return `${weight} · ${name}`
   }
 
-  // Polices installées sur Windows (Local Font Access), lues au 1er clic dans le champ.
-  // Refusé ou indisponible : la liste reste vide, on peut toujours taper un nom.
+  // Polices installées sur Windows (Local Font Access). Demandées à l'ouverture du panneau (le clic
+  // sur la roue compte comme geste de l'utilisateur), sinon au 1er clic sur le menu.
+  // Refusé ou indisponible : le menu n'a que la police de Photon et celle du thème.
   let installed = $state<string[]>([])
   let asked = false
   type LocalFonts = () => Promise<{ family: string }[]>
@@ -143,6 +144,17 @@
       asked = false // pas de geste de l'utilisateur (Tab) : on redemandera au prochain clic
     }
   }
+
+  void loadFonts()
+
+  // Menu : police de Photon, police du thème (importée, ou Windows absente de la liste), installées.
+  const fontOptions = $derived([
+    ['', 'Satoshi (police de Photon)'],
+    ...(font.family && !installed.includes(font.family)
+      ? [[font.family, imported ? `${imported} (importée)` : font.family]]
+      : []),
+    ...installed.map((family) => [family, family])
+  ])
 
   async function importFont(): Promise<void> {
     const path = await window.photon.pickFile('font')
@@ -323,40 +335,23 @@
     <h3>Police</h3>
     <label class="field">
       <span class="line">Police</span>
-      <input
-        class="text"
-        list="photon-fonts"
-        value={imported ? '' : font.family}
-        placeholder={imported ? `${imported} (importée)` : 'Satoshi (police de Photon)'}
-        spellcheck="false"
+      <select
+        value={font.family}
         onpointerdown={loadFonts}
-        onchange={(event) =>
-          patchFont({ family: event.currentTarget.value.replace(/["'\\;{}<>]/g, '').trim() })}
-      />
-      <datalist id="photon-fonts">
-        {#each installed as family (family)}<option value={family}></option>{/each}
-      </datalist>
-      <small>Une police installée sur Windows, ou un fichier .ttf, .otf, .woff importé</small>
+        onchange={(event) => patchFont({ family: event.currentTarget.value })}
+      >
+        {#each fontOptions as [family, label] (family)}
+          <option value={family}>{label}</option>
+        {/each}
+      </select>
+      <small>Polices installées sur Windows, ou un fichier .ttf, .otf, .woff importé</small>
     </label>
     <div class="row">
       <button type="button" class="action" onclick={importFont}>Importer une police…</button>
-      {#if font.family}
-        <button type="button" class="action" onclick={() => patchFont({ family: '' })}>
-          Police de Photon
-        </button>
-      {/if}
     </div>
     {@render range('Graisse', font.weight, -200, 300, 50, weightLabel, (weight) =>
       patchFont({ weight })
     )}
-    <label class="check">
-      <input
-        type="checkbox"
-        checked={font.italic}
-        onchange={(event) => patchFont({ italic: event.currentTarget.checked })}
-      />
-      <span>Italique</span>
-    </label>
     {@render range('Taille du texte', font.scale, 0.8, 1.4, 0.05, percent, (scale) =>
       patchFont({ scale })
     )}
@@ -714,8 +709,7 @@
     opacity: 0.6;
   }
 
-  select,
-  .text {
+  select {
     min-height: 36px;
     padding: 0 10px;
     border: 1px solid var(--line);
@@ -725,15 +719,6 @@
     font: inherit;
     font-size: var(--text-13);
     cursor: pointer;
-  }
-
-  .text {
-    cursor: text;
-    user-select: text;
-  }
-
-  .text::placeholder {
-    color: var(--text-faint);
   }
 
   select option {

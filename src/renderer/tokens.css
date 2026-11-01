@@ -158,12 +158,11 @@
   --focus-ring: 2px solid var(--accent);
   --focus-offset: 2px;
 
-  /* Typographie : Satoshi, variable 300 à 900. Police, graisse (--weight-shift), taille
-     (--font-scale) et italique (--font-style) se règlent dans le thème (theme/apply.svelte.ts). */
+  /* Typographie : Satoshi, variable 300 à 900. Police, graisse (--weight-shift) et taille
+     (--font-scale) se règlent dans le thème (theme/apply.svelte.ts). */
   --font-sans: 'Satoshi', system-ui, sans-serif;
   --weight-shift: 0;
   --font-scale: 1;
-  --font-style: normal;
   /* light : grands chiffres (horloge, température, espace libre) ; medium : boutons, choix
      segmentés ; semibold : nom de l'app, titres, en-têtes de section */
   --weight-light: calc(300 + var(--weight-shift));

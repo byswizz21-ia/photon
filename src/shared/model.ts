@@ -38,7 +38,6 @@ export type Density = 'compact' | 'comfortable'
 export interface FontSettings {
   family: string // '' = Satoshi (police de Photon) ; « file:<nom> » = police importée ; sinon police Windows
   weight: number // décalage de graisse ajouté à tous les textes, -200 (fin) à +300 (gras)
-  italic: boolean
   scale: number // taille des textes, 0,8 à 1,4
 }
 
@@ -121,7 +120,7 @@ export const defaultTheme = (): Theme => ({
   opacity: 0.5,
   radius: 20,
   density: 'comfortable',
-  font: { family: '', weight: 0, italic: false, scale: 1 }
+  font: { family: '', weight: 0, scale: 1 }
 })
 
 export const defaultProfile = (): Profile => ({
@@ -224,7 +223,6 @@ function parseFont(v: unknown): FontSettings {
   return {
     family: isFontFamily(v.family) ? v.family.trim() : d.family,
     weight: Math.round(num(v.weight, -200, 300, d.weight) / 50) * 50,
-    italic: v.italic === true,
     scale: num(v.scale, 0.8, 1.4, d.scale)
   }
 }

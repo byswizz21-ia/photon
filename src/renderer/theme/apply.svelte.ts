@@ -98,6 +98,5 @@ export function useTheme(): void {
     style.setProperty('--font-sans', fontStack(theme.font.family))
     style.setProperty('--weight-shift', String(theme.font.weight))
     style.setProperty('--font-scale', String(theme.font.scale))
-    style.setProperty('--font-style', theme.font.italic ? 'italic' : 'normal')
   })
 }
