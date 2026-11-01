@@ -5,6 +5,7 @@
   import { addWidget } from './Grid.svelte'
 
   let open = $state(false)
+  let box = $state<HTMLElement>()
 
   function pick(type: string): void {
     addWidget(type)
@@ -12,7 +13,14 @@
   }
 </script>
 
-<div class="add">
+<!-- Clic ailleurs : le menu se ferme. -->
+<svelte:window
+  onpointerdown={(event) => {
+    if (open && !box?.contains(event.target as Node)) open = false
+  }}
+/>
+
+<div class="add" bind:this={box}>
   <button
     type="button"
     class="action"

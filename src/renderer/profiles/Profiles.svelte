@@ -9,7 +9,9 @@
   import { app, changeProfile, saveProfile, switchProfile } from '../state.svelte'
 
   let menu = $state(false)
+  let addBox = $state<HTMLElement>()
   let confirmDelete = $state(false)
+  let askedAt = 0 // un double-clic ne doit pas valoir confirmation
 
   // Nouveau profil : mode édition pour le nommer et placer ses widgets.
   async function create(source: string): Promise<void> {
@@ -20,14 +22,23 @@
   function remove(): void {
     if (!confirmDelete) {
       confirmDelete = true
+      askedAt = Date.now()
       return
     }
+    if (Date.now() - askedAt < 500) return
     confirmDelete = false
     void changeProfile(() => window.photon.deleteProfile())
   }
 
   const isActive = (id: string): boolean => id === app.settings.activeProfile
 </script>
+
+<!-- Clic ailleurs : le menu se ferme. -->
+<svelte:window
+  onpointerdown={(event) => {
+    if (menu && !addBox?.contains(event.target as Node)) menu = false
+  }}
+/>
 
 <div class="profiles">
   <div class="pills" role="group" aria-label="Profils">
@@ -76,7 +87,7 @@
     {/each}
   </div>
 
-  <div class="add">
+  <div class="add" bind:this={addBox}>
     <button
       type="button"
       class="action icon small"

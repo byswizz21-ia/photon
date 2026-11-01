@@ -2,10 +2,11 @@
 // Node pur (os, fs.statfs) : quelques ms par lecture, contre 0,4 à 1 s pour systeminformation
 // qui lance PowerShell à chaque appel (mesuré sur la machine cible).
 import { app, dialog, shell } from 'electron'
+import { execFile } from 'node:child_process'
 import { promises as fs } from 'node:fs'
 import { cpus, freemem, totalmem } from 'node:os'
 import { extname, isAbsolute, join } from 'node:path'
-import type { CpuRam, Disk } from '../shared/api'
+import type { CpuRam, Disk, NetworkRate } from '../shared/api'
 import { withModal } from './window'
 
 const DRIVE_LETTERS = [...'CDEFGHIJKLMNOPQRSTUVWXYZ']
@@ -143,4 +144,50 @@ export async function pickApps(): Promise<string[]> {
     })
   )
   return result.canceled ? [] : result.filePaths
+}
+
+// Boîte « ajouter des dossiers » (widget Dossiers).
+export async function pickFolders(): Promise<string[]> {
+  const result = await withModal((parent) =>
+    dialog.showOpenDialog(parent, {
+      title: 'Ajouter des dossiers',
+      properties: ['openDirectory', 'multiSelections']
+    })
+  )
+  return result.canceled ? [] : result.filePaths
+}
+
+// Débit réseau : octets reçus / envoyés de toutes les interfaces, via `netstat -e` (≈ 40 ms,
+// Node n'a pas ces compteurs). Ligne « Octets » / « Bytes » : 1re ligne libellé + 2 nombres.
+const COUNTER = 2 ** 32 // compteurs 32 bits : ils repartent de zéro après 4 Go
+let lastNet: { at: number; received: number; sent: number } | null = null
+
+function netstat(): Promise<{ received: number; sent: number } | null> {
+  return new Promise((resolve) => {
+    execFile('netstat.exe', ['-e'], { windowsHide: true, timeout: 3000 }, (error, stdout) => {
+      const match = error ? null : /^\S+\s+(\d+)\s+(\d+)\s*$/m.exec(stdout)
+      resolve(match ? { received: Number(match[1]), sent: Number(match[2]) } : null)
+    })
+  })
+}
+
+// Octets par seconde depuis la lecture précédente ; null à la 1re lecture ou après une pause.
+// Plusieurs widgets Réseau : les appels rapprochés partagent la même mesure (comme cpuRam).
+let lastRate: NetworkRate | null = null
+
+export async function network(): Promise<NetworkRate | null> {
+  if (lastNet && Date.now() - lastNet.at < SHARE_MS * 0.8) return lastRate
+  lastRate = await measureNetwork()
+  return lastRate
+}
+
+async function measureNetwork(): Promise<NetworkRate | null> {
+  const now = await netstat()
+  if (!now) return null
+  const previous = lastNet
+  lastNet = { at: Date.now(), ...now }
+  if (!previous || lastNet.at - previous.at > STALE_MS) return null
+  const seconds = (lastNet.at - previous.at) / 1000
+  const rate = (a: number, b: number): number => ((a - b + COUNTER) % COUNTER) / seconds
+  return { down: rate(now.received, previous.received), up: rate(now.sent, previous.sent) }
 }

@@ -8,6 +8,7 @@ import { data, loadAll, saveSettings } from './data'
 import { registerIpc } from './ipc'
 import { loadSearch } from './search/search'
 import { loadMusic } from './music'
+import { startWeather } from './weather'
 import { registerShortcut } from './shortcut'
 import { createTray, refreshTray } from './tray'
 import {
@@ -83,6 +84,7 @@ if (!app.requestSingleInstanceLock()) {
     createTray({ toggle: toggleWindow, update, quit: () => app.quit() }, activeShortcut)
     enableLaunchAtLogin()
     startCalendars()
+    startWeather()
     loadMusic()
   })
 }

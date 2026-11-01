@@ -17,8 +17,12 @@ import {
 } from './claude'
 import { createProfile, data, deleteProfile, saveProfile, saveTheme, switchProfile } from './data'
 import { musicControl, musicSeek, musicState, musicVolume, openMusic, syncMusic } from './music'
+import { pomodoro, pomodoroControl } from './pomodoro'
+import { recentFiles } from './search/files'
 import { openResult, resultIcon, search } from './search/search'
-import { cpuRam, disks, fileIcon, launch, pickApps } from './system'
+import { sharedLoad, sharedSave } from './shared'
+import { cpuRam, disks, fileIcon, launch, network, pickApps, pickFolders } from './system'
+import { onWeatherProfile, weather } from './weather'
 import { hideWindow, logShown, ownsSender, resizeBar } from './window'
 
 interface IpcActions {
@@ -68,12 +72,14 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:saveProfile', async (raw) => {
     await saveProfile(raw) // validé par parseProfile
     onProfileSaved()
+    onWeatherProfile()
     syncMusic()
   })
   // Profil changé : agendas et lecteur YT Music suivent les widgets du nouveau profil.
   const switched = (ok: boolean): AppState | null => {
     if (!ok) return null
     onProfileSaved()
+    onWeatherProfile()
     syncMusic()
     return { ...data }
   }
@@ -126,4 +132,14 @@ export function registerIpc(actions: IpcActions): void {
     if (typeof height === 'number' && Number.isFinite(height)) resizeBar(height)
   })
   handle('photon:pickImage', pickImage)
+  handle('photon:sharedLoad', sharedLoad) // clé = nom de fichier validé, taille bornée
+  handle('photon:sharedSave', sharedSave)
+  handle('photon:pomodoro', pomodoro)
+  handle('photon:pomodoroControl', pomodoroControl) // commande et durées validées
+  handle('photon:weather', weather)
+  handle('photon:network', network)
+  handle('photon:recentFiles', () =>
+    recentFiles(12).map(({ path, name, folder }) => ({ path, name, folder }))
+  )
+  handle('photon:pickFolders', pickFolders)
 }

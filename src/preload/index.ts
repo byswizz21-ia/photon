@@ -51,6 +51,15 @@ const photon: PhotonApi = {
   openResult: (id, inFolder) => ipcRenderer.invoke('photon:openResult', id, inFolder),
   resultIcon: (id) => ipcRenderer.invoke('photon:resultIcon', id),
   barResize: (height) => ipcRenderer.send('photon:barResize', height),
+  sharedLoad: (key) => ipcRenderer.invoke('photon:sharedLoad', key),
+  sharedSave: (key, value) => ipcRenderer.invoke('photon:sharedSave', key, value),
+  pomodoro: () => ipcRenderer.invoke('photon:pomodoro'),
+  pomodoroControl: (command, focus, pause) =>
+    ipcRenderer.invoke('photon:pomodoroControl', command, focus, pause),
+  weather: (city) => ipcRenderer.invoke('photon:weather', city),
+  network: () => ipcRenderer.invoke('photon:network'),
+  recentFiles: () => ipcRenderer.invoke('photon:recentFiles'),
+  pickFolders: () => ipcRenderer.invoke('photon:pickFolders'),
   pickImage: () => ipcRenderer.invoke('photon:pickImage')
 }
 

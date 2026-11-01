@@ -110,6 +110,44 @@ export interface MusicState {
   track: MusicTrack | null // null : rien en cours
 }
 
+// Pomodoro (src/main/pomodoro.ts) : un seul, partagé par tous les profils.
+export type PomodoroCommand = 'start' | 'pause' | 'skip' | 'reset'
+
+export interface PomodoroState {
+  phase: 'idle' | 'focus' | 'pause'
+  running: boolean
+  endsAt: number // ms depuis 1970, phase en cours
+  left: number // ms restantes, phase en pause
+  total: number // ms, durée de la phase
+}
+
+// Météo (src/main/weather.ts) : cache lu en fond, codes météo WMO.
+export interface WeatherDay {
+  date: string // « 2026-11-01 »
+  code: number
+  max: number // °C
+  min: number // °C
+}
+
+export interface WeatherFeed {
+  place: string // nom trouvé par le géocodage
+  current: { temperature: number; code: number; day: boolean } | null
+  days: WeatherDay[] // aujourd'hui d'abord
+  updatedAt: number | null // dernière lecture réussie ; null = jamais
+  error: string | null
+}
+
+export interface NetworkRate {
+  down: number // octets/s reçus
+  up: number // octets/s envoyés
+}
+
+export interface RecentFile {
+  path: string
+  name: string
+  folder: boolean
+}
+
 // Images de fond servies par le protocole photon:// (src/main/background.ts).
 export const WALLPAPER_URL = 'photon://wallpaper'
 export const IMAGE_URL = 'photon://image'
@@ -164,6 +202,15 @@ export interface PhotonApi {
   openResult(id: string, inFolder: boolean): Promise<boolean> // true : ouvert, Photon se cache
   resultIcon(id: string): Promise<string | null>
   barResize(height: number): void // mini-mode : la fenêtre suit la hauteur de la barre
+  // Petits widgets
+  sharedLoad(key: string): Promise<unknown> // données partagées entre profils ; null si absentes
+  sharedSave(key: string, value: unknown): Promise<void>
+  pomodoro(): Promise<PomodoroState>
+  pomodoroControl(command: PomodoroCommand, focus?: number, pause?: number): Promise<PomodoroState>
+  weather(city: string): Promise<WeatherFeed | null> // cache seulement, aucun appel réseau
+  network(): Promise<NetworkRate | null> // null : 1re lecture, la suivante donne le débit
+  recentFiles(): Promise<RecentFile[]> // derniers fichiers et dossiers ouverts dans Windows
+  pickFolders(): Promise<string[]> // boîte de dialogue ; [] si annulée
   // Thème
   pickImage(): Promise<string | null> // boîte de dialogue ; null si annulée
 }

@@ -171,3 +171,9 @@ button {
 .menu button:focus-visible {
   background: rgb(255 255 255 / 0.06);
 }
+
+/* Barres de défilement fines et discrètes (listes des widgets, panneau). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.18) transparent;
+}

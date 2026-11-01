@@ -2,6 +2,7 @@
 // Les commandes lourdes (redémarrer, éteindre…) demandent une 2e validation dans la barre.
 import { spawn } from 'node:child_process'
 import { musicAvailable, musicControl, openMusic } from '../music'
+import { pomodoroCommand } from '../pomodoro'
 
 export interface Command {
   id: string
@@ -113,6 +114,27 @@ export const COMMANDS: readonly Command[] = [
     () => void musicControl('previous')
   ),
   music('music-open', 'Ouvrir YT Music', 'musique youtube music', openMusic),
+  system(
+    'pomodoro-start',
+    'Lancer un pomodoro',
+    'pomodoro minuteur focus travail',
+    false,
+    pomodoroCommand('start')
+  ),
+  system(
+    'pomodoro-pause',
+    'Mettre le pomodoro en pause',
+    'pomodoro pause minuteur',
+    false,
+    pomodoroCommand('pause')
+  ),
+  system(
+    'pomodoro-reset',
+    'Arrêter le pomodoro',
+    'pomodoro stop arreter minuteur',
+    false,
+    pomodoroCommand('reset')
+  ),
   ui('edit', 'Modifier la grille', 'widgets ajouter edition'),
   ui('settings', 'Réglages de Photon', 'parametres theme fond raccourci')
 ]

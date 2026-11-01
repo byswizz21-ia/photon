@@ -6,6 +6,7 @@
   import AddMenu from './grid/AddMenu.svelte'
   import Grid from './grid/Grid.svelte'
   import Logo from './lib/Logo.svelte'
+  import { flushShared } from './lib/shared.svelte'
   import Profiles from './profiles/Profiles.svelte'
   import { reveal } from './reveal'
   import { app, flushProfile, flushTheme, reducedMotion, switchProfile } from './state.svelte'
@@ -36,6 +37,7 @@
       settingsOpen = false
       flushProfile()
       flushTheme()
+      flushShared()
     })
     const offSettings = window.photon.onSettings((settings) => (app.settings = settings))
     window.photon.ready()
