@@ -28,6 +28,31 @@
   );
   --glass-rim: inset 0 1px 0 rgb(255 255 255 / 0.24), inset 0 -1px 0 rgb(255 255 255 / 0.05);
   --glass-filter: blur(var(--blur)) saturate(1.7);
+  /* Panneau principal « fumé lumineux » : verre sombre très saturé (les couleurs du fond y
+     saignent), lumière d'accent captée dans les coins, bord en dégradé accent → violet, grain. */
+  --panel-tint: rgb(9 10 14 / calc(var(--glass) + 0.06));
+  --panel-filter: blur(var(--blur)) saturate(2.2) brightness(0.88);
+  --panel-sheen: linear-gradient(180deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0) 140px);
+  --panel-light:
+    radial-gradient(
+      ellipse 55% 45% at 0% 0%,
+      color-mix(in srgb, var(--accent) 16%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 50% 45% at 100% 100%,
+      color-mix(in srgb, var(--glow-secondary) 18%, transparent),
+      transparent 70%
+    );
+  --panel-edge: linear-gradient(
+    140deg,
+    color-mix(in srgb, var(--accent) 70%, transparent),
+    rgb(255 255 255 / 0.14) 28%,
+    rgb(255 255 255 / 0.04) 60%,
+    color-mix(in srgb, var(--glow-secondary) 60%, transparent)
+  );
+  /* Grain : bruit gris à 7 %, tuile de 200 px (data: autorisé par la CSP img-src). */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0.07'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   --radius-panel: 28px;
   --radius: 20px;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);

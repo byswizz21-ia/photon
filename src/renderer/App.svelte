@@ -18,6 +18,7 @@
   let gear = $state<HTMLButtonElement>()
   let settingsOpen = $state(false)
   let pressedVoid = false // le clic a commencé dans le vide (sinon : curseur glissé hors d'un contrôle)
+  let claudeBusy = $state(false) // le logo tourne en continu pendant une réponse de Claude
 
   useTheme()
 
@@ -45,6 +46,16 @@
       offShow()
       offHide()
       offSettings()
+    }
+  })
+
+  $effect(() => {
+    let alive = true
+    void window.photon.claudeState().then((state) => alive && (claudeBusy = state.busy))
+    const off = window.photon.onClaude((state) => (claudeBusy = state.busy))
+    return () => {
+      alive = false
+      off()
     }
   })
 
@@ -134,7 +145,7 @@
     <div class="light" aria-hidden="true"></div>
     <main class="panel" data-void>
       <header class="bar" data-reveal class:drag={!fullscreen}>
-        <Logo size={28} />
+        <Logo size={28} mode={claudeBusy ? 'thinking' : 'idle'} />
         <span class="name">Photon</span>
         <Profiles />
         <CommandBar onaction={runAction} />
@@ -207,19 +218,19 @@
     background:
       radial-gradient(
         circle at 12% 8%,
-        color-mix(in srgb, var(--accent) 20%, transparent),
+        color-mix(in srgb, var(--accent) 32%, transparent),
         transparent 45%
       ),
       radial-gradient(
         circle at 92% 96%,
-        color-mix(in srgb, var(--glow-secondary) 20%, transparent),
+        color-mix(in srgb, var(--glow-secondary) 32%, transparent),
         transparent 45%
       );
   }
 
-  /* Fond net et juste assombri : c'est le panneau qui le floute, d'où l'effet de verre. */
+  /* Fond net et assombri : c'est le panneau qui le floute, d'où l'effet de verre. */
   .fullscreen .veil {
-    background-color: rgb(7 8 11 / 0.3);
+    background-color: rgb(7 8 11 / 0.4);
   }
 
   .light {
@@ -239,7 +250,8 @@
     pointer-events: none;
   }
 
-  /* Mode fenêtre : le panneau est la fenêtre (Windows dessine coins et bordure). */
+  /* Mode fenêtre : le panneau est la fenêtre (Windows dessine coins, bordure et flou acrylic).
+     Fumé lumineux : grain, lumière d'accent dans les coins, reflet du haut, teinte sombre. */
   .panel {
     position: relative;
     box-sizing: border-box;
@@ -249,21 +261,38 @@
     flex-direction: column;
     gap: 20px;
     overflow: auto;
-    background: var(--glass-sheen), var(--panel-bg);
+    background: var(--grain), var(--panel-light), var(--panel-sheen), var(--panel-tint);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.16);
   }
 
-  /* Plein écran : panneau de verre centré, qui floute le fond d'écran derrière lui. */
+  /* Bord en dégradé accent → violet : anneau de 1 px découpé par masque. */
+  .panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: var(--panel-edge);
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Plein écran : panneau de verre centré, qui floute (et sature) le fond d'écran derrière lui. */
   .fullscreen .panel {
     width: min(1280px, calc(100% - 96px));
     height: auto;
     max-height: calc(100% - 96px);
     margin: 48px auto;
-    border: 1px solid var(--glass-edge);
     border-radius: var(--radius-panel);
-    backdrop-filter: var(--glass-filter);
+    backdrop-filter: var(--panel-filter);
     box-shadow:
-      var(--glass-rim),
-      0 40px 100px -30px rgb(0 0 0 / 0.65);
+      inset 0 1px 0 rgb(255 255 255 / 0.18),
+      0 0 0 1px rgb(0 0 0 / 0.35),
+      0 50px 120px -30px rgb(0 0 0 / 0.8),
+      0 0 120px -30px color-mix(in srgb, var(--accent) 45%, transparent);
   }
 
   /* Claude en mode Bypass : halo rouge sur tout le panneau tant qu'il est actif. */
