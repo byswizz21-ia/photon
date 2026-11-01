@@ -51,6 +51,12 @@ export function createWindow(): BrowserWindow {
   // L'interface ne quitte jamais sa page (fichier lâché, lien) et n'ouvre aucune fenêtre.
   win.webContents.on('will-navigate', (event) => event.preventDefault())
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
+  // Interface plantée : seul cas où on recharge, sinon le raccourci afficherait une fenêtre morte.
+  win.webContents.on('render-process-gone', (_event, { reason }) => {
+    if (reason === 'clean-exit' || win.isDestroyed()) return
+    console.error(`[photon] interface arrêtée (${reason}), rechargement`)
+    win.webContents.reload()
+  })
   // App installée : pas de menu, donc pas de Ctrl+R, DevTools, zoom ni F11.
   if (app.isPackaged) Menu.setApplicationMenu(null)
   win.on('blur', () => {
