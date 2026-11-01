@@ -29,3 +29,19 @@ export function flushProfile(): void {
 // Réglage « réduire les animations » de Photon, ou celui de Windows.
 export const reducedMotion = (): boolean =>
   app.settings.reduceMotion || prefersReducedMotion.current
+
+let themeTimer: ReturnType<typeof setTimeout> | undefined
+
+// Même principe pour le thème (curseurs des réglages : une écriture par rafale).
+export function saveTheme(): void {
+  clearTimeout(themeTimer)
+  themeTimer = setTimeout(flushTheme, 250)
+}
+
+// Écrit tout de suite s'il reste une sauvegarde en attente (appelé à la fermeture de Photon).
+export function flushTheme(): void {
+  if (themeTimer === undefined) return
+  clearTimeout(themeTimer)
+  themeTimer = undefined
+  void window.photon.saveTheme($state.snapshot(app.theme))
+}

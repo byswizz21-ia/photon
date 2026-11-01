@@ -12,8 +12,10 @@
   --text-muted: #a3a8b3;
   --text-faint: #8b909b;
   --accent: #7cc4ff; /* remplacée par le thème */
+  --on-accent: #07080b; /* texte posé sur l'accent, choisi selon son contraste */
   --glow-secondary: #7a5cff;
   --glass: 0.5; /* opacité du verre, réglée par le thème */
+  --blur: 48px; /* flou du fond (plein écran), réglé par le thème */
   --panel-bg: rgb(16 18 24 / var(--glass));
   --line: rgb(255 255 255 / 0.08);
   --card-bg: rgb(255 255 255 / 0.04);
@@ -120,5 +122,5 @@ button {
 .action.primary {
   border-color: transparent;
   background: var(--accent);
-  color: var(--bg);
+  color: var(--on-accent);
 }

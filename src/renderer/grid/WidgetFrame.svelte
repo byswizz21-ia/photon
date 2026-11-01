@@ -24,9 +24,26 @@
   function logError(error: unknown): void {
     console.error(`[photon] le widget « ${widget.type} » a planté`, error)
   }
+
+  // Point lumineux qui suit le curseur le long de la bordure (déplacé par transform seulement).
+  let light = $state({ x: 0, y: 0 })
+
+  function track(event: PointerEvent): void {
+    const box = (event.currentTarget as HTMLElement).getBoundingClientRect()
+    light = { x: event.clientX - box.left, y: event.clientY - box.top }
+  }
 </script>
 
-<article class="card" class:editing={app.editing} data-reveal aria-label={manifest.name}>
+<article
+  class="card"
+  class:editing={app.editing}
+  data-reveal
+  aria-label={manifest.name}
+  onpointermove={track}
+>
+  <span class="ring" aria-hidden="true">
+    <span class="spot" style:transform="translate({light.x}px, {light.y}px)"></span>
+  </span>
   <div class="content">
     <svelte:boundary onerror={logError}>
       <Widget {settings} editing={app.editing} {save} />
@@ -75,6 +92,37 @@
 
   .card:hover::before {
     opacity: 1;
+  }
+
+  /* Anneau de 1 px (masque) dans lequel glisse un point de lumière d'accent. */
+  .ring {
+    position: absolute;
+    inset: -1px;
+    padding: 1px;
+    border-radius: inherit;
+    overflow: hidden;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 200ms var(--ease-out);
+    pointer-events: none;
+  }
+
+  .card:hover .ring {
+    opacity: 1;
+  }
+
+  .spot {
+    position: absolute;
+    left: -110px;
+    top: -110px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent), transparent 70%);
+    will-change: transform;
   }
 
   /* Appui : 97 % puis retour en ressort (le ressort vient de la transition de base). */

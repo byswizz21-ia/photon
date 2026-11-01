@@ -1,13 +1,22 @@
 <script lang="ts">
   import CheckIcon from 'phosphor-svelte/lib/CheckIcon'
+  import GearSixIcon from 'phosphor-svelte/lib/GearSixIcon'
   import PencilSimpleIcon from 'phosphor-svelte/lib/PencilSimpleIcon'
   import AddMenu from './grid/AddMenu.svelte'
   import Grid from './grid/Grid.svelte'
   import Logo from './lib/Logo.svelte'
   import { reveal } from './reveal'
-  import { app, flushProfile, reducedMotion } from './state.svelte'
+  import { app, flushProfile, flushTheme, reducedMotion } from './state.svelte'
+  import { useTheme } from './theme/apply.svelte'
+  import Background from './theme/Background.svelte'
+  import SettingsPanel from './theme/SettingsPanel.svelte'
 
   let root: HTMLElement
+  let gear = $state<HTMLButtonElement>()
+  let settingsOpen = $state(false)
+  let pressedVoid = false // le clic a commencé dans le vide (sinon : curseur glissé hors d'un contrôle)
+
+  useTheme()
 
   const fullscreen = $derived(app.settings.mode === 'fullscreen')
 
@@ -21,7 +30,9 @@
     const offHide = window.photon.onHide(() => {
       app.visible = false
       app.editing = false
+      settingsOpen = false
       flushProfile()
+      flushTheme()
     })
     const offSettings = window.photon.onSettings((settings) => (app.settings = settings))
     window.photon.ready()
@@ -37,19 +48,26 @@
     document.documentElement.toggleAttribute('data-reduce-motion', reducedMotion())
   })
 
-  // Échap : quitte d'abord le mode édition, sinon ferme Photon.
+  function closeSettings(): void {
+    settingsOpen = false
+    gear?.focus()
+  }
+
+  // Échap : ferme d'abord les réglages, puis quitte le mode édition, sinon ferme Photon.
   function onKeydown(event: KeyboardEvent): void {
     if (event.key !== 'Escape') return
-    if (app.editing) app.editing = false
+    if (settingsOpen) closeSettings()
+    else if (app.editing) app.editing = false
     else window.photon.hide('Échap')
   }
 
-  // Clic dans le vide (fond, marges du panneau) : ferme, en plein écran et hors édition.
+  const isVoid = (event: Event): boolean => (event.target as HTMLElement).hasAttribute('data-void')
+
+  // Clic dans le vide (fond, marges du panneau) : ferme les réglages, sinon Photon (plein écran, hors édition).
   function onClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement
-    if (fullscreen && !app.editing && target.hasAttribute('data-void')) {
-      window.photon.hide('clic dans le vide')
-    }
+    if (!pressedVoid || !isVoid(event)) return
+    if (settingsOpen) closeSettings()
+    else if (fullscreen && !app.editing) window.photon.hide('clic dans le vide')
   }
 </script>
 
@@ -62,8 +80,19 @@
 
 <!-- Le clic dans le vide est un raccourci souris : au clavier, Échap ferme déjà. -->
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-<div class="root" class:fullscreen bind:this={root} onclick={onClick} data-void>
-  <div class="backdrop" aria-hidden="true"></div>
+<div
+  class="root"
+  class:fullscreen
+  bind:this={root}
+  onpointerdown={(event) => (pressedVoid = isVoid(event))}
+  onclick={onClick}
+  data-void
+>
+  <div class="backdrop" aria-hidden="true">
+    <!-- Plein écran seulement : en mode fenêtre, le flou acrylic de Windows fait le verre. -->
+    {#if fullscreen}<Background />{/if}
+    <div class="veil"></div>
+  </div>
   <div class="light" aria-hidden="true"></div>
   <main class="panel" data-void>
     <header class="bar" data-reveal class:drag={!fullscreen}>
@@ -82,15 +111,31 @@
             class="action icon"
             aria-label="Modifier la grille"
             title="Modifier la grille"
-            onclick={() => (app.editing = true)}
+            onclick={() => {
+              settingsOpen = false
+              app.editing = true
+            }}
           >
             <PencilSimpleIcon size={18} weight="duotone" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            class="action icon"
+            bind:this={gear}
+            aria-label="Réglages"
+            title="Réglages"
+            aria-haspopup="dialog"
+            aria-expanded={settingsOpen}
+            onclick={() => (settingsOpen = !settingsOpen)}
+          >
+            <GearSixIcon size={18} weight="duotone" aria-hidden="true" />
           </button>
         {/if}
       </div>
     </header>
     <Grid />
   </main>
+  {#if settingsOpen}<SettingsPanel onclose={closeSettings} />{/if}
 </div>
 
 <style>
@@ -100,11 +145,17 @@
     overflow: hidden;
   }
 
-  /* Fond : voile sombre (plein écran) et deux lueurs, celle de l'accent et la violette. */
+  /* Fond : calque flouté (plein écran), puis voile sombre et deux lueurs d'accent et violette. */
   .backdrop {
     position: absolute;
     inset: 0;
+    overflow: hidden;
     pointer-events: none;
+  }
+
+  .veil {
+    position: absolute;
+    inset: 0;
     background:
       radial-gradient(
         circle at 12% 8%,
@@ -118,7 +169,7 @@
       );
   }
 
-  .fullscreen .backdrop {
+  .fullscreen .veil {
     background-color: rgb(7 8 11 / 0.55);
   }
 
