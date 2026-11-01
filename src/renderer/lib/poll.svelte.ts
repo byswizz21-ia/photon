@@ -6,10 +6,15 @@ import { app } from '../state.svelte'
 export function pollWhileVisible(read: () => unknown, ms: number): void {
   $effect(() => {
     if (!app.visible) return
+    // Lecture lente (lecteur réseau) : on saute les tours tant que la précédente n'a pas fini.
+    let busy = false
     const run = (): void => {
+      if (busy) return
+      busy = true
       Promise.resolve()
         .then(read)
         .catch((error: unknown) => console.error('[photon] lecture impossible', error))
+        .finally(() => (busy = false))
     }
     run()
     const timer = setInterval(run, ms)

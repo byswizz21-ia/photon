@@ -10,7 +10,11 @@ import { withModal } from './window'
 
 const DRIVE_LETTERS = [...'CDEFGHIJKLMNOPQRSTUVWXYZ']
 
+const STALE_MS = 3000 // au-delà, l'ancienne mesure date d'avant la fermeture de Photon
+const FRESH_WINDOW_MS = 250
+
 let lastCpu = cpuTimes()
+let lastCpuAt = Date.now()
 
 function cpuTimes(): { idle: number; total: number } {
   let idle = 0
@@ -22,8 +26,27 @@ function cpuTimes(): { idle: number; total: number } {
   return { idle, total }
 }
 
+// Plusieurs widgets Système : les appels rapprochés partagent la même mesure, sinon le 2e
+// mesurerait une fenêtre de quelques ms (0 % ou pics).
+const SHARE_MS = 1000
+let lastMeasure: { at: number; value: Promise<CpuRam> } | null = null
+
+export function cpuRam(): Promise<CpuRam> {
+  if (!lastMeasure || Date.now() - lastMeasure.at > SHARE_MS) {
+    lastMeasure = { at: Date.now(), value: measureCpuRam() }
+  }
+  return lastMeasure.value
+}
+
 // CPU : part du temps actif depuis la lecture précédente. RAM : mémoire physique utilisée.
-export function cpuRam(): CpuRam {
+// Mesure précédente périmée (Photon était caché) : on mesure sur une fenêtre courte et fraîche,
+// sinon la première valeur serait la moyenne de toute la période cachée.
+async function measureCpuRam(): Promise<CpuRam> {
+  if (Date.now() - lastCpuAt > STALE_MS) {
+    lastCpu = cpuTimes()
+    await new Promise((resolve) => setTimeout(resolve, FRESH_WINDOW_MS))
+  }
+  lastCpuAt = Date.now()
   const now = cpuTimes()
   const total = now.total - lastCpu.total
   const idle = now.idle - lastCpu.idle
@@ -36,21 +59,39 @@ export function cpuRam(): CpuRam {
   }
 }
 
-// Lecteurs C: à Z: présents, lus en parallèle : un lecteur réseau lent ne retarde pas les autres.
+// Un lecteur réseau déconnecté peut bloquer statfs longtemps : au-delà de DRIVE_TIMEOUT_MS il est
+// ignoré pour ce tour, et on ne relance pas une lettre dont la lecture précédente n'a pas fini
+// (sinon les lectures bloquées s'empileraient et occuperaient les threads de Node).
+const DRIVE_TIMEOUT_MS = 1500
+const pending = new Map<string, Promise<Disk | null>>()
+
+async function readDrive(letter: string): Promise<Disk | null> {
+  try {
+    const stats = await fs.statfs(`${letter}:\\`)
+    if (stats.blocks <= 0) return null
+    return {
+      mount: `${letter}:`,
+      total: stats.blocks * stats.bsize,
+      free: stats.bavail * stats.bsize
+    }
+  } catch {
+    return null // lettre absente ou lecteur sans support
+  } finally {
+    pending.delete(letter)
+  }
+}
+
+// Lecteurs C: à Z: présents, lus en parallèle.
 export async function disks(): Promise<Disk[]> {
   const found = await Promise.all(
-    DRIVE_LETTERS.map(async (letter): Promise<Disk | null> => {
-      try {
-        const stats = await fs.statfs(`${letter}:\\`)
-        if (stats.blocks <= 0) return null
-        return {
-          mount: `${letter}:`,
-          total: stats.blocks * stats.bsize,
-          free: stats.bavail * stats.bsize
-        }
-      } catch {
-        return null // lettre absente ou lecteur sans support
+    DRIVE_LETTERS.map((letter) => {
+      let read = pending.get(letter)
+      if (!read) {
+        read = readDrive(letter)
+        pending.set(letter, read)
       }
+      const timeout = new Promise<null>((resolve) => setTimeout(resolve, DRIVE_TIMEOUT_MS, null))
+      return Promise.race([read, timeout])
     })
   )
   return found.filter((disk) => disk !== null)
@@ -58,8 +99,11 @@ export async function disks(): Promise<Disk[]> {
 
 // Icône d'une app (data URL PNG, 32 px). Pour un raccourci .lnk, Electron rendrait une icône
 // générique : on lit l'icône déclarée par le raccourci, sinon celle de sa cible.
+// Chemins réseau (\\serveur\…) ignorés : aucun appel réseau pour une icône.
+const isLocal = (path: string): boolean => isAbsolute(path) && !path.startsWith('\\\\')
+
 export async function fileIcon(path: string): Promise<string | null> {
-  if (!isAbsolute(path)) return null
+  if (!isLocal(path)) return null
   const candidates = [path]
   if (extname(path).toLowerCase() === '.lnk') {
     try {
@@ -69,7 +113,7 @@ export async function fileIcon(path: string): Promise<string | null> {
       // raccourci illisible : icône du fichier lui-même
     }
   }
-  for (const candidate of candidates) {
+  for (const candidate of candidates.filter(isLocal)) {
     try {
       const icon = await app.getFileIcon(candidate, { size: 'large' })
       if (!icon.isEmpty()) return icon.toDataURL()
