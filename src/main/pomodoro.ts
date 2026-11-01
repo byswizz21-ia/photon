@@ -12,13 +12,29 @@ let state: PomodoroState = { phase: 'idle', running: false, endsAt: 0, left: 0, 
 let focusMs = DEFAULT.focus * MINUTE
 let pauseMs = DEFAULT.pause * MINUTE
 let timer: NodeJS.Timeout | undefined
+let reminders = false // profil Focus actif (src/main/focus.ts)
+
+export const setReminders = (on: boolean): void => {
+  reminders = on
+}
+
+const xml = (text: string): string => text.replace(/[<>&"]/g, (c) => `&#${c.charCodeAt(0)};`)
+
+// Rappel : passe « Ne pas déranger » (réglage par défaut de Windows 11) et reste affiché
+// jusqu'au clic sur OK.
+const reminderXml = (title: string, body: string): string =>
+  `<toast scenario="reminder"><visual><binding template="ToastGeneric"><text>${xml(title)}</text>` +
+  `<text>${xml(body)}</text></binding></visual><actions>` +
+  `<action content="OK" arguments="dismiss" activationType="system"/></actions></toast>`
 
 const minutes = (v: unknown, fallback: number): number =>
   typeof v === 'number' && Number.isFinite(v) ? Math.min(Math.max(Math.round(v), 1), 180) : fallback
 
 function notify(title: string, body: string): void {
   if (!Notification.isSupported()) return
-  const notification = new Notification({ title, body })
+  const notification = new Notification(
+    reminders ? { title, toastXml: reminderXml(title, body) } : { title, body }
+  )
   notification.on('click', showWindow)
   notification.show()
 }

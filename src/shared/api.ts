@@ -229,6 +229,7 @@ export interface PhotonApi {
   onShow(callback: (event: ShowEvent) => void): () => void
   onHide(callback: () => void): () => void
   onSettings(callback: (settings: Settings) => void): () => void
+  onSwitchTo(callback: (profileId: string) => void): () => void // bascule auto (src/main/auto.ts)
   // Système, pour les widgets : à lire seulement fenêtre visible (lib/poll.svelte.ts)
   cpuRam(): Promise<CpuRam>
   temperatures(): Promise<Temperatures>
@@ -238,6 +239,7 @@ export interface PhotonApi {
   fileIcon(path: string): Promise<string | null> // data URL PNG 32 px, null si introuvable
   launch(path: string): Promise<boolean> // ouvre puis cache Photon ; false si Windows échoue
   pickApps(): Promise<string[]> // boîte de dialogue ; [] si annulée
+  pickAutoApps(): Promise<string[]> // idem, noms d'exécutables (règles de bascule auto)
   pathForFile(file: File): string // chemin d'un fichier glissé-déposé ; '' si inconnu
   // Agenda : cache seulement, aucun appel réseau ; null si l'adresse n'est pas en https/webcal
   calendar(url: string): Promise<CalendarFeed | null>

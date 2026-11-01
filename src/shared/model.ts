@@ -22,6 +22,7 @@ export interface Settings {
   activeProfile: string // nom de fichier dans profiles/, sans .json
   theme: string // thème global, nom de fichier dans themes/
   reduceMotion: boolean
+  autoProfiles: boolean // bascule automatique selon les règles des profils
 }
 
 export type Background =
@@ -50,10 +51,19 @@ export interface WidgetInstance {
   settings: Record<string, unknown>
 }
 
+// Bascule automatique vers un profil (réglage autoProfiles) : au lancement d'une de ces apps,
+// ou au début de la plage horaire.
+export interface AutoRules {
+  apps: string[] // exécutables en minuscules, ex. « geometrydash.exe »
+  hours: { from: string; to: string; days: number[] } | null // « HH:MM », jours 0 = dimanche
+}
+
 export interface Profile {
   name: string
   createdAt: number // ms ; ordre des pastilles et de Ctrl+1, Ctrl+2…
   theme: string | null // thème attaché au profil, sinon thème global
+  focus: boolean // profil Focus : « Ne pas déranger » + pomodoro à l'activation
+  auto: AutoRules
   widgets: WidgetInstance[]
 }
 
@@ -61,6 +71,8 @@ export interface Profile {
 export interface ProfileInfo {
   id: string
   name: string
+  focus: boolean
+  auto: AutoRules
 }
 
 export const MAX_PROFILE_NAME = 40
@@ -86,7 +98,8 @@ export const defaultSettings = (): Settings => ({
   screen: 'mouse',
   activeProfile: 'default',
   theme: 'default',
-  reduceMotion: false
+  reduceMotion: false,
+  autoProfiles: false
 })
 
 export const defaultTheme = (): Theme => ({
@@ -102,6 +115,8 @@ export const defaultProfile = (): Profile => ({
   name: 'Principal',
   createdAt: 0,
   theme: null,
+  focus: false,
+  auto: { apps: [], hours: null },
   widgets: [
     { id: 'clock', type: 'clock', x: 0, y: 0, w: 6, h: 2, settings: {} },
     { id: 'system', type: 'system', x: 6, y: 0, w: 3, h: 2, settings: {} },
@@ -168,7 +183,8 @@ export function parseSettings(raw: unknown): Settings {
         : d.screen,
     activeProfile: isName(v.activeProfile) ? v.activeProfile : d.activeProfile,
     theme: isName(v.theme) ? v.theme : d.theme,
-    reduceMotion: typeof v.reduceMotion === 'boolean' ? v.reduceMotion : d.reduceMotion
+    reduceMotion: typeof v.reduceMotion === 'boolean' ? v.reduceMotion : d.reduceMotion,
+    autoProfiles: v.autoProfiles === true
   }
 }
 
@@ -209,6 +225,29 @@ function parseWidget(v: unknown): WidgetInstance | null {
   }
 }
 
+const MAX_AUTO_APPS = 20
+export const isExeName = (v: unknown): v is string =>
+  typeof v === 'string' && /^[\w .()+-]{1,80}\.exe$/i.test(v)
+const isTime = (v: unknown): v is string =>
+  typeof v === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(v)
+
+export function parseAuto(v: unknown): AutoRules {
+  if (!isObject(v)) return { apps: [], hours: null }
+  const apps = Array.isArray(v.apps) ? v.apps.filter(isExeName).map((a) => a.toLowerCase()) : []
+  const h = v.hours
+  const days =
+    isObject(h) && Array.isArray(h.days)
+      ? [...new Set(h.days.filter((d) => Number.isInteger(d) && d >= 0 && d <= 6))].sort(
+          (a, b) => a - b
+        )
+      : []
+  const hours =
+    isObject(h) && isTime(h.from) && isTime(h.to) && h.from !== h.to
+      ? { from: h.from, to: h.to, days: days as number[] }
+      : null
+  return { apps: [...new Set(apps)].slice(0, MAX_AUTO_APPS), hours }
+}
+
 export function parseProfile(raw: unknown): Profile {
   const v = root(raw)
   if (!Array.isArray(v.widgets)) throw new Error('Profil invalide : liste de widgets attendue')
@@ -222,6 +261,8 @@ export function parseProfile(raw: unknown): Profile {
         : 'Principal',
     createdAt: num(v.createdAt, 0, Number.MAX_SAFE_INTEGER, 0),
     theme: isName(v.theme) ? v.theme : null,
+    focus: v.focus === true,
+    auto: parseAuto(v.auto),
     widgets: unique
   }
 }

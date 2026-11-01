@@ -41,11 +41,13 @@
       flushShared()
     })
     const offSettings = window.photon.onSettings((settings) => (app.settings = settings))
+    const offSwitch = window.photon.onSwitchTo(switchProfile) // bascule auto
     window.photon.ready()
     return () => {
       offShow()
       offHide()
       offSettings()
+      offSwitch()
     }
   })
 

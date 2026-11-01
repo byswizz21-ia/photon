@@ -24,6 +24,8 @@ import {
   toggleWindow
 } from './window'
 import { startScreens } from './screens'
+import { leaveFocus } from './focus'
+import { startAuto } from './auto'
 
 // Argument passé par le lancement au démarrage de Windows : rester caché dans la zone de notif.
 const HIDDEN_ARG = '--hidden'
@@ -68,7 +70,10 @@ if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
   app.on('before-quit', allowQuit)
-  app.on('will-quit', () => globalShortcut.unregisterAll())
+  app.on('will-quit', () => {
+    globalShortcut.unregisterAll()
+    leaveFocus() // Windows retrouve son « Ne pas déranger » d'avant
+  })
   registerBackgroundScheme() // doit précéder app.whenReady()
 
   void app.whenReady().then(async () => {
@@ -92,5 +97,6 @@ if (!app.requestSingleInstanceLock()) {
     syncClipboard()
     loadMusic()
     startScreens()
+    startAuto()
   })
 }
