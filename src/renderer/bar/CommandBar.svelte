@@ -198,13 +198,13 @@
     height: 38px;
     padding: 0 14px;
     border: 1px solid var(--line);
-    border-radius: 999px;
-    background: rgb(0 0 0 / 0.2);
+    border-radius: var(--radius-pill);
+    background: var(--black-20);
     color: var(--text-faint);
   }
 
   .field:focus-within {
-    border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+    border-color: var(--border-focus);
   }
 
   input {
@@ -215,7 +215,7 @@
     background: none;
     color: var(--text);
     font: inherit;
-    font-size: 14px;
+    font-size: var(--text-14);
     user-select: text;
   }
 
@@ -224,7 +224,7 @@
   }
 
   .notice {
-    font-size: 12px;
+    font-size: var(--text-12);
   }
 
   /* En-tête : liste et réponse flottent sous le champ, au-dessus de la grille. */
@@ -238,12 +238,10 @@
     margin: 0;
     padding: 6px;
     border: 1px solid var(--glass-edge);
-    border-radius: 18px;
-    background: var(--glass-sheen), rgb(16 18 24 / 0.86);
+    border-radius: var(--radius-popover);
+    background: var(--glass-sheen), var(--popover-bg);
     backdrop-filter: var(--glass-filter);
-    box-shadow:
-      var(--glass-rim),
-      0 24px 60px -20px rgb(0 0 0 / 0.7);
+    box-shadow: var(--shadow-popover);
   }
 
   ul {
@@ -255,12 +253,12 @@
     align-items: center;
     gap: 12px;
     padding: 7px 10px;
-    border-radius: 12px;
+    border-radius: var(--radius-row);
     cursor: pointer;
   }
 
   li[aria-selected='true'] {
-    background: rgb(255 255 255 / 0.08);
+    background: var(--white-8);
   }
 
   .text {
@@ -278,25 +276,25 @@
   }
 
   .title {
-    font-size: 14px;
+    font-size: var(--text-14);
   }
 
   .subtitle {
-    font-size: 12px;
+    font-size: var(--text-12);
     color: var(--text-faint);
   }
 
   .subtitle.warn {
-    color: #ff9aa8;
+    color: var(--danger-text);
   }
 
   kbd {
     flex: none;
     padding: 2px 7px;
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: var(--radius-kbd);
     font: inherit;
-    font-size: 11px;
+    font-size: var(--text-11);
     color: var(--text-faint);
   }
 
@@ -307,7 +305,7 @@
     flex-direction: column;
     gap: 8px;
     padding: 12px 14px;
-    font-size: 13px;
+    font-size: var(--text-13);
     user-select: text;
   }
 
@@ -324,7 +322,7 @@
   }
 
   .error {
-    color: #ff9aa8;
+    color: var(--danger-text);
   }
 
   /* Mini-mode : la barre est toute la fenêtre, liste et réponse dans le flux. */
@@ -335,11 +333,11 @@
 
   .mini .field {
     height: 44px;
-    border-radius: 14px;
+    border-radius: var(--radius-menu);
   }
 
   .mini input {
-    font-size: 16px;
+    font-size: var(--text-16);
   }
 
   .mini ul,

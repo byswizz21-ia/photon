@@ -70,10 +70,8 @@
     border-radius: var(--radius);
     background: var(--glass-sheen);
     border: 1px solid var(--glass-edge);
-    box-shadow:
-      var(--glass-rim),
-      0 10px 30px -14px rgb(0 0 0 / 0.55);
-    transition: transform 450ms var(--ease-spring);
+    box-shadow: var(--shadow-card);
+    transition: transform var(--dur-spring-card) var(--ease-spring);
   }
 
   /* Bordure qui s'éclaire et halo d'accent : un calque dont seule l'opacité change. */
@@ -83,9 +81,9 @@
     inset: -1px;
     border-radius: inherit;
     border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
-    box-shadow: 0 0 40px -12px var(--accent);
+    box-shadow: var(--glow-card);
     opacity: 0;
-    transition: opacity 200ms var(--ease-out);
+    transition: opacity var(--dur-hover) var(--ease-out);
     pointer-events: none;
   }
 
@@ -109,7 +107,7 @@
       linear-gradient(#000 0 0);
     mask-composite: exclude;
     opacity: 0;
-    transition: opacity 200ms var(--ease-out);
+    transition: opacity var(--dur-hover) var(--ease-out);
     pointer-events: none;
   }
 
@@ -132,7 +130,7 @@
      Pas pour les widgets où l'on tape et sélectionne du texte (data-no-press). */
   .card:active:not(:has([data-no-press])) {
     transform: translateY(-1px) scale(0.97);
-    transition-duration: 120ms;
+    transition-duration: var(--dur-press-card);
     transition-timing-function: var(--ease-out);
   }
 
@@ -160,14 +158,14 @@
     padding: 0;
     border: 1px solid var(--line);
     border-radius: 50%;
-    background: #1b1d24;
+    background: var(--surface-chip);
     color: var(--text);
     cursor: pointer;
   }
 
   .remove:hover {
-    background: #2a1d22;
-    color: #ff9aa8;
+    background: var(--surface-chip-danger);
+    color: var(--danger-text);
   }
 
   .failed {
@@ -180,7 +178,7 @@
     padding: 16px;
     text-align: center;
     color: var(--text-muted);
-    font-size: 13px;
+    font-size: var(--text-13);
   }
 
   .failed p {

@@ -167,7 +167,7 @@
 
   .time {
     font-size: clamp(16px, 11cqmin, 30px);
-    font-weight: 300;
+    font-weight: var(--weight-light);
     font-variant-numeric: tabular-nums;
   }
 
@@ -179,8 +179,8 @@
   }
 
   .label {
-    font-size: 12px;
-    letter-spacing: 0.1em;
+    font-size: var(--text-12);
+    letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--text-faint);
   }
@@ -197,12 +197,12 @@
     padding: 0;
     border: 0;
     cursor: pointer;
-    transition: transform 300ms var(--ease-spring);
+    transition: transform var(--dur-spring) var(--ease-spring);
   }
 
   button:active {
     transform: scale(0.9);
-    transition-duration: 100ms;
+    transition-duration: var(--dur-press);
   }
 
   .play {
@@ -223,14 +223,14 @@
 
   .icon:hover {
     color: var(--text);
-    background: rgb(255 255 255 / 0.08);
+    background: var(--white-8);
   }
 
   .field {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    font-size: 12px;
+    font-size: var(--text-12);
     color: var(--text-muted);
   }
 
@@ -239,15 +239,15 @@
     min-height: 28px;
     padding: 0 8px;
     border: 1px solid var(--line);
-    border-radius: 8px;
-    background: rgb(255 255 255 / 0.05);
+    border-radius: var(--radius-pre);
+    background: var(--white-5);
     color: var(--text);
     font: inherit;
   }
 
   button:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
   }
 
   /* Petite case : l'anneau seul, clic dessus impossible → on garde les boutons dessous. */

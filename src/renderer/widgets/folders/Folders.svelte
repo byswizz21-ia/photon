@@ -138,7 +138,7 @@
     flex-direction: column;
     gap: 8px;
     border-radius: var(--radius);
-    transition: box-shadow 200ms var(--ease-out);
+    transition: box-shadow var(--dur-hover) var(--ease-out);
   }
 
   .over {
@@ -146,8 +146,8 @@
   }
 
   .label {
-    font-size: 12px;
-    letter-spacing: 0.1em;
+    font-size: var(--text-12);
+    letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--text-faint);
   }
@@ -174,9 +174,9 @@
     display: inline-flex;
     align-items: center;
     border: 1px solid var(--line);
-    border-radius: 999px;
-    background: rgb(255 255 255 / 0.05);
-    font-size: 13px;
+    border-radius: var(--radius-pill);
+    background: var(--white-5);
+    font-size: var(--text-13);
   }
 
   .open,
@@ -186,7 +186,7 @@
     gap: 6px;
     height: 30px;
     padding: 0 12px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
   }
 
   .chip.add {
@@ -195,7 +195,7 @@
 
   .open:hover,
   .chip.add:hover {
-    background: rgb(255 255 255 / 0.06);
+    background: var(--white-6);
   }
 
   .remove {
@@ -210,7 +210,7 @@
 
   .remove:hover {
     color: var(--text);
-    background: rgb(255 255 255 / 0.08);
+    background: var(--white-8);
   }
 
   img {
@@ -234,8 +234,8 @@
     gap: 8px;
     min-height: 28px;
     padding: 0 6px;
-    border-radius: 8px;
-    font-size: 13px;
+    border-radius: var(--radius-pre);
+    font-size: var(--text-13);
     color: var(--text-muted);
     text-align: left;
   }
@@ -248,12 +248,12 @@
 
   .row:hover {
     color: var(--text);
-    background: rgb(255 255 255 / 0.06);
+    background: var(--white-6);
   }
 
   button:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
   }
 
   /* Petite case : les favoris seulement. */

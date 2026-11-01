@@ -102,8 +102,8 @@
   }
 
   .label {
-    font-size: 12px;
-    letter-spacing: 0.1em;
+    font-size: var(--text-12);
+    letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--text-faint);
   }
@@ -118,7 +118,7 @@
     display: flex;
     justify-content: space-between;
     gap: 8px;
-    font-size: 13px;
+    font-size: var(--text-13);
   }
 
   .name {
@@ -139,8 +139,8 @@
 
   .bar {
     height: 4px;
-    border-radius: 4px;
-    background: rgb(255 255 255 / 0.12);
+    border-radius: var(--radius-bar);
+    background: var(--white-12);
   }
 
   /* Remplissage : jamais la largeur, seulement scaleX depuis la gauche. */
@@ -148,15 +148,15 @@
     height: 100%;
     border-radius: inherit;
     background: var(--accent);
-    box-shadow: 0 0 10px var(--accent);
+    box-shadow: var(--glow-bar);
     transform-origin: left;
-    transition: transform 400ms var(--ease-out);
+    transition: transform var(--dur-fill) var(--ease-out);
   }
 
   /* Détail de la RAM : seulement si la carte a la place (3 lignes de haut et plus). */
   .detail {
     display: none;
-    font-size: 12px;
+    font-size: var(--text-12);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
     color: var(--text-faint);

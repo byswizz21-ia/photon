@@ -195,29 +195,29 @@
     height: 30px;
     padding: 0 12px;
     border: 1px solid transparent;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: none;
     color: var(--text-muted);
     font: inherit;
-    font-size: 13px;
+    font-size: var(--text-13);
     white-space: nowrap;
     cursor: pointer;
-    transition: transform 300ms var(--ease-spring);
+    transition: transform var(--dur-spring) var(--ease-spring);
   }
 
   .pill:hover {
     color: var(--text);
-    background: rgb(255 255 255 / 0.06);
+    background: var(--white-6);
   }
 
   .pill:active {
     transform: scale(0.96);
-    transition-duration: 100ms;
+    transition-duration: var(--dur-press);
   }
 
   .pill.active {
-    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
-    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    border-color: var(--border-accent-soft);
+    background: var(--surface-accent-soft);
     color: var(--text);
   }
 
@@ -241,23 +241,23 @@
     gap: 6px;
     padding: 0 8px;
     border: 0;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: none;
     color: var(--text-faint);
     font: inherit;
-    font-size: 12px;
+    font-size: var(--text-12);
     cursor: pointer;
   }
 
   .tool:hover,
   .tool.on {
     color: var(--text);
-    background: rgb(255 255 255 / 0.08);
+    background: var(--white-8);
   }
 
   .delete:hover,
   .delete.confirm {
-    color: #ff9aa8;
+    color: var(--danger-text);
     background: rgb(255 77 94 / 0.12);
   }
 
@@ -286,14 +286,14 @@
 
   .label {
     padding: 8px 12px 4px;
-    font-size: 11px;
+    font-size: var(--text-11);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: var(--tracking-menu-label);
     color: var(--text-faint);
   }
 
   button:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
   }
 </style>

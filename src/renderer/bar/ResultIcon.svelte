@@ -50,8 +50,8 @@
     height: 32px;
     display: grid;
     place-items: center;
-    border-radius: 9px;
-    background: rgb(255 255 255 / 0.06);
+    border-radius: var(--radius-icon);
+    background: var(--white-6);
     color: var(--text-muted);
   }
 

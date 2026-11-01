@@ -165,7 +165,7 @@
 
   /* Bascule de profil : la nouvelle grille apparaît en fondu. */
   .grid-stack {
-    animation: fade-in 220ms var(--ease-out);
+    animation: fade-in var(--dur-fade) var(--ease-out);
   }
 
   @keyframes fade-in {
@@ -186,7 +186,7 @@
 
   .hint {
     margin-top: 6px !important;
-    font-size: 13px;
+    font-size: var(--text-13);
     color: var(--text-faint);
   }
 </style>

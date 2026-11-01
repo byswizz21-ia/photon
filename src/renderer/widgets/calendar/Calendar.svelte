@@ -119,15 +119,15 @@
   }
 
   .label {
-    font-size: 12px;
-    letter-spacing: 0.1em;
+    font-size: var(--text-12);
+    letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--text-faint);
   }
 
   .message {
     margin: auto 0;
-    font-size: 13px;
+    font-size: var(--text-13);
     color: var(--text-faint);
   }
 
@@ -150,8 +150,8 @@
 
   h3 {
     margin: 0;
-    font-size: 12px;
-    font-weight: 500;
+    font-size: var(--text-12);
+    font-weight: var(--weight-medium);
     color: var(--text-muted);
   }
 
@@ -169,7 +169,7 @@
     grid-template-columns: 6px 4.6em 1fr;
     align-items: center;
     column-gap: 10px;
-    font-size: 13px;
+    font-size: var(--text-13);
     line-height: 18px;
   }
 
@@ -195,7 +195,7 @@
   /* Événement en cours : point d'accent lumineux. */
   .now .dot {
     background: var(--accent);
-    box-shadow: 0 0 8px var(--accent);
+    box-shadow: var(--glow-dot);
   }
 
   .now .time {
@@ -206,27 +206,27 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    font-size: 13px;
+    font-size: var(--text-13);
   }
 
   .field input {
     min-height: 34px;
     padding: 0 10px;
     border: 1px solid var(--glass-edge);
-    border-radius: 10px;
-    background: rgb(0 0 0 / 0.25);
+    border-radius: var(--radius-input);
+    background: var(--black-25);
     color: var(--text);
     font: inherit;
     user-select: text;
   }
 
   .field input:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--focus-ring);
     outline-offset: 0;
   }
 
   .field small {
-    font-size: 11px;
+    font-size: var(--text-11);
     color: var(--text-faint);
   }
 </style>

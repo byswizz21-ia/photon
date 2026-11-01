@@ -29,15 +29,15 @@
     flex-direction: column;
     gap: 8px;
     padding: 10px 12px;
-    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
-    border-radius: 14px;
+    border: 1px solid var(--border-accent-soft);
+    border-radius: var(--radius-menu);
     background: color-mix(in srgb, var(--accent) 8%, transparent);
-    font-size: 12px;
+    font-size: var(--text-12);
   }
 
   p {
     margin: 0;
-    font-weight: 600;
+    font-weight: var(--weight-semibold);
   }
 
   /* Le détail complet reste lisible : il défile au-delà de 8 lignes. */
@@ -46,9 +46,9 @@
     margin: 0;
     padding: 8px;
     overflow: auto;
-    border-radius: 8px;
-    background: rgb(0 0 0 / 0.3);
-    font-size: 11px;
+    border-radius: var(--radius-pre);
+    background: var(--black-30);
+    font-size: var(--text-11);
     line-height: 1.45;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
@@ -65,9 +65,9 @@
     min-height: 26px;
     padding: 0 12px;
     border: 1px solid var(--line);
-    border-radius: 999px;
-    background: rgb(255 255 255 / 0.04);
-    font-size: 12px;
+    border-radius: var(--radius-pill);
+    background: var(--white-4);
+    font-size: var(--text-12);
     color: var(--text-muted);
     cursor: pointer;
   }

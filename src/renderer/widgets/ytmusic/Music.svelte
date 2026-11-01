@@ -214,7 +214,7 @@
     align-items: center;
     gap: 10px;
     text-align: center;
-    font-size: 13px;
+    font-size: var(--text-13);
     color: var(--text-faint);
   }
 
@@ -230,11 +230,11 @@
     max-width: 45%;
     display: grid;
     place-items: center;
-    border-radius: 14px;
+    border-radius: var(--radius-menu);
     overflow: hidden;
-    background: rgb(255 255 255 / 0.06);
+    background: var(--white-6);
     color: var(--text-faint);
-    box-shadow: 0 10px 24px -12px rgb(0 0 0 / 0.7);
+    box-shadow: var(--shadow-art);
   }
 
   .art img {
@@ -271,12 +271,12 @@
   }
 
   .title {
-    font-size: 15px;
-    font-weight: 600;
+    font-size: var(--text-15);
+    font-weight: var(--weight-semibold);
   }
 
   .artist {
-    font-size: 13px;
+    font-size: var(--text-13);
     color: var(--text-muted);
   }
 
@@ -288,12 +288,12 @@
     background: none;
     color: var(--text);
     cursor: pointer;
-    transition: transform 300ms var(--ease-spring);
+    transition: transform var(--dur-spring) var(--ease-spring);
   }
 
   button:active {
     transform: scale(0.9);
-    transition-duration: 100ms;
+    transition-duration: var(--dur-press);
   }
 
   .icon {
@@ -306,7 +306,7 @@
 
   .icon:hover {
     color: var(--text);
-    background: rgb(255 255 255 / 0.08);
+    background: var(--white-8);
   }
 
   .play {
@@ -321,7 +321,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 11px;
+    font-size: var(--text-11);
     color: var(--text-faint);
     font-variant-numeric: tabular-nums;
   }
@@ -346,8 +346,8 @@
 
   button:focus-visible,
   input:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
   }
 
   /* Bouton posé sur la pochette : petite case seulement. */

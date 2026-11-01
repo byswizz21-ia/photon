@@ -26,6 +26,9 @@ Un `npm install` lancé dans WSL installerait les binaires Linux d'Electron.
   que via `window.photon`, défini dans `src/shared/api.ts`.
 - Robustesse : un widget qui plante n'affiche une erreur que dans sa case. JSON écrits de façon
   atomique avec copie `.bak` (`src/main/store.ts`).
+- Style : Photon Design System. Couleurs, rayons, ombres, tailles de texte et durées passent par
+  les tokens de `src/renderer/tokens.css`, jamais en dur. Règles (icônes, textes en français, verre) :
+  readme du design system (`Photon Design System.zip`).
 - Code : TS strict, un fichier = un rôle, noms en anglais, commentaires courts en français.
   Pas de dépendance hors stack sans raison écrite.
 

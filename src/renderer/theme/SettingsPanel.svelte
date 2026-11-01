@@ -337,13 +337,11 @@
     gap: 24px;
     border: 1px solid var(--glass-edge);
     border-radius: var(--radius-panel);
-    background: var(--glass-sheen), rgb(14 16 22 / 0.6);
-    backdrop-filter: blur(30px) saturate(1.7);
-    box-shadow:
-      var(--glass-rim),
-      0 24px 60px -20px rgb(0 0 0 / 0.7);
+    background: var(--glass-sheen), var(--drawer-bg);
+    backdrop-filter: var(--glass-filter-drawer);
+    box-shadow: var(--shadow-popover);
     -webkit-app-region: no-drag;
-    animation: open 180ms var(--ease-out);
+    animation: open var(--dur-reveal) var(--ease-out);
   }
 
   @keyframes open {
@@ -361,9 +359,9 @@
 
   h2 {
     margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-size: var(--text-18);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-title);
   }
 
   section {
@@ -374,10 +372,10 @@
 
   h3 {
     margin: 0;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: var(--text-12);
+    font-weight: var(--weight-semibold);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: var(--tracking-label);
     color: var(--text-faint);
   }
 
@@ -416,7 +414,7 @@
   .line {
     display: flex;
     justify-content: space-between;
-    font-size: 13px;
+    font-size: var(--text-13);
   }
 
   .value {
@@ -434,8 +432,8 @@
     margin: 0;
     padding: 3px;
     border: 1px solid var(--line);
-    border-radius: 999px;
-    background: rgb(255 255 255 / 0.04);
+    border-radius: var(--radius-pill);
+    background: var(--white-4);
   }
 
   .seg label {
@@ -449,7 +447,7 @@
     width: 100%;
     height: 100%;
     margin: 0;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     opacity: 0;
     cursor: pointer;
   }
@@ -460,9 +458,9 @@
     place-items: center;
     min-height: 32px;
     padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 500;
+    border-radius: var(--radius-pill);
+    font-size: var(--text-13);
+    font-weight: var(--weight-medium);
     line-height: 1.2;
     text-align: center;
     text-wrap: balance;
@@ -471,7 +469,7 @@
 
   .seg input:not(:checked):hover + span {
     color: var(--text);
-    background: rgb(255 255 255 / 0.06);
+    background: var(--white-6);
   }
 
   .seg input:checked + span {
@@ -491,11 +489,7 @@
   input[type='range']::-webkit-slider-runnable-track {
     height: 4px;
     border-radius: 2px;
-    background: linear-gradient(
-      to right,
-      var(--accent) var(--fill),
-      rgb(255 255 255 / 0.18) var(--fill)
-    );
+    background: linear-gradient(to right, var(--accent) var(--fill), var(--white-18) var(--fill));
   }
 
   input[type='range']::-webkit-slider-thumb {
@@ -509,7 +503,7 @@
     box-shadow:
       0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent),
       0 2px 6px rgb(0 0 0 / 0.5);
-    transition: transform 150ms var(--ease-out);
+    transition: transform var(--dur-fast) var(--ease-out);
   }
 
   input[type='range']:active::-webkit-slider-thumb {
@@ -525,7 +519,7 @@
     background: var(--c);
     box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25);
     cursor: pointer;
-    transition: transform 150ms var(--ease-out);
+    transition: transform var(--dur-fast) var(--ease-out);
   }
 
   .swatch:hover {
@@ -535,7 +529,7 @@
   .swatch[aria-pressed='true'] {
     box-shadow:
       inset 0 0 0 1px rgb(255 255 255 / 0.25),
-      0 0 0 2px #0e1016,
+      0 0 0 2px var(--surface-ring),
       0 0 0 4px var(--text);
   }
 
@@ -543,7 +537,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
+    font-size: var(--text-13);
     color: var(--text-muted);
     cursor: pointer;
   }
@@ -574,7 +568,7 @@
     grid-template-columns: 18px 1fr;
     align-items: center;
     gap: 2px 10px;
-    font-size: 13px;
+    font-size: var(--text-13);
     cursor: pointer;
   }
 
@@ -587,12 +581,12 @@
   .check small {
     grid-column: 2;
     color: var(--text-faint);
-    font-size: 12px;
+    font-size: var(--text-12);
   }
 
   .field small {
     color: var(--text-faint);
-    font-size: 12px;
+    font-size: var(--text-12);
   }
 
   .check:has(input:disabled) {
@@ -604,16 +598,16 @@
     min-height: 36px;
     padding: 0 10px;
     border: 1px solid var(--line);
-    border-radius: 12px;
-    background: rgb(255 255 255 / 0.06);
+    border-radius: var(--radius-row);
+    background: var(--white-6);
     color: var(--text);
     font: inherit;
-    font-size: 13px;
+    font-size: var(--text-13);
     cursor: pointer;
   }
 
   select option {
-    background: #14161d;
+    background: var(--surface-option);
     color: var(--text);
   }
 </style>

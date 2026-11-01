@@ -1,6 +1,7 @@
 <script lang="ts">
   // Règles de bascule automatique du profil actif (mode édition) : apps qui l'activent à leur
   // lancement, plage horaire. Appliquées seulement si l'option est active dans les réglages.
+  import PlusIcon from 'phosphor-svelte/lib/PlusIcon'
   import XIcon from 'phosphor-svelte/lib/XIcon'
   import { app, saveProfile } from '../state.svelte'
 
@@ -51,29 +52,37 @@
 <div class="rules">
   <span class="label">Activer « {app.profile.name} » automatiquement</span>
   {#if !app.settings.autoProfiles}
-    <small>Désactivé : à allumer dans les réglages (bascule automatique des profils)</small>
+    <small>À activer dans Réglages › Bascule automatique des profils</small>
   {/if}
 
   <span class="title">Quand je lance</span>
   {#each auto.apps as name (name)}
     <div class="app">
       <span>{name}</span>
-      <button type="button" aria-label="Retirer {name}" onclick={() => removeApp(name)}>
-        <XIcon size={12} aria-hidden="true" />
+      <button
+        type="button"
+        class="ghost"
+        aria-label="Retirer {name}"
+        onclick={() => removeApp(name)}
+      >
+        <XIcon size={12} weight="bold" aria-hidden="true" />
       </button>
     </div>
   {/each}
   {#if auto.apps.length < MAX_APPS}
-    <button type="button" class="add" onclick={addApps}>Ajouter une app…</button>
+    <button type="button" class="action small" onclick={addApps}>
+      <PlusIcon size={14} weight="bold" aria-hidden="true" />
+      Ajouter une app…
+    </button>
   {/if}
 
-  <label class="title check">
+  <label class="check">
     <input
       type="checkbox"
       checked={auto.hours !== null}
       onchange={(event) => toggleHours(event.currentTarget.checked)}
     />
-    Aux heures
+    <span>Aux heures</span>
   </label>
   {#if auto.hours}
     <div class="hours">
@@ -83,7 +92,7 @@
         aria-label="Début"
         onchange={(event) => setTime('from', event.currentTarget.value)}
       />
-      →
+      <span>à</span>
       <input
         type="time"
         value={auto.hours.to}
@@ -109,34 +118,37 @@
 </div>
 
 <style>
+  /* Popover de verre façon menu (Photon Design System : glass/Menu). */
   .rules {
     position: absolute;
     left: 0;
     top: calc(100% + 8px);
     z-index: 10;
-    width: 260px;
+    box-sizing: border-box;
+    width: 280px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
     padding: 14px;
-    border-radius: 14px;
-    background: var(--glass-sheen), rgb(20 22 29 / 0.6);
-    backdrop-filter: blur(24px) saturate(1.7);
+    border-radius: var(--radius-menu);
+    background: var(--glass-sheen), var(--menu-bg);
+    backdrop-filter: var(--glass-filter-menu);
     border: 1px solid var(--glass-edge);
-    box-shadow: var(--glass-rim);
-    font-size: 13px;
+    box-shadow: var(--shadow-menu);
+    font-size: var(--text-13);
   }
 
   .label {
-    font-size: 11px;
+    font-size: var(--text-11);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: var(--tracking-menu-label);
     color: var(--text-faint);
   }
 
+  /* Indice : faible, il dit où aller (› sépare les étapes). */
   small {
-    font-size: 12px;
-    color: #ffb86b;
+    font-size: var(--text-12);
+    color: var(--text-faint);
   }
 
   .title {
@@ -144,11 +156,21 @@
     color: var(--text-muted);
   }
 
+  /* Case native teintée par l'accent (Checkbox). */
   .check {
-    display: flex;
+    display: grid;
+    grid-template-columns: 18px 1fr;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    margin-top: 4px;
+    color: var(--text-muted);
     cursor: pointer;
+  }
+
+  .check input {
+    margin: 0;
+    accent-color: var(--accent);
+    cursor: inherit;
   }
 
   .app {
@@ -156,9 +178,10 @@
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding: 4px 4px 4px 10px;
-    border-radius: 8px;
-    background: rgb(255 255 255 / 0.06);
+    min-height: 36px;
+    padding: 0 4px 0 12px;
+    border-radius: var(--radius-row);
+    background: var(--white-5);
   }
 
   .app span {
@@ -167,32 +190,35 @@
     white-space: nowrap;
   }
 
-  button {
-    border: 0;
-    background: none;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-  }
-
-  .app button {
+  /* Bouton rond discret (IconButton ghost). */
+  .ghost {
+    flex: none;
     display: grid;
     place-items: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 6px;
-    color: var(--text-faint);
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: transform var(--dur-spring) var(--ease-spring);
   }
 
-  .app button:hover {
+  .ghost:hover {
     color: var(--text);
-    background: rgb(255 255 255 / 0.08);
+    background: var(--white-8);
   }
 
-  .add {
+  .ghost:active {
+    transform: scale(0.9);
+    transition-duration: var(--dur-press);
+  }
+
+  .action.small {
     align-self: flex-start;
-    padding: 4px 0;
-    color: var(--accent);
+    min-height: var(--control-h-pill);
   }
 
   .hours {
@@ -202,18 +228,28 @@
     color: var(--text-faint);
   }
 
+  /* Champ de widget (TextField). */
   .hours input {
     flex: 1;
     min-width: 0;
-    padding: 6px 8px;
-    border: 1px solid var(--glass-edge);
-    border-radius: 8px;
-    background: rgb(255 255 255 / 0.06);
+    box-sizing: border-box;
+    min-height: var(--control-h-input);
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-input);
+    background: var(--white-5);
     color: var(--text);
     font: inherit;
+    font-size: var(--text-13);
+    outline: 0;
     color-scheme: dark;
   }
 
+  .hours input:focus {
+    border-color: var(--border-focus);
+  }
+
+  /* Jours : pastilles rondes ; choisi = accent 16 % + bord accent 45 %. */
   .days {
     display: flex;
     gap: 4px;
@@ -221,20 +257,31 @@
 
   .days button {
     flex: 1;
-    height: 28px;
-    border-radius: 8px;
-    color: var(--text-faint);
-    background: rgb(255 255 255 / 0.04);
+    height: var(--control-h-chip);
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: var(--white-4);
+    color: var(--text-muted);
+    font: inherit;
+    font-size: var(--text-12);
+    cursor: pointer;
+    transition: transform var(--dur-spring) var(--ease-spring);
+  }
+
+  .days button:hover {
+    color: var(--text);
+    background: var(--white-8);
+  }
+
+  .days button:active {
+    transform: scale(0.95);
+    transition-duration: var(--dur-press);
   }
 
   .days button.on {
+    border-color: var(--border-accent-soft);
+    background: var(--surface-accent-soft);
     color: var(--text);
-    background: color-mix(in srgb, var(--accent) 24%, transparent);
-  }
-
-  button:focus-visible,
-  input:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
   }
 </style>

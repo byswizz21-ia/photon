@@ -121,8 +121,8 @@
   }
 
   .label {
-    font-size: 12px;
-    letter-spacing: 0.1em;
+    font-size: var(--text-12);
+    letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--text-faint);
   }
@@ -139,13 +139,13 @@
   /* 32 px sur la carte 3×2 par défaut ; suit la largeur et la hauteur de la carte. */
   .value {
     font-size: clamp(18px, min(11.2cqw, 22cqh), 40px);
-    font-weight: 300;
+    font-weight: var(--weight-light);
     line-height: 1;
     font-variant-numeric: tabular-nums;
   }
 
   .caption {
-    font-size: 13px;
+    font-size: var(--text-13);
     color: var(--text-muted);
   }
 
@@ -157,17 +157,17 @@
   .track {
     flex: none;
     height: 4px;
-    border-radius: 4px;
-    background: rgb(255 255 255 / 0.12);
+    border-radius: var(--radius-bar);
+    background: var(--white-12);
   }
 
   .fill {
     height: 100%;
     border-radius: inherit;
     background: var(--accent);
-    box-shadow: 0 0 10px var(--accent);
+    box-shadow: var(--glow-bar);
     transform-origin: left;
-    transition: transform 400ms var(--ease-out);
+    transition: transform var(--dur-fill) var(--ease-out);
   }
 
   /* Autres lecteurs : seulement si la carte est assez large et assez haute pour au moins une ligne. */
@@ -198,7 +198,7 @@
     grid-template-columns: 1.5em 3.6em 1fr;
     align-items: center;
     column-gap: 8px;
-    font-size: 13px;
+    font-size: var(--text-13);
     line-height: 16px;
   }
 
@@ -227,7 +227,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 13px;
+    font-size: var(--text-13);
     cursor: pointer;
   }
 

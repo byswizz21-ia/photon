@@ -77,13 +77,13 @@
   }
 
   .heading {
-    font-weight: 600;
+    font-weight: var(--weight-semibold);
   }
 
   code {
     padding: 1px 5px;
     border-radius: 5px;
-    background: rgb(255 255 255 / 0.08);
+    background: var(--white-8);
     font-family: 'Cascadia Code', Consolas, monospace;
     font-size: 0.92em;
   }
@@ -91,8 +91,8 @@
   .code {
     position: relative;
     border: 1px solid var(--line);
-    border-radius: 10px;
-    background: rgb(0 0 0 / 0.3);
+    border-radius: var(--radius-input);
+    background: var(--black-30);
   }
 
   pre {
@@ -120,7 +120,7 @@
     background: rgb(20 22 29 / 0.8);
     cursor: pointer;
     opacity: 0;
-    transition: opacity 150ms var(--ease-out);
+    transition: opacity var(--dur-fast) var(--ease-out);
   }
 
   .code:hover .copy,

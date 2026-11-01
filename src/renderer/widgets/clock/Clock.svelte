@@ -71,8 +71,8 @@
       100cqh - 2 * var(--pad) - var(--date-rows) - var(--edit-rows),
       (100cqw - 2 * var(--pad)) / var(--span)
     );
-    font-weight: 300;
-    letter-spacing: -0.04em;
+    font-weight: var(--weight-light);
+    letter-spacing: var(--tracking-display);
     line-height: 1;
     white-space: nowrap;
   }
@@ -109,7 +109,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
+    font-size: var(--text-13);
     color: var(--text-muted);
     cursor: pointer;
   }

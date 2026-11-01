@@ -198,8 +198,8 @@
   }
 
   .label {
-    font-size: 12px;
-    letter-spacing: 0.1em;
+    font-size: var(--text-12);
+    letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--text-faint);
   }
@@ -223,10 +223,10 @@
     gap: 8px;
     padding: 0;
     border: 0;
-    border-radius: 12px;
+    border-radius: var(--radius-row);
     background: none;
     cursor: pointer;
-    transition: transform 300ms var(--ease-spring);
+    transition: transform var(--dur-spring) var(--ease-spring);
   }
 
   .tile:hover {
@@ -236,7 +236,7 @@
   /* Appui : 97 % puis retour en ressort (le ressort vient de la transition de base). */
   .tile:active {
     transform: scale(0.97);
-    transition-duration: 100ms;
+    transition-duration: var(--dur-press);
   }
 
   .square {
@@ -246,12 +246,12 @@
     display: grid;
     place-items: center;
     border: 1px solid var(--line);
-    border-radius: 16px;
-    background: rgb(255 255 255 / 0.07);
+    border-radius: var(--radius-tile);
+    background: var(--white-7);
   }
 
   .tile:hover .square {
-    background: rgb(255 255 255 / 0.12);
+    background: var(--white-12);
   }
 
   .tile.failed .square {
@@ -268,7 +268,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 12px;
+    font-size: var(--text-12);
     color: var(--text-muted);
   }
 
@@ -284,14 +284,14 @@
     padding: 0;
     border: 1px solid var(--line);
     border-radius: 50%;
-    background: #1b1d24;
+    background: var(--surface-chip);
     color: var(--text);
     cursor: pointer;
   }
 
   .remove:hover {
-    background: #2a1d22;
-    color: #ff9aa8;
+    background: var(--surface-chip-danger);
+    color: var(--danger-text);
   }
 
   /* État vide : le texte se centre sur la hauteur du carré de la tuile « Ajouter ». */
@@ -300,7 +300,7 @@
     margin: 0;
     display: flex;
     align-items: center;
-    font-size: 13px;
+    font-size: var(--text-13);
     color: var(--text-muted);
   }
 
@@ -314,10 +314,10 @@
     border-radius: inherit;
     background: color-mix(in srgb, var(--accent) 18%, rgb(16 18 24 / 0.9));
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent);
-    font-weight: 500;
+    font-weight: var(--weight-medium);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 200ms var(--ease-out);
+    transition: opacity var(--dur-hover) var(--ease-out);
   }
 
   .over .drop {

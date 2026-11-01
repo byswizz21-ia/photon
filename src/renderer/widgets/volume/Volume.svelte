@@ -122,8 +122,8 @@
   }
 
   .label {
-    font-size: 12px;
-    letter-spacing: 0.1em;
+    font-size: var(--text-12);
+    letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--text-faint);
   }
@@ -149,16 +149,16 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    transition: transform 300ms var(--ease-spring);
+    transition: transform var(--dur-spring) var(--ease-spring);
   }
 
   .mute:hover {
-    background: rgb(255 255 255 / 0.08);
+    background: var(--white-8);
   }
 
   .mute:active {
     transform: scale(0.92);
-    transition-duration: 100ms;
+    transition-duration: var(--dur-press);
   }
 
   input.muted {
@@ -169,7 +169,7 @@
     flex: none;
     min-width: 3ch;
     text-align: right;
-    font-size: 13px;
+    font-size: var(--text-13);
     font-variant-numeric: tabular-nums;
     color: var(--text-muted);
   }
@@ -193,19 +193,19 @@
     align-items: flex-start;
     padding: 6px 10px;
     border: 1px solid transparent;
-    border-radius: 10px;
+    border-radius: var(--radius-input);
     text-align: left;
     color: var(--text-muted);
   }
 
   .devices button:hover {
     color: var(--text);
-    background: rgb(255 255 255 / 0.06);
+    background: var(--white-6);
   }
 
   .devices .current {
-    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
-    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    border-color: var(--border-accent-soft);
+    background: var(--surface-accent-soft);
     color: var(--text);
   }
 
@@ -218,11 +218,11 @@
   }
 
   .name {
-    font-size: 13px;
+    font-size: var(--text-13);
   }
 
   .detail {
-    font-size: 11px;
+    font-size: var(--text-11);
     color: var(--text-faint);
   }
 

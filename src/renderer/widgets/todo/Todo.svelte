@@ -123,14 +123,14 @@
   }
 
   .label {
-    font-size: 12px;
-    letter-spacing: 0.1em;
+    font-size: var(--text-12);
+    letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--text-faint);
   }
 
   .count {
-    font-size: 12px;
+    font-size: var(--text-12);
     color: var(--text-faint);
   }
 
@@ -148,14 +148,14 @@
     align-items: center;
     gap: 10px;
     min-height: 30px;
-    font-size: 14px;
+    font-size: var(--text-14);
   }
 
   .text {
     flex: 1;
     min-width: 0;
     overflow-wrap: anywhere;
-    transition: opacity 200ms var(--ease-out);
+    transition: opacity var(--dur-hover) var(--ease-out);
   }
 
   .done .text {
@@ -176,7 +176,7 @@
     width: 18px;
     height: 18px;
     border: 1.5px solid var(--text-faint);
-    border-radius: 6px;
+    border-radius: var(--radius-kbd);
     background: none;
     color: var(--on-accent);
   }
@@ -202,27 +202,27 @@
 
   .remove:hover {
     color: var(--text);
-    background: rgb(255 255 255 / 0.08);
+    background: var(--white-8);
   }
 
   input {
     min-height: 32px;
     padding: 0 10px;
     border: 1px solid var(--line);
-    border-radius: 10px;
-    background: rgb(255 255 255 / 0.05);
+    border-radius: var(--radius-input);
+    background: var(--white-5);
     color: var(--text);
     font: inherit;
-    font-size: 13px;
+    font-size: var(--text-13);
     outline: 0;
   }
 
   input:focus {
-    border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+    border-color: var(--border-focus);
   }
 
   button:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
   }
 </style>

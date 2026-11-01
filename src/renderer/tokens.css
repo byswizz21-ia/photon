@@ -1,0 +1,193 @@
+/* Tokens du Photon Design System (direction « lumière » : verre fumé sombre, accents lumineux).
+   Source : « Photon Design System » (tokens/*.css). Toute valeur de style passe par ici :
+   un composant n'écrit en dur que ses mesures propres (marges, tailles d'icônes…).
+   Les valeurs « theme » sont remplacées à l'exécution par le thème (theme/apply.svelte.ts). */
+:root {
+  /* Couleurs de base */
+  --bg: #07080b;
+  --text: #f3f4f6;
+  --text-muted: #a3a8b3;
+  --text-faint: #8b909b;
+
+  /* Accent : extraite du fond d'écran, ou choisie (theme). Bleu par défaut. */
+  --accent: #7cc4ff;
+  --on-accent: #07080b; /* #07080b ou #ffffff selon la luminance (WCAG > 0,18) */
+  --glow-secondary: #7a5cff; /* 2e halo violet ; anneau du pomodoro en pause */
+
+  /* Accents proposés (Réglages › Couleur d'accent) */
+  --accent-blue: #7cc4ff;
+  --accent-violet: #b69cff;
+  --accent-orange: #ffb86b;
+  --accent-mint: #6ef2c2;
+
+  /* Danger : suppression, Bypass, erreurs */
+  --danger: #ff4d5e;
+  --danger-text: #ff9aa8;
+  --danger-text-strong: #ff8a96;
+  --danger-border: rgb(255 107 125 / 0.6);
+  --danger-surface: rgb(255 77 94 / 0.12);
+
+  /* Surfaces sombres opaques */
+  --surface-chip: #1b1d24; /* pastille « retirer » des cartes et tuiles */
+  --surface-chip-danger: #2a1d22;
+  --surface-option: #14161d; /* liste d'options d'un <select> */
+  --surface-icon-tile: #0e1015; /* tuile d'icône d'app */
+  --surface-ring: #0e1016; /* anneau d'écart autour d'une pastille de couleur choisie */
+
+  /* Blanc et noir translucides, pour les fonds posés sur le verre */
+  --white-4: rgb(255 255 255 / 0.04);
+  --white-5: rgb(255 255 255 / 0.05);
+  --white-6: rgb(255 255 255 / 0.06);
+  --white-7: rgb(255 255 255 / 0.07);
+  --white-8: rgb(255 255 255 / 0.08);
+  --white-9: rgb(255 255 255 / 0.09);
+  --white-12: rgb(255 255 255 / 0.12);
+  --white-15: rgb(255 255 255 / 0.15);
+  --white-18: rgb(255 255 255 / 0.18);
+  --black-20: rgb(0 0 0 / 0.2);
+  --black-22: rgb(0 0 0 / 0.22);
+  --black-25: rgb(0 0 0 / 0.25);
+  --black-30: rgb(0 0 0 / 0.3);
+
+  /* Traits */
+  --line: rgb(255 255 255 / 0.08);
+  --glass-edge: rgb(255 255 255 / 0.13);
+
+  /* Alias sémantiques */
+  --text-body: var(--text);
+  --text-secondary: var(--text-muted);
+  --text-label: var(--text-faint);
+  --surface-hover: var(--white-6);
+  --surface-selected: var(--white-8);
+  --surface-control: var(--white-5);
+  --surface-field: var(--black-20);
+  --surface-accent-soft: color-mix(in srgb, var(--accent) 16%, transparent);
+  --border-accent-soft: color-mix(in srgb, var(--accent) 45%, transparent);
+  --border-focus: color-mix(in srgb, var(--accent) 50%, transparent);
+
+  /* Verre (la recette est la marque) */
+  --glass: 0.5; /* opacité du verre (theme, 0 à 1) */
+  --blur: 48px; /* flou du verre en plein écran (theme, 0 à 120) */
+  --panel-bg: rgb(16 18 24 / var(--glass));
+  --menu-bg: rgb(20 22 29 / 0.6);
+  --drawer-bg: rgb(14 16 22 / 0.6);
+  --popover-bg: rgb(16 18 24 / 0.86); /* résultats de la barre, réponse de Claude */
+  /* Façon Apple : reflet en biais, liseré clair en haut, bord plus lumineux que le fond. */
+  --glass-sheen: linear-gradient(
+    165deg,
+    rgb(255 255 255 / 0.11),
+    rgb(255 255 255 / 0.03) 38%,
+    rgb(255 255 255 / 0.015)
+  );
+  --glass-rim: inset 0 1px 0 rgb(255 255 255 / 0.24), inset 0 -1px 0 rgb(255 255 255 / 0.05);
+  --glass-filter: blur(var(--blur)) saturate(1.7);
+  --glass-filter-menu: blur(24px) saturate(1.7);
+  --glass-filter-drawer: blur(30px) saturate(1.7);
+
+  /* Arrondis : imbriqués (panneau = carte + 8) ; boutons, pastilles et puces toujours ronds */
+  --radius-panel: 28px;
+  --radius: 20px; /* carte de widget (theme, 0 à 40) */
+  --radius-popover: 18px;
+  --radius-tile: 16px;
+  --radius-composer: 16px;
+  --radius-menu: 14px;
+  --radius-bubble: 14px;
+  --radius-row: 12px;
+  --radius-select: 12px;
+  --radius-input: 10px;
+  --radius-menu-item: 10px;
+  --radius-icon: 9px;
+  --radius-pre: 8px;
+  --radius-kbd: 6px;
+  --radius-check: 6px;
+  --radius-bar: 4px;
+  --radius-pill: 999px;
+
+  /* Ombres : longues, douces, étalement négatif, toujours avec le liseré */
+  --shadow-card: var(--glass-rim), 0 10px 30px -14px rgb(0 0 0 / 0.55);
+  --shadow-menu: var(--glass-rim), 0 16px 40px -16px rgb(0 0 0 / 0.6);
+  --shadow-popover: var(--glass-rim), 0 24px 60px -20px rgb(0 0 0 / 0.7);
+  --shadow-panel: var(--glass-rim), 0 40px 100px -30px rgb(0 0 0 / 0.65);
+  --shadow-art: 0 10px 24px -12px rgb(0 0 0 / 0.7);
+  --glow-card: 0 0 40px -12px var(--accent);
+  --glow-bar: 0 0 10px var(--accent);
+  --glow-dot: 0 0 8px var(--accent);
+  --halo-bypass: inset 0 0 0 1px rgb(255 77 94 / 0.55), inset 0 0 120px -40px rgb(255 77 94 / 0.5);
+
+  /* Focus */
+  --focus-ring: 2px solid var(--accent);
+  --focus-offset: 2px;
+
+  /* Typographie : Satoshi seule, variable 300 à 900 */
+  --font-sans: 'Satoshi', system-ui, sans-serif;
+  --weight-light: 300; /* grands chiffres : horloge, température, espace libre */
+  --weight-regular: 400;
+  --weight-medium: 500; /* boutons, choix segmentés */
+  --weight-semibold: 600; /* nom de l'app, titres, en-têtes de section */
+  --text-11: 11px; /* touches, temps de lecture, fichier joint */
+  --text-12: 12px; /* étiquette de widget, sous-titres, indices */
+  --text-13: 13px; /* texte secondaire, boutons, lignes */
+  --text-14: 14px; /* texte courant */
+  --text-15: 15px; /* titre du morceau */
+  --text-16: 16px; /* champ de la barre seule */
+  --text-18: 18px; /* nom de l'app, titre du tiroir */
+  --text-display-s: 30px;
+  --text-display-m: 40px;
+  --text-display-l: 44px;
+  --text-display-xl: 96px;
+  --tracking-display: -0.04em;
+  --tracking-title: -0.01em;
+  --tracking-label: 0.1em;
+  --tracking-menu-label: 0.06em;
+
+  /* Mise en page */
+  --panel-padding: 24px;
+  --panel-gap: 20px;
+  --panel-max-width: 1280px;
+  --panel-inset: 48px; /* marge du panneau en plein écran */
+  --control-h: 36px; /* bouton d'action */
+  --control-h-field: 38px; /* barre de commande */
+  --control-h-pill: 30px; /* pastille de profil, petit bouton */
+  --control-h-input: 32px; /* champ dans un widget */
+  --control-h-chip: 26px;
+  --menu-item-h: 40px;
+
+  /* Mouvement : transform et opacity seulement */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* Ressort amorti (dépassement 12 %), calculé depuis un oscillateur réel. */
+  --ease-spring: linear(
+    0,
+    0.098 5%,
+    0.318 10%,
+    0.569 15%,
+    0.794 20%,
+    0.963 25%,
+    1.068 30%,
+    1.117 35%,
+    1.125 40%,
+    1.107 45%,
+    1.077 50%,
+    1.046 55%,
+    1.019 60%,
+    1 65%,
+    0.989 70%,
+    0.984 75%,
+    0.985 80%,
+    0.987 85%,
+    0.991 90%,
+    0.995 95%,
+    1
+  );
+  --dur-press: 100ms; /* appui : réduction */
+  --dur-press-card: 120ms;
+  --dur-fast: 150ms;
+  --dur-reveal: 180ms; /* cascade d'ouverture, tiroir */
+  --dur-hover: 200ms; /* halo de survol des cartes */
+  --dur-fade: 220ms; /* changement de profil */
+  --dur-light: 280ms; /* éclat de lumière à l'ouverture */
+  --dur-spring: 300ms; /* retour en ressort des boutons */
+  --dur-fill: 400ms; /* remplissage des jauges */
+  --dur-spring-card: 450ms;
+  --press-scale: 0.97;
+  --hover-lift: -2px;
+}

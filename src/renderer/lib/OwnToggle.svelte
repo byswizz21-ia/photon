@@ -5,15 +5,17 @@
 
 <label title="Décoché : les mêmes données dans tous les profils">
   <input type="checkbox" {checked} onchange={(event) => onchange(event.currentTarget.checked)} />
-  Propre à ce profil
+  <span>Propre à ce profil</span>
 </label>
 
 <style>
+  /* Case native teintée par l'accent (Photon Design System : forms/Checkbox). */
   label {
-    display: inline-flex;
+    display: inline-grid;
+    grid-template-columns: 18px auto;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
+    gap: 10px;
+    font-size: var(--text-13);
     color: var(--text-muted);
     cursor: pointer;
   }
@@ -21,5 +23,6 @@
   input {
     margin: 0;
     accent-color: var(--accent);
+    cursor: inherit;
   }
 </style>

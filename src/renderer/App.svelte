@@ -263,16 +263,12 @@
     border: 1px solid var(--glass-edge);
     border-radius: var(--radius-panel);
     backdrop-filter: var(--glass-filter);
-    box-shadow:
-      var(--glass-rim),
-      0 40px 100px -30px rgb(0 0 0 / 0.65);
+    box-shadow: var(--shadow-panel);
   }
 
   /* Claude en mode Bypass : halo rouge sur tout le panneau tant qu'il est actif. */
   .panel:has(:global([data-bypass])) {
-    box-shadow:
-      inset 0 0 0 1px rgb(255 77 94 / 0.55),
-      inset 0 0 120px -40px rgb(255 77 94 / 0.5);
+    box-shadow: var(--halo-bypass);
   }
 
   .bar {
@@ -288,9 +284,9 @@
   }
 
   .name {
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-size: var(--text-18);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-title);
   }
 
   /* Boutons de la barre : cliquables même dans la zone qui déplace la fenêtre. */

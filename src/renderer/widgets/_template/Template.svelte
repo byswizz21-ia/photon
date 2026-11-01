@@ -31,8 +31,8 @@
   }
 
   .label {
-    font-size: 12px;
-    letter-spacing: 0.1em;
+    font-size: var(--text-12);
+    letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--text-faint);
   }
@@ -40,14 +40,14 @@
   .value {
     margin: 0;
     font-size: 24px;
-    font-weight: 300;
+    font-weight: var(--weight-light);
   }
 
   .field {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    font-size: 12px;
+    font-size: var(--text-12);
     color: var(--text-muted);
   }
 
@@ -55,8 +55,8 @@
     min-height: 32px;
     padding: 0 10px;
     border: 1px solid var(--line);
-    border-radius: 10px;
-    background: rgb(255 255 255 / 0.05);
+    border-radius: var(--radius-input);
+    background: var(--white-5);
     color: var(--text);
     font: inherit;
   }
