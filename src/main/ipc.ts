@@ -5,11 +5,13 @@ import type { Settings } from '../shared/model'
 import { pickImage } from './background'
 import { calendar, onProfileSaved } from './calendar'
 import {
+  answerApproval,
   ask,
   claudeState,
   newConversation,
   openConversation,
   saveImage,
+  setMode,
   stopAnswer,
   validFiles
 } from './claude'
@@ -81,6 +83,8 @@ export function registerIpc(actions: IpcActions): void {
   on('photon:claudeStop', stopAnswer)
   on('photon:claudeNew', newConversation)
   on('photon:claudeOpen', openConversation)
+  on('photon:claudeMode', setMode) // validés dans claude.ts
+  on('photon:claudeApprove', answerApproval)
   handle('photon:claudeImage', saveImage) // PNG vérifié, 10 Mo au plus
   handle('photon:clipboardText', async () => (await clipboard.readText()).slice(0, MAX_TEXT))
   on('photon:copyText', (text) => {

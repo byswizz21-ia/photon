@@ -56,9 +56,21 @@ export interface Conversation {
   messages: ClaudeMessage[]
 }
 
+// Question : lecture seule ; Agent : agit sur le PC après accord ; Bypass : agit sans demander.
+export type ClaudeMode = 'question' | 'agent' | 'bypass'
+
+// Action que Claude veut faire en mode Agent, à accepter ou refuser.
+export interface ClaudeApproval {
+  id: string
+  title: string // « Exécuter une commande »
+  detail: string // la commande entière, le fichier et son contenu…
+}
+
 export interface ClaudeState {
   available: boolean // claude.exe trouvé côté Windows
   busy: boolean // une réponse est en cours
+  mode: ClaudeMode // revient à Question quand Photon se cache (Bypass) ou redémarre
+  approval: ClaudeApproval | null // action en attente d'accord
   current: Conversation
   history: { id: string; title: string; updatedAt: number }[] // plus récentes d'abord
 }
@@ -115,6 +127,8 @@ export interface PhotonApi {
   claudeStop(): void
   claudeNew(): void
   claudeOpen(id: string): void
+  claudeMode(mode: ClaudeMode): void
+  claudeApprove(id: string, allow: boolean): void
   claudeImage(png: Uint8Array): Promise<string | null> // capture collée → fichier temporaire
   clipboardText(): Promise<string>
   copyText(text: string): void

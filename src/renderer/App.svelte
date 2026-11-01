@@ -218,6 +218,13 @@
       0 40px 100px -30px rgb(0 0 0 / 0.65);
   }
 
+  /* Claude en mode Bypass : halo rouge sur tout le panneau tant qu'il est actif. */
+  .panel:has(:global([data-bypass])) {
+    box-shadow:
+      inset 0 0 0 1px rgb(255 77 94 / 0.55),
+      inset 0 0 120px -40px rgb(255 77 94 / 0.5);
+  }
+
   .bar {
     display: flex;
     align-items: center;

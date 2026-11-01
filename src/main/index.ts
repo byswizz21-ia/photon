@@ -3,7 +3,7 @@ import { app, globalShortcut } from 'electron'
 import type { Settings } from '../shared/model'
 import { registerBackgroundScheme, serveBackgrounds } from './background'
 import { startCalendars } from './calendar'
-import { loadClaude } from './claude'
+import { leaveBypass, loadClaude } from './claude'
 import { data, loadAll, saveSettings } from './data'
 import { registerIpc } from './ipc'
 import { loadMusic } from './music'
@@ -65,7 +65,7 @@ if (!app.requestSingleInstanceLock()) {
     await Promise.all([loadAll(), loadClaude()])
     serveBackgrounds()
     registerIpc({ ready: onRendererReady, updateSettings })
-    createWindow()
+    createWindow().on('hide', leaveBypass) // Bypass ne survit pas à la fermeture de Photon
     // Branché après la fenêtre : un 2e lancement pendant le démarrage ne trouve pas de fenêtre vide.
     app.on('second-instance', showWindow)
     activeShortcut = registerShortcut(data.settings.shortcut, toggleWindow)

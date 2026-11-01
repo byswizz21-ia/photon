@@ -1,7 +1,8 @@
 <script lang="ts">
-  // Barre Claude (mode Question) : fil de conversation, réponse mot par mot, prompts rapides sur le
-  // presse-papier, fichiers glissés et captures collées. La conversation vit côté Windows
-  // (src/main/claude.ts) : elle continue Photon caché et se retrouve à la réouverture.
+  // Barre Claude : fil de conversation, réponse mot par mot, prompts rapides sur le presse-papier,
+  // fichiers glissés et captures collées. Modes Question / Agent (chaque action acceptée ici) /
+  // Bypass (halo rouge). La conversation vit côté Windows (src/main/claude.ts) : elle continue
+  // Photon caché et se retrouve à la réouverture.
   import ArrowUpIcon from 'phosphor-svelte/lib/ArrowUpIcon'
   import CheckIcon from 'phosphor-svelte/lib/CheckIcon'
   import ClipboardTextIcon from 'phosphor-svelte/lib/ClipboardTextIcon'
@@ -10,7 +11,7 @@
   import PlusIcon from 'phosphor-svelte/lib/PlusIcon'
   import StopIcon from 'phosphor-svelte/lib/StopIcon'
   import XIcon from 'phosphor-svelte/lib/XIcon'
-  import type { ClaudeState } from '../../../shared/api'
+  import type { ClaudeMode, ClaudeState } from '../../../shared/api'
   import type { WidgetProps } from '../types'
   import type { ClaudeSettings } from './manifest'
   import Markdown from './Markdown.svelte'
@@ -33,6 +34,24 @@
 
   const messages = $derived(claude?.current.messages ?? [])
   const busy = $derived(claude?.busy ?? false)
+  const mode = $derived(claude?.mode ?? 'question')
+  const approval = $derived(claude?.approval ?? null)
+
+  const MODES: { id: ClaudeMode; label: string; hint: string }[] = [
+    {
+      id: 'question',
+      label: 'Question',
+      hint: 'Lit les fichiers donnés, ne modifie et ne lance rien'
+    },
+    { id: 'agent', label: 'Agent', hint: 'Agit sur le PC, chaque action te sera demandée' },
+    { id: 'bypass', label: 'Bypass', hint: 'Agit sur le PC sans rien demander' }
+  ]
+  let confirmBypass = $state(false)
+
+  function choose(next: ClaudeMode): void {
+    confirmBypass = next === 'bypass' && mode !== 'bypass'
+    if (!confirmBypass) window.photon.claudeMode(next)
+  }
 
   let draft = $state('')
   let files = $state<string[]>([])
@@ -158,15 +177,27 @@
   role="group"
   aria-label="Claude"
   data-no-press
+  data-bypass={mode === 'bypass' || undefined}
   ondragover={onDragOver}
   ondragleave={onDragLeave}
   ondrop={onDrop}
 >
   <header>
     <span class="label">Claude</span>
-    <span class="mode" title="Claude lit les fichiers donnés, ne modifie et ne lance rien"
-      >Question</span
-    >
+    <div class="modes" role="radiogroup" aria-label="Mode de Claude">
+      {#each MODES as item (item.id)}
+        <button
+          type="button"
+          role="radio"
+          class={item.id}
+          aria-checked={mode === item.id}
+          title={item.hint}
+          onclick={() => choose(item.id)}
+        >
+          {item.label}
+        </button>
+      {/each}
+    </div>
     <div class="tools">
       <button
         type="button"
@@ -194,6 +225,28 @@
       </button>
     </div>
   </header>
+
+  {#if confirmBypass}
+    <div class="bypass-confirm" role="alertdialog" aria-label="Activer le mode Bypass">
+      <p>
+        <strong>Bypass</strong> : Claude agit sur ton PC (fichiers, commandes) sans rien te demander.
+        Il revient en mode Question dès que Photon se ferme.
+      </p>
+      <div class="row">
+        <button type="button" class="chip" onclick={() => (confirmBypass = false)}>Annuler</button>
+        <button
+          type="button"
+          class="chip danger"
+          onclick={() => {
+            confirmBypass = false
+            window.photon.claudeMode('bypass')
+          }}
+        >
+          Activer
+        </button>
+      </div>
+    </div>
+  {/if}
 
   {#if claude && !claude.available}
     <p class="hint">Claude Code est introuvable côté Windows. Installe-le, puis relance Photon.</p>
@@ -247,6 +300,30 @@
         {/if}
       {/each}
     </div>
+
+    {#if approval}
+      <!-- Mode Agent : l'action complète est montrée, rien n'est accepté par défaut. -->
+      <div class="approval" role="alertdialog" aria-label="Claude demande ton accord">
+        <p class="approval-title">{approval.title}</p>
+        <pre>{approval.detail}</pre>
+        <div class="row">
+          <button
+            type="button"
+            class="chip"
+            onclick={() => window.photon.claudeApprove(approval.id, false)}
+          >
+            Refuser
+          </button>
+          <button
+            type="button"
+            class="chip accept"
+            onclick={() => window.photon.claudeApprove(approval.id, true)}
+          >
+            Autoriser
+          </button>
+        </div>
+      </div>
+    {/if}
 
     <div class="quick">
       <button
@@ -351,12 +428,103 @@
     color: var(--text-faint);
   }
 
-  .mode {
-    padding: 2px 8px;
+  /* Bypass actif : halo rouge tant qu'il dure (le panneau de Photon aussi, voir App.svelte). */
+  .widget[data-bypass] {
+    box-shadow:
+      inset 0 0 0 1px rgb(255 77 94 / 0.7),
+      inset 0 0 40px -10px rgb(255 77 94 / 0.45);
+  }
+
+  .modes {
+    display: flex;
+    padding: 2px;
     border-radius: 999px;
+    background: rgb(0 0 0 / 0.22);
+  }
+
+  .modes button {
+    padding: 2px 9px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
     font-size: 11px;
+    color: var(--text-faint);
+  }
+
+  .modes button:hover {
+    color: var(--text);
+  }
+
+  .modes [aria-checked='true'] {
     color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+  }
+
+  .modes .bypass[aria-checked='true'] {
+    color: #ff8a96;
+    background: rgb(255 77 94 / 0.18);
+  }
+
+  .bypass-confirm,
+  .approval {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    font-size: 12px;
+  }
+
+  .bypass-confirm {
+    border: 1px solid rgb(255 77 94 / 0.45);
+    background: rgb(255 77 94 / 0.1);
+  }
+
+  .bypass-confirm p,
+  .approval p {
+    margin: 0;
+  }
+
+  .approval {
+    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+
+  .approval-title {
+    font-weight: 600;
+  }
+
+  /* Le détail complet reste lisible : il défile au-delà de 8 lignes. */
+  .approval pre {
+    max-height: 8lh;
+    margin: 0;
+    padding: 8px;
+    overflow: auto;
+    border-radius: 8px;
+    background: rgb(0 0 0 / 0.3);
+    font-size: 11px;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    user-select: text;
+  }
+
+  .row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+
+  .chip.accept {
+    border-color: transparent;
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .chip.danger {
+    border-color: transparent;
+    background: #ff4d5e;
+    color: #fff;
   }
 
   .tools {
