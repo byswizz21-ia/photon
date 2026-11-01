@@ -23,6 +23,7 @@ import {
 } from './window'
 import { startScreens } from './screens'
 import { leaveFocus } from './focus'
+import { startAuto } from './auto'
 
 // Argument passé par le lancement au démarrage de Windows : rester caché dans la zone de notif.
 const HIDDEN_ARG = '--hidden'
@@ -92,5 +93,6 @@ if (!app.requestSingleInstanceLock()) {
     startWeather()
     loadMusic()
     startScreens()
+    startAuto()
   })
 }

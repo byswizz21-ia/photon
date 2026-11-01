@@ -2,15 +2,24 @@
   // Pastilles des profils dans l'en-tête : clic (ou Ctrl+1…9, App.svelte) pour basculer, « + »
   // pour en créer un (vierge, copie, modèle). En mode édition, le profil actif se renomme
   // et se supprime (2e clic pour confirmer, jamais le dernier), et devient un profil Focus.
+  import LightningIcon from 'phosphor-svelte/lib/LightningIcon'
   import MoonIcon from 'phosphor-svelte/lib/MoonIcon'
   import PlusIcon from 'phosphor-svelte/lib/PlusIcon'
   import TrashIcon from 'phosphor-svelte/lib/TrashIcon'
   import { MAX_PROFILE_NAME } from '../../shared/model'
   import { TEMPLATES } from '../../shared/templates'
   import { app, changeProfile, saveProfile, switchProfile } from '../state.svelte'
+  import AutoRules from './AutoRules.svelte'
 
   let menu = $state(false)
+  let rules = $state(false) // règles de bascule auto du profil actif
   let addBox = $state<HTMLElement>()
+  let rulesBox = $state<HTMLElement>()
+
+  // Hors mode édition, le panneau des règles se ferme.
+  $effect(() => {
+    if (!app.editing) rules = false
+  })
   let confirmDelete = $state(false)
   let askedAt = 0 // un double-clic ne doit pas valoir confirmation
 
@@ -38,6 +47,7 @@
 <svelte:window
   onpointerdown={(event) => {
     if (menu && !addBox?.contains(event.target as Node)) menu = false
+    if (rules && !rulesBox?.contains(event.target as Node)) rules = false
   }}
 />
 
@@ -73,6 +83,17 @@
           <MoonIcon size={15} weight={app.profile.focus ? 'fill' : 'regular'} aria-hidden="true" />
           Focus
         </button>
+        <button
+          type="button"
+          class="tool"
+          class:on={app.profile.auto.apps.length > 0 || app.profile.auto.hours !== null}
+          aria-expanded={rules}
+          title="Activer ce profil automatiquement (apps, horaire)"
+          onclick={() => (rules = !rules)}
+        >
+          <LightningIcon size={15} aria-hidden="true" />
+          Auto
+        </button>
         {#if app.profiles.length > 1}
           <button
             type="button"
@@ -104,6 +125,10 @@
       {/if}
     {/each}
   </div>
+
+  {#if rules}
+    <div class="rules-anchor" bind:this={rulesBox}><AutoRules /></div>
+  {/if}
 
   <div class="add" bind:this={addBox}>
     <button
@@ -144,6 +169,7 @@
 
 <style>
   .profiles {
+    position: relative;
     min-width: 0;
     display: flex;
     align-items: center;
@@ -233,6 +259,13 @@
   .delete.confirm {
     color: #ff9aa8;
     background: rgb(255 77 94 / 0.12);
+  }
+
+  /* Le panneau s'ouvre sous les pastilles, hors de leur zone qui défile (elle le couperait). */
+  .rules-anchor {
+    position: absolute;
+    left: 0;
+    top: 100%;
   }
 
   .add {

@@ -26,6 +26,7 @@ import { cpuRam, disks, fileIcon, launch, network, pickApps, pickFolders } from 
 import { temperatures } from './temperatures'
 import { displayList } from './screens'
 import { syncFocus } from './focus'
+import { pickAutoApps } from './auto'
 import { onWeatherProfile, weather } from './weather'
 import { hideWindow, logShown, ownsSender, resizeBar } from './window'
 
@@ -47,7 +48,8 @@ const EDITABLE: readonly string[] = [
   'mode',
   'alwaysOnTop',
   'screen',
-  'reduceMotion'
+  'reduceMotion',
+  'autoProfiles'
 ]
 
 const editable = (patch: unknown): Partial<Settings> =>
@@ -107,6 +109,7 @@ export function registerIpc(actions: IpcActions): void {
     return launched
   })
   handle('photon:pickApps', pickApps)
+  handle('photon:pickAutoApps', pickAutoApps)
   handle('photon:calendar', calendar)
   handle('photon:claudeState', claudeState)
   handle('photon:claudeAsk', (text, files) =>

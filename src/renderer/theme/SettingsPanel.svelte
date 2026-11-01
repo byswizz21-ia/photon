@@ -309,6 +309,15 @@
       />
       <span>Réduire les animations</span>
     </label>
+    <label class="check">
+      <input
+        type="checkbox"
+        checked={app.settings.autoProfiles}
+        onchange={(event) => setting({ autoProfiles: event.currentTarget.checked })}
+      />
+      <span>Bascule automatique des profils</span>
+      <small>Règles de chaque profil : bouton « Auto » en mode édition</small>
+    </label>
   </section>
 </div>
 

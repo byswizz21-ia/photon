@@ -44,6 +44,13 @@ export async function loadAll(): Promise<void> {
   data.profiles = await listProfiles()
 }
 
+const info = (id: string, p: Profile): ProfileInfo => ({
+  id,
+  name: p.name,
+  focus: p.focus,
+  auto: p.auto
+})
+
 // Tous les profils de profiles/, du plus ancien au plus récent. Lu au démarrage seulement.
 async function listProfiles(): Promise<ProfileInfo[]> {
   const files = await fs.readdir(file('profiles')).catch(() => [] as string[])
@@ -60,7 +67,7 @@ async function listProfiles(): Promise<ProfileInfo[]> {
   if (!list.some((f) => f.id === active)) list.push({ id: active, profile: data.profile })
   return list
     .sort((a, b) => a.profile.createdAt - b.profile.createdAt || a.id.localeCompare(b.id))
-    .map(({ id, profile }) => ({ id, name: profile.name, focus: profile.focus }))
+    .map(({ id, profile }) => info(id, profile))
 }
 
 export async function saveSettings(patch: Partial<Settings>): Promise<Settings> {
@@ -79,9 +86,7 @@ export async function saveTheme(raw: unknown): Promise<void> {
 export async function saveProfile(raw: unknown): Promise<void> {
   const id = data.settings.activeProfile
   data.profile = parseProfile(raw)
-  data.profiles = data.profiles.map((p) =>
-    p.id === id ? { id, name: data.profile.name, focus: data.profile.focus } : p
-  )
+  data.profiles = data.profiles.map((p) => (p.id === id ? info(id, data.profile) : p))
   await writeJson(profileFile(id), data.profile, parseProfile)
 }
 
@@ -117,7 +122,7 @@ export async function createProfile(source: unknown): Promise<boolean> {
   while (data.profiles.some((p) => p.id === `p${n.toString(36)}`)) n++
   const id = `p${n.toString(36)}`
   await writeJson(profileFile(id), profile, parseProfile)
-  data.profiles = [...data.profiles, { id, name: profile.name, focus: profile.focus }]
+  data.profiles = [...data.profiles, info(id, profile)]
   return switchProfile(id)
 }
 

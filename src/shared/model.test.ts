@@ -30,6 +30,7 @@ describe('parseProfile', () => {
       createdAt: 0,
       theme: null,
       focus: false,
+      auto: { apps: [], hours: null },
       widgets: [{ id: 'a', type: 'clock', x: 0, y: 3, w: 12, h: 1, settings: { seconds: true } }]
     })
   })
