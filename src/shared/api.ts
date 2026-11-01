@@ -8,8 +8,19 @@ export interface AppState {
 }
 
 // Position du curseur dans la fenêtre au moment de l'ouverture : origine de la révélation.
+// mini : seulement la barre de commande, petite et centrée (2e raccourci).
 export interface ShowEvent {
   origin: { x: number; y: number }
+  mini: boolean
+}
+
+// Barre de commande (src/main/search/) : l'interface ne manipule que des identifiants.
+export interface SearchResult {
+  id: string // « ui:… » = action de l'interface, « claude » = question pour Claude
+  kind: 'app' | 'file' | 'folder' | 'site' | 'web' | 'calc' | 'command' | 'action' | 'claude'
+  title: string
+  subtitle: string
+  confirm: boolean // commande lourde (redémarrer…) : Entrée deux fois
 }
 
 export interface CpuRam {
@@ -138,6 +149,11 @@ export interface PhotonApi {
   musicSeek(seconds: number): Promise<void>
   musicVolume(volume: number): Promise<void> // 0 à 100
   musicOpen(): void // interface complète de YT Music (navigation, connexion Google)
+  // Barre de commande
+  search(query: string): Promise<SearchResult[]>
+  openResult(id: string, inFolder: boolean): Promise<boolean> // true : ouvert, Photon se cache
+  resultIcon(id: string): Promise<string | null>
+  barResize(height: number): void // mini-mode : la fenêtre suit la hauteur de la barre
   // Thème
   pickImage(): Promise<string | null> // boîte de dialogue ; null si annulée
 }

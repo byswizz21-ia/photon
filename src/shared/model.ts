@@ -13,6 +13,7 @@ export interface Bounds {
 
 export interface Settings {
   shortcut: string // accélérateur Electron, ex. "Super+Shift+Space"
+  barShortcut: string // mini-mode : la barre de commande seule
   mode: WindowMode
   alwaysOnTop: boolean // mode fenêtre uniquement
   windowBounds: Bounds | null // dernière position en mode fenêtre
@@ -55,6 +56,9 @@ export interface Profile {
 
 // Win+Shift+Espace est réservé par Windows (changement de langue) : register() échoue, testé.
 export const SHORTCUTS = ['Super+Alt+Space', 'Super+Shift+Space', 'Ctrl+Alt+Space'] as const
+// Alt+Espace : comme PowerToys Run (remplace le menu système de la fenêtre active).
+// Pas Ctrl+Espace : pris par les éditeurs de code et les claviers asiatiques.
+export const BAR_SHORTCUTS = ['Alt+Space', 'Super+Ctrl+Space', 'Ctrl+Shift+Space'] as const
 export const DEFAULT_ACCENT = '#7CC4FF'
 
 // 'Super+Alt+Space' → 'Win+Alt+Espace'
@@ -63,6 +67,7 @@ export const shortcutLabel = (accelerator: string): string =>
 
 export const defaultSettings = (): Settings => ({
   shortcut: SHORTCUTS[0],
+  barShortcut: BAR_SHORTCUTS[0],
   mode: 'fullscreen',
   alwaysOnTop: false,
   windowBounds: null,
@@ -128,6 +133,7 @@ export function parseSettings(raw: unknown): Settings {
   const d = defaultSettings()
   return {
     shortcut: typeof v.shortcut === 'string' && v.shortcut ? v.shortcut : d.shortcut,
+    barShortcut: typeof v.barShortcut === 'string' && v.barShortcut ? v.barShortcut : d.barShortcut,
     mode: oneOf(v.mode, ['fullscreen', 'window'], d.mode),
     alwaysOnTop: typeof v.alwaysOnTop === 'boolean' ? v.alwaysOnTop : d.alwaysOnTop,
     windowBounds: parseBounds(v.windowBounds),

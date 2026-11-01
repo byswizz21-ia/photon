@@ -17,8 +17,9 @@ import {
 } from './claude'
 import { data, saveProfile, saveTheme } from './data'
 import { musicControl, musicSeek, musicState, musicVolume, openMusic, syncMusic } from './music'
+import { openResult, resultIcon, search } from './search/search'
 import { cpuRam, disks, fileIcon, launch, pickApps } from './system'
-import { hideWindow, logShown, ownsSender } from './window'
+import { hideWindow, logShown, ownsSender, resizeBar } from './window'
 
 interface IpcActions {
   ready: () => void
@@ -32,7 +33,13 @@ const isObject = (v: unknown): v is Record<string, unknown> =>
 
 // Réglages modifiables depuis l'interface. Profil et thème actifs : pas de bascule avant la V3
 // (changer de fichier sans recharger écraserait le nouveau profil avec l'ancien).
-const EDITABLE: readonly string[] = ['shortcut', 'mode', 'alwaysOnTop', 'reduceMotion']
+const EDITABLE: readonly string[] = [
+  'shortcut',
+  'barShortcut',
+  'mode',
+  'alwaysOnTop',
+  'reduceMotion'
+]
 
 const editable = (patch: unknown): Partial<Settings> =>
   isObject(patch)
@@ -97,6 +104,16 @@ export function registerIpc(actions: IpcActions): void {
   on('photon:musicOpen', () => {
     hideWindow('YT Music ouvert')
     openMusic()
+  })
+  handle('photon:search', search) // texte borné, résultats gardés côté Windows
+  handle('photon:openResult', async (id, inFolder) => {
+    const opened = await openResult(id, inFolder)
+    if (opened) hideWindow('barre de commande')
+    return opened
+  })
+  handle('photon:resultIcon', resultIcon)
+  on('photon:barResize', (height) => {
+    if (typeof height === 'number' && Number.isFinite(height)) resizeBar(height)
   })
   handle('photon:pickImage', pickImage)
 }

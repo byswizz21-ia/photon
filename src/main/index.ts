@@ -1,11 +1,12 @@
 // Démarrage de Photon : instance unique, données, fenêtre cachée, zone de notification, raccourci.
 import { app, globalShortcut } from 'electron'
-import type { Settings } from '../shared/model'
+import { BAR_SHORTCUTS, SHORTCUTS, type Settings } from '../shared/model'
 import { registerBackgroundScheme, serveBackgrounds } from './background'
 import { startCalendars } from './calendar'
 import { leaveBypass, loadClaude } from './claude'
 import { data, loadAll, saveSettings } from './data'
 import { registerIpc } from './ipc'
+import { loadSearch } from './search/search'
 import { loadMusic } from './music'
 import { registerShortcut } from './shortcut'
 import { createTray, refreshTray } from './tray'
@@ -16,6 +17,7 @@ import {
   isVisible,
   send,
   showWindow,
+  toggleBar,
   toggleWindow
 } from './window'
 
@@ -38,9 +40,13 @@ function enableLaunchAtLogin(): void {
 // Réglages modifiés (zone de notif ou interface) : sauvegarde puis application partout.
 async function updateSettings(patch: Partial<Settings>): Promise<Settings> {
   const previousShortcut = data.settings.shortcut
+  const previousBar = data.settings.barShortcut
   const settings = await saveSettings(patch)
   if (settings.shortcut !== previousShortcut) {
-    activeShortcut = registerShortcut(settings.shortcut, toggleWindow)
+    activeShortcut = registerShortcut('photon', settings.shortcut, SHORTCUTS, toggleWindow)
+  }
+  if (settings.barShortcut !== previousBar) {
+    registerShortcut('bar', settings.barShortcut, BAR_SHORTCUTS, toggleBar)
   }
   applyMode()
   refreshTray(activeShortcut)
@@ -62,14 +68,17 @@ if (!app.requestSingleInstanceLock()) {
   registerBackgroundScheme() // doit précéder app.whenReady()
 
   void app.whenReady().then(async () => {
-    await Promise.all([loadAll(), loadClaude()])
+    await Promise.all([loadAll(), loadClaude(), loadSearch()])
     serveBackgrounds()
     registerIpc({ ready: onRendererReady, updateSettings })
     createWindow().on('hide', leaveBypass) // Bypass ne survit pas à la fermeture de Photon
     // Branché après la fenêtre : un 2e lancement pendant le démarrage ne trouve pas de fenêtre vide.
     app.on('second-instance', showWindow)
-    activeShortcut = registerShortcut(data.settings.shortcut, toggleWindow)
-    console.log(`[photon] raccourci actif : ${activeShortcut ?? 'aucun'}`)
+    activeShortcut = registerShortcut('photon', data.settings.shortcut, SHORTCUTS, toggleWindow)
+    const barShortcut = registerShortcut('bar', data.settings.barShortcut, BAR_SHORTCUTS, toggleBar)
+    console.log(
+      `[photon] raccourcis : ${activeShortcut ?? 'aucun'}, barre ${barShortcut ?? 'aucun'}`
+    )
     const update = (patch: Partial<Settings>): void => void updateSettings(patch)
     createTray({ toggle: toggleWindow, update, quit: () => app.quit() }, activeShortcut)
     enableLaunchAtLogin()

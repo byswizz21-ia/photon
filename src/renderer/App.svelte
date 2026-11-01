@@ -2,6 +2,7 @@
   import CheckIcon from 'phosphor-svelte/lib/CheckIcon'
   import GearSixIcon from 'phosphor-svelte/lib/GearSixIcon'
   import PencilSimpleIcon from 'phosphor-svelte/lib/PencilSimpleIcon'
+  import CommandBar from './bar/CommandBar.svelte'
   import AddMenu from './grid/AddMenu.svelte'
   import Grid from './grid/Grid.svelte'
   import Logo from './lib/Logo.svelte'
@@ -21,8 +22,9 @@
   const fullscreen = $derived(app.settings.mode === 'fullscreen')
 
   $effect(() => {
-    const offShow = window.photon.onShow(({ origin }) => {
+    const offShow = window.photon.onShow(({ origin, mini }) => {
       app.visible = true
+      app.mini = mini
       if (!reducedMotion()) reveal(root, origin)
       // Mesure : deux images après l'affichage ≈ fenêtre réellement à l'écran.
       requestAnimationFrame(() => requestAnimationFrame(() => window.photon.shown()))
@@ -53,8 +55,26 @@
     gear?.focus()
   }
 
+  // Actions de la barre de commande sur l'interface.
+  function runAction(id: string): void {
+    if (id === 'ui:edit') {
+      settingsOpen = false
+      app.editing = true
+    } else if (id === 'ui:settings') settingsOpen = true
+  }
+
+  // Une lettre tapée hors d'un champ part dans la barre de commande : ouvrir Photon puis taper.
+  function typeToSearch(event: KeyboardEvent): void {
+    const target = event.target as HTMLElement
+    const typing = target.closest('input, textarea, select, [contenteditable]')
+    if (typing || app.editing || event.ctrlKey || event.altKey || event.metaKey) return
+    if (event.key.length === 1)
+      document.querySelector<HTMLInputElement>('[data-command-input]')?.focus()
+  }
+
   // Échap : ferme d'abord les réglages, puis quitte le mode édition, sinon ferme Photon.
   function onKeydown(event: KeyboardEvent): void {
+    typeToSearch(event)
     if (event.key !== 'Escape') return
     if (settingsOpen) closeSettings()
     else if (app.editing) app.editing = false
@@ -82,60 +102,66 @@
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 <div
   class="root"
-  class:fullscreen
+  class:fullscreen={fullscreen && !app.mini}
+  class:mini={app.mini}
   bind:this={root}
   onpointerdown={(event) => (pressedVoid = isVoid(event))}
   onclick={onClick}
   data-void
 >
-  <div class="backdrop" aria-hidden="true">
-    <!-- Plein écran seulement : en mode fenêtre, le flou acrylic de Windows fait le verre. -->
-    {#if fullscreen}<Background />{/if}
-    <div class="veil"></div>
-  </div>
-  <div class="light" aria-hidden="true"></div>
-  <main class="panel" data-void>
-    <header class="bar" data-reveal class:drag={!fullscreen}>
-      <Logo size={28} />
-      <span class="name">Photon</span>
-      <div class="actions">
-        {#if app.editing}
-          <AddMenu />
-          <button type="button" class="action primary" onclick={() => (app.editing = false)}>
-            <CheckIcon size={16} weight="bold" aria-hidden="true" />
-            Terminé
-          </button>
-        {:else}
-          <button
-            type="button"
-            class="action icon"
-            aria-label="Modifier la grille"
-            title="Modifier la grille"
-            onclick={() => {
-              settingsOpen = false
-              app.editing = true
-            }}
-          >
-            <PencilSimpleIcon size={18} weight="duotone" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            class="action icon"
-            bind:this={gear}
-            aria-label="Réglages"
-            title="Réglages"
-            aria-haspopup="dialog"
-            aria-expanded={settingsOpen}
-            onclick={() => (settingsOpen = !settingsOpen)}
-          >
-            <GearSixIcon size={18} weight="duotone" aria-hidden="true" />
-          </button>
-        {/if}
-      </div>
-    </header>
-    <Grid />
-  </main>
-  {#if settingsOpen}<SettingsPanel onclose={closeSettings} />{/if}
+  {#if app.mini}
+    <CommandBar mini onaction={runAction} />
+  {:else}
+    <div class="backdrop" aria-hidden="true">
+      <!-- Plein écran seulement : en mode fenêtre, le flou acrylic de Windows fait le verre. -->
+      {#if fullscreen}<Background />{/if}
+      <div class="veil"></div>
+    </div>
+    <div class="light" aria-hidden="true"></div>
+    <main class="panel" data-void>
+      <header class="bar" data-reveal class:drag={!fullscreen}>
+        <Logo size={28} />
+        <span class="name">Photon</span>
+        <CommandBar onaction={runAction} />
+        <div class="actions">
+          {#if app.editing}
+            <AddMenu />
+            <button type="button" class="action primary" onclick={() => (app.editing = false)}>
+              <CheckIcon size={16} weight="bold" aria-hidden="true" />
+              Terminé
+            </button>
+          {:else}
+            <button
+              type="button"
+              class="action icon"
+              aria-label="Modifier la grille"
+              title="Modifier la grille"
+              onclick={() => {
+                settingsOpen = false
+                app.editing = true
+              }}
+            >
+              <PencilSimpleIcon size={18} weight="duotone" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="action icon"
+              bind:this={gear}
+              aria-label="Réglages"
+              title="Réglages"
+              aria-haspopup="dialog"
+              aria-expanded={settingsOpen}
+              onclick={() => (settingsOpen = !settingsOpen)}
+            >
+              <GearSixIcon size={18} weight="duotone" aria-hidden="true" />
+            </button>
+          {/if}
+        </div>
+      </header>
+      <Grid />
+    </main>
+    {#if settingsOpen}<SettingsPanel onclose={closeSettings} />{/if}
+  {/if}
 </div>
 
 <style>
@@ -143,6 +169,12 @@
     position: relative;
     height: 100%;
     overflow: hidden;
+  }
+
+  /* Mini-mode : la fenêtre (verre acrylic de Windows) ne contient que la barre. */
+  .root.mini {
+    height: auto;
+    background: var(--glass-sheen), var(--panel-bg);
   }
 
   /* Fond : calque flouté (plein écran), puis voile sombre et deux lueurs d'accent et violette. */

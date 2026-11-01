@@ -14,6 +14,7 @@
   import type { ClaudeMode, ClaudeState } from '../../../shared/api'
   import type { WidgetProps } from '../types'
   import type { ClaudeSettings } from './manifest'
+  import Approval from './Approval.svelte'
   import Markdown from './Markdown.svelte'
 
   // Aucun réglage : props déclarées pour le type seulement (voir widgets/system/System.svelte).
@@ -301,29 +302,7 @@
       {/each}
     </div>
 
-    {#if approval}
-      <!-- Mode Agent : l'action complète est montrée, rien n'est accepté par défaut. -->
-      <div class="approval" role="alertdialog" aria-label="Claude demande ton accord">
-        <p class="approval-title">{approval.title}</p>
-        <pre>{approval.detail}</pre>
-        <div class="row">
-          <button
-            type="button"
-            class="chip"
-            onclick={() => window.photon.claudeApprove(approval.id, false)}
-          >
-            Refuser
-          </button>
-          <button
-            type="button"
-            class="chip accept"
-            onclick={() => window.photon.claudeApprove(approval.id, true)}
-          >
-            Autoriser
-          </button>
-        </div>
-      </div>
-    {/if}
+    {#if approval}<Approval {approval} />{/if}
 
     <div class="quick">
       <button
@@ -465,60 +444,25 @@
     background: rgb(255 77 94 / 0.18);
   }
 
-  .bypass-confirm,
-  .approval {
+  .bypass-confirm {
     display: flex;
     flex-direction: column;
     gap: 8px;
     padding: 10px 12px;
+    border: 1px solid rgb(255 77 94 / 0.45);
     border-radius: 14px;
+    background: rgb(255 77 94 / 0.1);
     font-size: 12px;
   }
 
-  .bypass-confirm {
-    border: 1px solid rgb(255 77 94 / 0.45);
-    background: rgb(255 77 94 / 0.1);
-  }
-
-  .bypass-confirm p,
-  .approval p {
+  .bypass-confirm p {
     margin: 0;
-  }
-
-  .approval {
-    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
-    background: color-mix(in srgb, var(--accent) 8%, transparent);
-  }
-
-  .approval-title {
-    font-weight: 600;
-  }
-
-  /* Le détail complet reste lisible : il défile au-delà de 8 lignes. */
-  .approval pre {
-    max-height: 8lh;
-    margin: 0;
-    padding: 8px;
-    overflow: auto;
-    border-radius: 8px;
-    background: rgb(0 0 0 / 0.3);
-    font-size: 11px;
-    line-height: 1.45;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    user-select: text;
   }
 
   .row {
     display: flex;
     justify-content: flex-end;
     gap: 6px;
-  }
-
-  .chip.accept {
-    border-color: transparent;
-    background: var(--accent);
-    color: var(--on-accent);
   }
 
   .chip.danger {

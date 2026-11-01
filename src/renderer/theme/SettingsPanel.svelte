@@ -2,6 +2,7 @@
   // Panneau « Réglages » : thème (fond, accent, verre) enregistré avec le thème, général via saveSettings.
   import XIcon from 'phosphor-svelte/lib/XIcon'
   import {
+    BAR_SHORTCUTS,
     SHORTCUTS,
     shortcutLabel,
     type Background,
@@ -42,11 +43,10 @@
   const manual = $derived(app.theme.accent !== 'auto')
   const accent = $derived(resolvedAccent())
   // Un raccourci écrit à la main dans settings.json reste affiché.
-  const shortcuts = $derived(
-    (SHORTCUTS as readonly string[]).includes(app.settings.shortcut)
-      ? SHORTCUTS
-      : [app.settings.shortcut, ...SHORTCUTS]
-  )
+  const withCurrent = (current: string, list: readonly string[]): readonly string[] =>
+    list.includes(current) ? list : [current, ...list]
+  const shortcuts = $derived(withCurrent(app.settings.shortcut, SHORTCUTS))
+  const barShortcuts = $derived(withCurrent(app.settings.barShortcut, BAR_SHORTCUTS))
 
   let panel: HTMLElement
 
@@ -261,6 +261,17 @@
         onchange={(event) => setting({ shortcut: event.currentTarget.value })}
       >
         {#each shortcuts as shortcut (shortcut)}
+          <option value={shortcut}>{shortcutLabel(shortcut)}</option>
+        {/each}
+      </select>
+    </label>
+    <label class="field">
+      <span class="line">Barre de commande seule</span>
+      <select
+        value={app.settings.barShortcut}
+        onchange={(event) => setting({ barShortcut: event.currentTarget.value })}
+      >
+        {#each barShortcuts as shortcut (shortcut)}
           <option value={shortcut}>{shortcutLabel(shortcut)}</option>
         {/each}
       </select>

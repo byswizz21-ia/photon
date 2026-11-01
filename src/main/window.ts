@@ -21,6 +21,9 @@ let win: BrowserWindow
 let quitting = false
 let modals = 0 // boîte de dialogue ouverte : la perte de focus ne doit pas cacher Photon
 let showStartedAt = 0
+let mini = false // seulement la barre de commande, petite et centrée
+const BAR_WIDTH = 680
+const BAR_HEIGHT = { min: 64, max: 640 }
 
 export function createWindow(): BrowserWindow {
   win = new BrowserWindow({
@@ -61,7 +64,7 @@ export function createWindow(): BrowserWindow {
   if (app.isPackaged) Menu.setApplicationMenu(null)
   win.on('blur', () => {
     const fullscreen = data.settings.mode === 'fullscreen'
-    if (fullscreen && modals === 0 && !win.webContents.isDevToolsFocused())
+    if ((fullscreen || mini) && modals === 0 && !win.webContents.isDevToolsFocused())
       hideWindow('focus perdu')
   })
   win.on('moved', rememberBounds)
@@ -96,11 +99,15 @@ export function applyMode(): void {
 }
 
 export function showWindow(): void {
+  if (mini) {
+    mini = false
+    applyMode() // la barre seule avait changé taille, premier plan et redimensionnement
+  }
   showStartedAt = performance.now()
   const cursor = screen.getCursorScreenPoint()
   place(screen.getDisplayNearestPoint(cursor))
   const bounds = win.getBounds()
-  send('photon:show', { origin: { x: cursor.x - bounds.x, y: cursor.y - bounds.y } })
+  send('photon:show', { origin: { x: cursor.x - bounds.x, y: cursor.y - bounds.y }, mini: false })
   win.show()
   win.focus()
 }
@@ -115,6 +122,39 @@ export function hideWindow(reason: string): void {
 export function toggleWindow(): void {
   if (win.isVisible() && win.isFocused()) hideWindow('raccourci')
   else showWindow()
+}
+
+// Mini-mode : la barre seule, centrée en haut de l'écran de la souris (façon Spotlight).
+// Sa hauteur suit le contenu (resizeBar), la largeur est fixe.
+export function showBar(): void {
+  mini = true
+  showStartedAt = performance.now()
+  const area = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea
+  win.setResizable(false)
+  win.setSkipTaskbar(true)
+  win.setAlwaysOnTop(true)
+  win.setMinimumSize(0, 0)
+  win.setBounds({
+    x: area.x + Math.round((area.width - BAR_WIDTH) / 2),
+    y: area.y + Math.round(area.height * 0.2),
+    width: BAR_WIDTH,
+    height: BAR_HEIGHT.min
+  })
+  send('photon:show', { origin: { x: BAR_WIDTH / 2, y: 0 }, mini: true })
+  win.show()
+  win.focus()
+}
+
+export function toggleBar(): void {
+  if (mini && win.isVisible() && win.isFocused()) hideWindow('raccourci de la barre')
+  else showBar()
+}
+
+export function resizeBar(height: number): void {
+  if (!mini) return
+  const bounds = win.getBounds()
+  const next = clamp(Math.round(height), BAR_HEIGHT.min, BAR_HEIGHT.max)
+  if (next !== bounds.height) win.setBounds({ ...bounds, height: next })
 }
 
 export function isVisible(): boolean {
@@ -168,7 +208,7 @@ function windowBoundsOn(display: Display): Rectangle {
 }
 
 function rememberBounds(): void {
-  if (data.settings.mode === 'window' && win.isVisible()) {
+  if (!mini && data.settings.mode === 'window' && win.isVisible()) {
     void saveSettings({ windowBounds: win.getBounds() })
   }
 }

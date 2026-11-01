@@ -44,6 +44,10 @@ const photon: PhotonApi = {
   musicSeek: (seconds) => ipcRenderer.invoke('photon:musicSeek', seconds),
   musicVolume: (volume) => ipcRenderer.invoke('photon:musicVolume', volume),
   musicOpen: () => ipcRenderer.send('photon:musicOpen'),
+  search: (query) => ipcRenderer.invoke('photon:search', query),
+  openResult: (id, inFolder) => ipcRenderer.invoke('photon:openResult', id, inFolder),
+  resultIcon: (id) => ipcRenderer.invoke('photon:resultIcon', id),
+  barResize: (height) => ipcRenderer.send('photon:barResize', height),
   pickImage: () => ipcRenderer.invoke('photon:pickImage')
 }
 

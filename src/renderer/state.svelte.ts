@@ -5,6 +5,7 @@ import { defaultProfile, defaultSettings, defaultTheme } from '../shared/model'
 export const app = $state({
   visible: false, // fenêtre affichée : les widgets ne lisent le système que dans cet état
   editing: false, // mode édition de la grille
+  mini: false, // mini-mode : la barre de commande seule (2e raccourci)
   settings: defaultSettings(),
   theme: defaultTheme(),
   profile: defaultProfile()

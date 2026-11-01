@@ -176,3 +176,5 @@ async function run(code: string): Promise<void> {
   const script = `{ const p = document.querySelector('#movie_player'); if (p && p.getPlayerState) ${code} }`
   await player?.webContents.executeJavaScript(script, true).catch(() => undefined)
 }
+
+export const musicAvailable = (): boolean => player !== null
