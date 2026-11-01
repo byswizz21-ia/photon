@@ -1,0 +1,35 @@
+# Installateur Windows de Photon : `npm run dist` produit dist/Photon-Setup-<version>.exe
+appId: fr.hugo.photon
+productName: Photon
+artifactName: Photon-Setup-${version}.exe
+
+directories:
+  output: dist
+  buildResources: assets
+
+# app.asar minimal : aucune dépendance runtime ; renderer, police et icônes sont déjà dans out/
+# (en prod, `?asset` copie les .ico dans out/main/chunks/, c'est ce chemin que le main lit).
+files:
+  - out/**
+  - package.json
+
+# Tray et icône de fenêtre lisent de vrais fichiers .ico, hors de l'asar.
+asarUnpack:
+  - out/main/chunks/*.ico
+
+win:
+  target:
+    - target: nsis
+      arch: x64
+  icon: assets/icon.ico
+
+# Pas de script NSIS : le lancement au démarrage de Windows est géré par l'app elle-même.
+nsis:
+  oneClick: true
+  perMachine: false
+  runAfterFinish: true
+  createStartMenuShortcut: true
+  createDesktopShortcut: false
+  shortcutName: Photon
+  installerIcon: assets/icon.ico
+  uninstallerIcon: assets/icon.ico
