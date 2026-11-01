@@ -1,6 +1,7 @@
 <script lang="ts">
-  // Calque de fond : fond d'écran Windows, image ou dégradé, flouté par le panneau. Si l'image
-  // ne charge pas, le calque disparaît : on voit le flou acrylic de Windows et le voile.
+  // Calque de fond (plein écran) : fond d'écran Windows, image, dégradé ou scène « Lumineux »,
+  // flouté par le panneau. Si l'image ne charge pas, le calque disparaît : on voit le flou
+  // acrylic de Windows et le voile.
   import { app } from '../state.svelte'
   import { backgroundUrl } from './apply.svelte'
 

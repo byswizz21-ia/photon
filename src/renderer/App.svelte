@@ -13,14 +13,12 @@
   import { useTheme } from './theme/apply.svelte'
   import Background from './theme/Background.svelte'
   import SettingsPanel from './theme/SettingsPanel.svelte'
-  import type { Bounds } from '../shared/model'
 
   let root: HTMLElement
   let gear = $state<HTMLButtonElement>()
   let settingsOpen = $state(false)
   let pressedVoid = false // le clic a commencé dans le vide (sinon : curseur glissé hors d'un contrôle)
   let claudeBusy = $state(false) // le logo tourne en continu pendant une réponse de Claude
-  let stage = $state<Bounds | null>(null) // écran de la fenêtre, où poser le fond (photon:place)
 
   useTheme()
 
@@ -44,14 +42,12 @@
     })
     const offSettings = window.photon.onSettings((settings) => (app.settings = settings))
     const offSwitch = window.photon.onSwitchTo(switchProfile) // bascule auto
-    const offPlace = window.photon.onPlace((display) => (stage = display))
     window.photon.ready()
     return () => {
       offShow()
       offHide()
       offSettings()
       offSwitch()
-      offPlace()
     }
   })
 
@@ -144,15 +140,8 @@
     <CommandBar mini onaction={runAction} />
   {:else}
     <div class="backdrop" aria-hidden="true">
-      <!-- Fond calé sur l'écran : en mode fenêtre, on n'en voit que la partie sous Photon. -->
-      <div
-        class="stage"
-        style:width={stage ? `${stage.width}px` : null}
-        style:height={stage ? `${stage.height}px` : null}
-        style:transform={stage ? `translate(${stage.x}px, ${stage.y}px)` : null}
-      >
-        <Background />
-      </div>
+      <!-- Plein écran seulement : en mode fenêtre, le flou acrylic de Windows fait le verre. -->
+      {#if fullscreen}<Background />{/if}
       <div class="veil"></div>
     </div>
     <div class="light" aria-hidden="true"></div>
@@ -217,8 +206,7 @@
     background: var(--glass-sheen), var(--panel-bg);
   }
 
-  /* Fond : fond d'écran net, voile sombre et deux lueurs d'accent et violette. C'est le panneau
-     qui le floute et le sature (« fumé lumineux »), en plein écran comme en mode fenêtre. */
+  /* Fond : calque flouté (plein écran), puis voile sombre et deux lueurs d'accent et violette. */
   .backdrop {
     position: absolute;
     inset: 0;
@@ -226,18 +214,10 @@
     pointer-events: none;
   }
 
-  .stage {
-    position: absolute;
-    inset: 0 auto auto 0;
-    width: 100%;
-    height: 100%;
-  }
-
   .veil {
     position: absolute;
     inset: 0;
-    background-color: rgb(7 8 11 / 0.4);
-    background-image:
+    background:
       radial-gradient(
         circle at 12% 8%,
         color-mix(in srgb, var(--accent) 32%, transparent),
@@ -248,6 +228,11 @@
         color-mix(in srgb, var(--glow-secondary) 32%, transparent),
         transparent 45%
       );
+  }
+
+  /* Fond net et assombri : c'est le panneau qui le floute, d'où l'effet de verre. */
+  .fullscreen .veil {
+    background-color: rgb(7 8 11 / 0.4);
   }
 
   .light {
@@ -267,7 +252,7 @@
     pointer-events: none;
   }
 
-  /* Mode fenêtre : le panneau est la fenêtre (Windows dessine coins et bordure).
+  /* Mode fenêtre : le panneau est la fenêtre (Windows dessine coins, bordure et flou acrylic).
      Fumé lumineux : grain, lumière d'accent dans les coins, reflet du haut, teinte sombre. */
   .panel {
     position: relative;
@@ -279,7 +264,6 @@
     gap: 20px;
     overflow: auto;
     background: var(--grain), var(--panel-light), var(--panel-sheen), var(--panel-tint);
-    backdrop-filter: var(--panel-filter);
     box-shadow: var(--panel-rim);
   }
 
@@ -305,6 +289,7 @@
     max-height: calc(100% - 96px);
     margin: 48px auto;
     border-radius: var(--radius-panel);
+    backdrop-filter: var(--panel-filter);
     box-shadow: var(--panel-shadow);
   }
 

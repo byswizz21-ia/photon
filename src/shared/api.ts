@@ -1,5 +1,5 @@
 // Contrat du pont : seules ces fonctions passent entre l'interface et Windows (window.photon).
-import type { Bounds, Profile, ProfileInfo, Settings, Theme } from './model'
+import type { Profile, ProfileInfo, Settings, Theme } from './model'
 
 export interface AppState {
   settings: Settings
@@ -230,8 +230,6 @@ export interface PhotonApi {
   onHide(callback: () => void): () => void
   onSettings(callback: (settings: Settings) => void): () => void
   onSwitchTo(callback: (profileId: string) => void): () => void // bascule auto (src/main/auto.ts)
-  // Écran de la fenêtre, en coordonnées de la fenêtre : où poser le fond pour qu'il tombe juste.
-  onPlace(callback: (display: Bounds) => void): () => void
   // Système, pour les widgets : à lire seulement fenêtre visible (lib/poll.svelte.ts)
   cpuRam(): Promise<CpuRam>
   temperatures(): Promise<Temperatures>
