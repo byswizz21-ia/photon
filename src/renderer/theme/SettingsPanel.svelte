@@ -134,7 +134,8 @@
   max: number,
   step: number,
   format: (value: number) => string,
-  set: (value: number) => void
+  set: (value: number) => void,
+  hint?: string
 )}
   <label class="field">
     <span class="line">
@@ -151,6 +152,7 @@
       style:--fill="{((value - min) / (max - min)) * 100}%"
       oninput={(event) => set(event.currentTarget.valueAsNumber)}
     />
+    {#if hint}<small>{hint}</small>{/if}
   </label>
 {/snippet}
 
@@ -223,7 +225,19 @@
 
   <section>
     <h3>Verre</h3>
-    {@render range('Flou du verre', app.theme.blur, 0, 120, 1, px, (blur) => patchTheme({ blur }))}
+    <!-- En mode fenêtre, le flou est celui de Windows (acrylic) : intensité fixe. -->
+    {@render range(
+      'Flou du verre',
+      app.theme.blur,
+      0,
+      120,
+      1,
+      px,
+      (blur) => patchTheme({ blur }),
+      app.settings.mode === 'window'
+        ? 'Plein écran uniquement : en mode fenêtre, Windows floute'
+        : undefined
+    )}
     {@render range('Opacité du verre', app.theme.opacity, 0, 1, 0.01, percent, (opacity) =>
       patchTheme({ opacity })
     )}
