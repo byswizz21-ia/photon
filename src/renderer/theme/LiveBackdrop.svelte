@@ -35,7 +35,7 @@
 
 <video
   bind:this={video}
-  class:ready
+  class:ready={ready && !place.moving}
   muted
   disablepictureinpicture
   aria-hidden="true"
@@ -51,10 +51,11 @@
     top: 0;
     object-fit: fill;
     opacity: 0;
-    transition: opacity var(--dur-fade) var(--ease-out);
   }
 
+  /* Fondu à l'apparition seulement : masquée d'un coup quand on glisse la fenêtre. */
   .ready {
     opacity: 1;
+    transition: opacity var(--dur-fade) var(--ease-out);
   }
 </style>

@@ -24,6 +24,7 @@ let quitting = false
 let modals = 0 // boîte de dialogue ouverte : la perte de focus ne doit pas cacher Photon
 let showStartedAt = 0
 let mini = false // seulement la barre de commande, petite et centrée
+let moving = false // fenêtre en train d'être glissée (flou réglable)
 const BAR_WIDTH = 680
 const BAR_HEIGHT = { min: 64, max: 640 }
 
@@ -73,6 +74,10 @@ export function createWindow(): BrowserWindow {
   win.on('resized', rememberBounds)
   win.on('move', sendPlace)
   win.on('resize', sendPlace)
+  // Glisser la fenêtre : la capture suivrait avec une image de retard (le fond « traîne »),
+  // on la masque jusqu'au lâcher.
+  win.on('will-move', () => !moving && ((moving = true), sendPlace()))
+  win.on('moved', () => ((moving = false), sendPlace()))
   applyMode()
   const devUrl = process.env['ELECTRON_RENDERER_URL']
   if (devUrl && !app.isPackaged) void win.loadURL(devUrl)
@@ -216,7 +221,8 @@ function sendPlace(): void {
     x: display.bounds.x - bounds.x,
     y: display.bounds.y - bounds.y,
     width: display.bounds.width,
-    height: display.bounds.height
+    height: display.bounds.height,
+    moving
   })
 }
 

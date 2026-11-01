@@ -22,6 +22,7 @@ export interface Placement {
   y: number
   width: number
   height: number
+  moving: boolean // fenêtre glissée : capture masquée
 }
 
 export interface ShowEvent {
