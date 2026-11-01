@@ -66,6 +66,11 @@ const photon: PhotonApi = {
   audioVolume: (volume) => ipcRenderer.invoke('photon:audioVolume', volume),
   audioMute: (muted) => ipcRenderer.invoke('photon:audioMute', muted),
   audioDevice: (id) => ipcRenderer.invoke('photon:audioDevice', id),
+  claudeUsage: () => ipcRenderer.invoke('photon:claudeUsage'),
+  clipboardHistory: () => ipcRenderer.invoke('photon:clipboardHistory'),
+  clipboardClear: () => ipcRenderer.send('photon:clipboardClear'),
+  batteries: () => ipcRenderer.invoke('photon:batteries'),
+  markets: (symbols) => ipcRenderer.invoke('photon:markets', symbols),
   pickImage: () => ipcRenderer.invoke('photon:pickImage')
 }
 
