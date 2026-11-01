@@ -34,6 +34,14 @@ export interface CpuRam {
   ramTotal: number // octets
 }
 
+// Températures en °C, null si inconnue. CPU : seulement si LibreHardwareMonitor tourne (lhm).
+export interface Temperatures {
+  cpu: number | null
+  gpu: number | null
+  gpuLoad: number | null // % (nvidia-smi)
+  lhm: boolean // serveur web de LibreHardwareMonitor joignable
+}
+
 export interface Disk {
   mount: string // « C: »
   total: number // octets
@@ -183,6 +191,7 @@ export interface PhotonApi {
   onSettings(callback: (settings: Settings) => void): () => void
   // Système, pour les widgets : à lire seulement fenêtre visible (lib/poll.svelte.ts)
   cpuRam(): Promise<CpuRam>
+  temperatures(): Promise<Temperatures>
   disks(): Promise<Disk[]>
   // Apps
   fileIcon(path: string): Promise<string | null> // data URL PNG 32 px, null si introuvable

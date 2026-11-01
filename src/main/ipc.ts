@@ -23,6 +23,7 @@ import { recentFiles } from './search/files'
 import { openResult, resultIcon, search } from './search/search'
 import { sharedLoad, sharedSave } from './shared'
 import { cpuRam, disks, fileIcon, launch, network, pickApps, pickFolders } from './system'
+import { temperatures } from './temperatures'
 import { onWeatherProfile, weather } from './weather'
 import { hideWindow, logShown, ownsSender, resizeBar } from './window'
 
@@ -90,6 +91,7 @@ export function registerIpc(actions: IpcActions): void {
   on('photon:hide', (reason) => hideWindow(typeof reason === 'string' ? reason : 'interface'))
   on('photon:shown', logShown)
   handle('photon:cpuRam', cpuRam)
+  handle('photon:temperatures', temperatures)
   handle('photon:disks', disks)
   handle('photon:fileIcon', (path) => (typeof path === 'string' ? fileIcon(path) : null))
   // Lancer une app depuis Photon le cache, seulement si Windows a pu l'ouvrir.

@@ -25,6 +25,7 @@ const photon: PhotonApi = {
   onHide: listen('photon:hide'),
   onSettings: listen('photon:settings'),
   cpuRam: () => ipcRenderer.invoke('photon:cpuRam'),
+  temperatures: () => ipcRenderer.invoke('photon:temperatures'),
   disks: () => ipcRenderer.invoke('photon:disks'),
   fileIcon: (path) => ipcRenderer.invoke('photon:fileIcon', path),
   launch: (path) => ipcRenderer.invoke('photon:launch', path),

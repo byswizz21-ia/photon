@@ -1,4 +1,4 @@
-// Widget « Système » : charge du processeur et de la mémoire, sans réglage.
+// Widget « Système » : charge CPU, RAM, GPU et températures, sans réglage.
 import CpuIcon from 'phosphor-svelte/lib/CpuIcon'
 import type { WidgetManifest } from '../types'
 import System from './System.svelte'
