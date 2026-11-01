@@ -54,6 +54,7 @@ export interface Profile {
   name: string
   createdAt: number // ms ; ordre des pastilles et de Ctrl+1, Ctrl+2…
   theme: string | null // thème attaché au profil, sinon thème global
+  focus: boolean // profil Focus : « Ne pas déranger » + pomodoro à l'activation
   widgets: WidgetInstance[]
 }
 
@@ -61,6 +62,7 @@ export interface Profile {
 export interface ProfileInfo {
   id: string
   name: string
+  focus: boolean
 }
 
 export const MAX_PROFILE_NAME = 40
@@ -102,6 +104,7 @@ export const defaultProfile = (): Profile => ({
   name: 'Principal',
   createdAt: 0,
   theme: null,
+  focus: false,
   widgets: [
     { id: 'clock', type: 'clock', x: 0, y: 0, w: 6, h: 2, settings: {} },
     { id: 'system', type: 'system', x: 6, y: 0, w: 3, h: 2, settings: {} },
@@ -222,6 +225,7 @@ export function parseProfile(raw: unknown): Profile {
         : 'Principal',
     createdAt: num(v.createdAt, 0, Number.MAX_SAFE_INTEGER, 0),
     theme: isName(v.theme) ? v.theme : null,
+    focus: v.focus === true,
     widgets: unique
   }
 }

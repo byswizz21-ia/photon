@@ -1,7 +1,8 @@
 <script lang="ts">
   // Pastilles des profils dans l'en-tête : clic (ou Ctrl+1…9, App.svelte) pour basculer, « + »
   // pour en créer un (vierge, copie, modèle). En mode édition, le profil actif se renomme
-  // et se supprime (2e clic pour confirmer, jamais le dernier).
+  // et se supprime (2e clic pour confirmer, jamais le dernier), et devient un profil Focus.
+  import MoonIcon from 'phosphor-svelte/lib/MoonIcon'
   import PlusIcon from 'phosphor-svelte/lib/PlusIcon'
   import TrashIcon from 'phosphor-svelte/lib/TrashIcon'
   import { MAX_PROFILE_NAME } from '../../shared/model'
@@ -58,10 +59,24 @@
           spellcheck="false"
           aria-label="Nom du profil"
         />
+        <button
+          type="button"
+          class="tool"
+          class:on={app.profile.focus}
+          aria-pressed={app.profile.focus}
+          title="Profil Focus : « Ne pas déranger » de Windows et pomodoro lancé à l'activation"
+          onclick={() => {
+            app.profile.focus = !app.profile.focus
+            saveProfile()
+          }}
+        >
+          <MoonIcon size={15} weight={app.profile.focus ? 'fill' : 'regular'} aria-hidden="true" />
+          Focus
+        </button>
         {#if app.profiles.length > 1}
           <button
             type="button"
-            class="delete"
+            class="tool delete"
             class:confirm={confirmDelete}
             aria-label={confirmDelete ? 'Confirmer la suppression' : 'Supprimer ce profil'}
             title="Supprimer ce profil"
@@ -81,6 +96,9 @@
           title={index < 9 ? `Ctrl+${index + 1}` : undefined}
           onclick={() => switchProfile(profile.id)}
         >
+          {#if isActive(profile.id) ? app.profile.focus : profile.focus}
+            <MoonIcon size={12} weight="fill" aria-label="Focus" />
+          {/if}
           {isActive(profile.id) ? app.profile.name : profile.name}
         </button>
       {/if}
@@ -145,6 +163,9 @@
 
   .pill {
     flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     height: 30px;
     padding: 0 12px;
     border: 1px solid transparent;
@@ -184,7 +205,7 @@
     border-color: var(--accent);
   }
 
-  .delete {
+  .tool {
     flex: none;
     height: 30px;
     min-width: 30px;
@@ -200,6 +221,12 @@
     font: inherit;
     font-size: 12px;
     cursor: pointer;
+  }
+
+  .tool:hover,
+  .tool.on {
+    color: var(--text);
+    background: rgb(255 255 255 / 0.08);
   }
 
   .delete:hover,

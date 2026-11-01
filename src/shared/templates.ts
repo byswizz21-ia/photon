@@ -7,7 +7,10 @@ type Slot = [type: string, x: number, y: number, w: number, h: number]
 const widgets = (slots: Slot[]): WidgetInstance[] =>
   slots.map(([type, x, y, w, h]) => ({ id: type, type, x, y, w, h, settings: {} }))
 
-export const TEMPLATES: Record<string, { name: string; widgets: () => WidgetInstance[] }> = {
+export const TEMPLATES: Record<
+  string,
+  { name: string; focus?: boolean; widgets: () => WidgetInstance[] }
+> = {
   work: {
     name: 'Travail',
     widgets: () =>
@@ -35,6 +38,17 @@ export const TEMPLATES: Record<string, { name: string; widgets: () => WidgetInst
         ['disks', 4, 0, 4, 2],
         ['ytmusic', 8, 0, 4, 2],
         ['launcher', 0, 2, 12, 2]
+      ])
+  },
+  focus: {
+    name: 'Focus',
+    focus: true,
+    widgets: () =>
+      widgets([
+        ['clock', 0, 0, 8, 2],
+        ['pomodoro', 8, 0, 4, 2],
+        ['todo', 0, 2, 6, 4],
+        ['notes', 6, 2, 6, 4]
       ])
   },
   minimal: {

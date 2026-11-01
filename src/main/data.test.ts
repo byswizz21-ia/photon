@@ -13,7 +13,7 @@ afterAll(() => rmSync(dir, { recursive: true, force: true }))
 
 test('créer, renommer, basculer, supprimer un profil', async () => {
   await loadAll() // premier lancement : rien sur le disque
-  expect(data.profiles).toEqual([{ id: 'default', name: 'Principal' }])
+  expect(data.profiles).toEqual([{ id: 'default', name: 'Principal', focus: false }])
   await saveProfile(data.profile)
 
   expect(await createProfile('work')).toBe(true)
@@ -37,7 +37,13 @@ test('créer, renommer, basculer, supprimer un profil', async () => {
 
   expect(await deleteProfile()).toBe(true)
   expect(data.settings.activeProfile).toBe('default')
-  expect(data.profiles).toEqual([{ id: 'default', name: 'Principal' }])
+  expect(data.profiles).toEqual([{ id: 'default', name: 'Principal', focus: false }])
   expect(readdirSync(join(dir, 'profiles'))).toContain(`${work}.json.deleted`)
   expect(await deleteProfile()).toBe(false) // jamais le dernier
+})
+
+test('modèle Focus : profil marqué focus', async () => {
+  expect(await createProfile('focus')).toBe(true)
+  expect(data.profile.focus).toBe(true)
+  expect(data.profiles.at(-1)).toMatchObject({ name: 'Focus', focus: true })
 })
