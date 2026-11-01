@@ -14,7 +14,7 @@
 
   async function use(path: string | null): Promise<void> {
     if (!path) return
-    const image = await window.photon.importImage(path)
+    const image = await window.photon.importFile('image', path)
     refused = !image
     if (!image) return
     broken = false
@@ -67,7 +67,7 @@
         <button
           type="button"
           class="action"
-          onclick={async () => use(await window.photon.pickImage())}
+          onclick={async () => use(await window.photon.pickFile('image'))}
         >
           Changer…
         </button>
@@ -88,7 +88,7 @@
         type="button"
         class="action"
         data-no-drag
-        onclick={async () => use(await window.photon.pickImage())}
+        onclick={async () => use(await window.photon.pickFile('image'))}
       >
         Choisir…
       </button>

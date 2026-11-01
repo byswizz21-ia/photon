@@ -6,12 +6,13 @@
     SHORTCUTS,
     shortcutLabel,
     type Background,
+    type FontSettings,
     type Settings,
     type Theme
   } from '../../shared/model'
   import type { DisplayInfo } from '../../shared/api'
   import { app, saveTheme } from '../state.svelte'
-  import { resolvedAccent } from './apply.svelte'
+  import { importedFamily, importedFontName, resolvedAccent } from './apply.svelte'
 
   let { onclose }: { onclose: () => void } = $props()
 
@@ -93,11 +94,60 @@
 
   // Windows sert l'image d'après le thème enregistré : on l'écrit avant d'afficher le nouveau fond.
   async function chooseImage(): Promise<void> {
-    const path = await window.photon.pickImage()
+    const path = await window.photon.pickFile('image')
     if (!path) return
     const background: Background = { type: 'image', path }
     await window.photon.saveTheme({ ...$state.snapshot(app.theme), background })
     app.theme.background = background
+  }
+
+  const font = $derived(app.theme.font)
+  const imported = $derived(importedFontName(font.family))
+
+  function patchFont(patch: Partial<FontSettings>): void {
+    patchTheme({ font: { ...app.theme.font, ...patch } })
+  }
+
+  // « 400 · normale » : graisse du texte courant une fois le décalage appliqué.
+  function weightLabel(shift: number): string {
+    const weight = 400 + shift
+    const name =
+      weight <= 250
+        ? 'très fine'
+        : weight <= 350
+          ? 'fine'
+          : weight <= 450
+            ? 'normale'
+            : weight <= 550
+              ? 'medium'
+              : weight <= 650
+                ? 'semi-grasse'
+                : 'grasse'
+    return `${weight} · ${name}`
+  }
+
+  // Polices installées sur Windows (Local Font Access), lues au 1er clic dans le champ.
+  // Refusé ou indisponible : la liste reste vide, on peut toujours taper un nom.
+  let installed = $state<string[]>([])
+  let asked = false
+  type LocalFonts = () => Promise<{ family: string }[]>
+
+  async function loadFonts(): Promise<void> {
+    const query = (window as unknown as { queryLocalFonts?: LocalFonts }).queryLocalFonts
+    if (asked || !query) return
+    asked = true
+    try {
+      const list = await query()
+      installed = [...new Set(list.map((f) => f.family))].sort((a, b) => a.localeCompare(b))
+    } catch {
+      asked = false // pas de geste de l'utilisateur (Tab) : on redemandera au prochain clic
+    }
+  }
+
+  async function importFont(): Promise<void> {
+    const path = await window.photon.pickFile('font')
+    const copy = path && (await window.photon.importFile('font', path))
+    if (copy) patchFont({ family: importedFamily(copy) })
   }
 
   async function setting(patch: Partial<Settings>): Promise<void> {
@@ -267,6 +317,49 @@
         (id) => patchTheme({ density: id === 'compact' ? 'compact' : 'comfortable' })
       )}
     </div>
+  </section>
+
+  <section>
+    <h3>Police</h3>
+    <label class="field">
+      <span class="line">Police</span>
+      <input
+        class="text"
+        list="photon-fonts"
+        value={imported ? '' : font.family}
+        placeholder={imported ? `${imported} (importée)` : 'Satoshi (police de Photon)'}
+        spellcheck="false"
+        onpointerdown={loadFonts}
+        onchange={(event) =>
+          patchFont({ family: event.currentTarget.value.replace(/["'\\;{}<>]/g, '').trim() })}
+      />
+      <datalist id="photon-fonts">
+        {#each installed as family (family)}<option value={family}></option>{/each}
+      </datalist>
+      <small>Une police installée sur Windows, ou un fichier .ttf, .otf, .woff importé</small>
+    </label>
+    <div class="row">
+      <button type="button" class="action" onclick={importFont}>Importer une police…</button>
+      {#if font.family}
+        <button type="button" class="action" onclick={() => patchFont({ family: '' })}>
+          Police de Photon
+        </button>
+      {/if}
+    </div>
+    {@render range('Graisse', font.weight, -200, 300, 50, weightLabel, (weight) =>
+      patchFont({ weight })
+    )}
+    <label class="check">
+      <input
+        type="checkbox"
+        checked={font.italic}
+        onchange={(event) => patchFont({ italic: event.currentTarget.checked })}
+      />
+      <span>Italique</span>
+    </label>
+    {@render range('Taille du texte', font.scale, 0.8, 1.4, 0.05, percent, (scale) =>
+      patchFont({ scale })
+    )}
   </section>
 
   <section>
@@ -621,7 +714,8 @@
     opacity: 0.6;
   }
 
-  select {
+  select,
+  .text {
     min-height: 36px;
     padding: 0 10px;
     border: 1px solid var(--line);
@@ -631,6 +725,15 @@
     font: inherit;
     font-size: var(--text-13);
     cursor: pointer;
+  }
+
+  .text {
+    cursor: text;
+    user-select: text;
+  }
+
+  .text::placeholder {
+    color: var(--text-faint);
   }
 
   select option {

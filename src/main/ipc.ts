@@ -3,7 +3,7 @@ import { clipboard, ipcMain, type IpcMainEvent, type IpcMainInvokeEvent } from '
 import type { AppState } from '../shared/api'
 import type { Settings } from '../shared/model'
 import { audio, audioDevice, audioMute, audioVolume } from './audio'
-import { importImage, pickImage } from './background'
+import { importFile, pickFile } from './background'
 import { batteries } from './batteries'
 import { calendar, onProfileSaved } from './calendar'
 import {
@@ -152,8 +152,8 @@ export function registerIpc(actions: IpcActions): void {
   on('photon:barResize', (height) => {
     if (typeof height === 'number' && Number.isFinite(height)) resizeBar(height)
   })
-  handle('photon:pickImage', pickImage)
-  handle('photon:importImage', importImage) // extension et taille vérifiées dans background.ts
+  handle('photon:pickFile', pickFile)
+  handle('photon:importFile', importFile) // type, extension et taille vérifiés dans background.ts
   handle('photon:sharedLoad', sharedLoad) // clé = nom de fichier validé, taille bornée
   handle('photon:sharedSave', sharedSave)
   handle('photon:pomodoro', pomodoro)

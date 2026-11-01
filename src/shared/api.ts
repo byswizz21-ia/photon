@@ -302,8 +302,9 @@ export interface PhotonApi {
   batteries(): Promise<Battery[] | null> // null : outil natif indisponible
   markets(symbols: string): Promise<MarketFeed> // cache seulement, aucun appel réseau
   // Thème
-  pickImage(): Promise<string | null> // boîte de dialogue ; null si annulée
-  importImage(path: string): Promise<string | null> // widget Image : copie, nom pour photon://images/
+  pickFile(kind: 'image' | 'font'): Promise<string | null> // boîte de dialogue ; null si annulée
+  // Copie chez Photon ; nom pour photon://images/<nom> ou photon://fonts/<nom>, null si refusé
+  importFile(kind: 'image' | 'font', path: string): Promise<string | null>
 }
 
 declare global {

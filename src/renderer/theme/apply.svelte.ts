@@ -33,6 +33,35 @@ async function readPixels(url: string): Promise<Uint8ClampedArray> {
   return context.getImageData(0, 0, SAMPLE, SAMPLE).data
 }
 
+const FONT_FILE = 'file:' // police importée : « file:<nom de la copie> »
+const DEFAULT_FONT = "'Satoshi', system-ui, sans-serif" // = --font-sans de tokens.css
+
+// Police importée : déclarée une fois (FontFace), puis utilisée par son nom de copie.
+// Registre interne, jamais affiché : pas besoin d'un Set réactif.
+// eslint-disable-next-line svelte/prefer-svelte-reactivity
+const loadedFonts = new Set<string>()
+
+function fontStack(family: string): string {
+  if (!family) return DEFAULT_FONT
+  if (!family.startsWith(FONT_FILE)) return `"${family}", ${DEFAULT_FONT}`
+  const name = family.slice(FONT_FILE.length)
+  if (!loadedFonts.has(name)) {
+    loadedFonts.add(name)
+    const face = new FontFace(name, `url("photon://fonts/${encodeURIComponent(name)}")`)
+    document.fonts.add(face)
+    face.load().catch(() => console.warn('[photon] police importée illisible :', name))
+  }
+  return `"${name}", ${DEFAULT_FONT}`
+}
+
+// « file:Inter-3f2b9c1a.ttf » → « Inter » ; null pour une police Windows ou celle de Photon.
+export const importedFontName = (family: string): string | null =>
+  family.startsWith(FONT_FILE)
+    ? family.slice(FONT_FILE.length).replace(/-[0-9a-f]{8}\.\w+$/, '')
+    : null
+
+export const importedFamily = (copy: string): string => FONT_FILE + copy
+
 // À appeler une fois depuis App.svelte (les effets ont besoin d'un composant).
 export function useTheme(): void {
   const auto = $derived(app.theme.accent === 'auto')
@@ -66,5 +95,9 @@ export function useTheme(): void {
     style.setProperty('--radius', `${theme.radius}px`)
     style.setProperty('--radius-panel', `${theme.radius + 8}px`)
     style.setProperty('--blur', `${theme.blur}px`)
+    style.setProperty('--font-sans', fontStack(theme.font.family))
+    style.setProperty('--weight-shift', String(theme.font.weight))
+    style.setProperty('--font-scale', String(theme.font.scale))
+    style.setProperty('--font-style', theme.font.italic ? 'italic' : 'normal')
   })
 }

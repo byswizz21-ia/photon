@@ -158,23 +158,29 @@
   --focus-ring: 2px solid var(--accent);
   --focus-offset: 2px;
 
-  /* Typographie : Satoshi seule, variable 300 à 900 */
+  /* Typographie : Satoshi, variable 300 à 900. Police, graisse (--weight-shift), taille
+     (--font-scale) et italique (--font-style) se règlent dans le thème (theme/apply.svelte.ts). */
   --font-sans: 'Satoshi', system-ui, sans-serif;
-  --weight-light: 300; /* grands chiffres : horloge, température, espace libre */
-  --weight-regular: 400;
-  --weight-medium: 500; /* boutons, choix segmentés */
-  --weight-semibold: 600; /* nom de l'app, titres, en-têtes de section */
-  --text-11: 11px; /* touches, temps de lecture, fichier joint */
-  --text-12: 12px; /* étiquette de widget, sous-titres, indices */
-  --text-13: 13px; /* texte secondaire, boutons, lignes */
-  --text-14: 14px; /* texte courant */
-  --text-15: 15px; /* titre du morceau */
-  --text-16: 16px; /* champ de la barre seule */
-  --text-18: 18px; /* nom de l'app, titre du tiroir */
-  --text-display-s: 30px;
-  --text-display-m: 40px;
-  --text-display-l: 44px;
-  --text-display-xl: 96px;
+  --weight-shift: 0;
+  --font-scale: 1;
+  --font-style: normal;
+  /* light : grands chiffres (horloge, température, espace libre) ; medium : boutons, choix
+     segmentés ; semibold : nom de l'app, titres, en-têtes de section */
+  --weight-light: calc(300 + var(--weight-shift));
+  --weight-regular: calc(400 + var(--weight-shift));
+  --weight-medium: calc(500 + var(--weight-shift));
+  --weight-semibold: calc(600 + var(--weight-shift));
+  --text-11: calc(11px * var(--font-scale)); /* touches, temps de lecture, fichier joint */
+  --text-12: calc(12px * var(--font-scale)); /* étiquette de widget, sous-titres, indices */
+  --text-13: calc(13px * var(--font-scale)); /* texte secondaire, boutons, lignes */
+  --text-14: calc(14px * var(--font-scale)); /* texte courant */
+  --text-15: calc(15px * var(--font-scale)); /* titre du morceau */
+  --text-16: calc(16px * var(--font-scale)); /* champ de la barre seule */
+  --text-18: calc(18px * var(--font-scale)); /* nom de l'app, titre du tiroir */
+  --text-display-s: calc(30px * var(--font-scale));
+  --text-display-m: calc(40px * var(--font-scale));
+  --text-display-l: calc(44px * var(--font-scale));
+  --text-display-xl: calc(96px * var(--font-scale));
   --tracking-display: -0.04em;
   --tracking-title: -0.01em;
   --tracking-label: 0.1em;

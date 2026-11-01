@@ -34,6 +34,14 @@ export type Background =
 
 export type Density = 'compact' | 'comfortable'
 
+// Police de toute l'interface (thème).
+export interface FontSettings {
+  family: string // '' = Satoshi (police de Photon) ; « file:<nom> » = police importée ; sinon police Windows
+  weight: number // décalage de graisse ajouté à tous les textes, -200 (fin) à +300 (gras)
+  italic: boolean
+  scale: number // taille des textes, 0,8 à 1,4
+}
+
 export interface Theme {
   background: Background
   accent: 'auto' | string // 'auto' = extraite du fond, sinon '#rrggbb'
@@ -41,6 +49,7 @@ export interface Theme {
   opacity: number // 0..1, opacité du verre
   radius: number // px, arrondi des cartes
   density: Density
+  font: FontSettings
 }
 
 export interface WidgetInstance {
@@ -111,7 +120,8 @@ export const defaultTheme = (): Theme => ({
   blur: 48,
   opacity: 0.5,
   radius: 20,
-  density: 'comfortable'
+  density: 'comfortable',
+  font: { family: '', weight: 0, italic: false, scale: 1 }
 })
 
 export const defaultProfile = (): Profile => ({
@@ -204,6 +214,21 @@ function parseBackground(v: unknown): Background {
   return { type: 'wallpaper' }
 }
 
+// Nom de police écrit tel quel dans le CSS (entre guillemets) : pas de guillemet ni d'accolade.
+const isFontFamily = (v: unknown): v is string =>
+  typeof v === 'string' && /^[^"'\\;{}<>]{0,100}$/.test(v)
+
+function parseFont(v: unknown): FontSettings {
+  const d = defaultTheme().font
+  if (!isObject(v)) return d
+  return {
+    family: isFontFamily(v.family) ? v.family.trim() : d.family,
+    weight: Math.round(num(v.weight, -200, 300, d.weight) / 50) * 50,
+    italic: v.italic === true,
+    scale: num(v.scale, 0.8, 1.4, d.scale)
+  }
+}
+
 export function parseTheme(raw: unknown): Theme {
   const v = root(raw)
   const d = defaultTheme()
@@ -213,7 +238,8 @@ export function parseTheme(raw: unknown): Theme {
     blur: int(v.blur, 0, 120, d.blur),
     opacity: num(v.opacity, 0, 1, d.opacity),
     radius: int(v.radius, 0, 40, d.radius),
-    density: oneOf(v.density, ['compact', 'comfortable'], d.density)
+    density: oneOf(v.density, ['compact', 'comfortable'], d.density),
+    font: parseFont(v.font)
   }
 }
 

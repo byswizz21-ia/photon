@@ -10,6 +10,8 @@
 /* Base : Photon est sombre uniquement. */
 :root {
   font-family: var(--font-sans);
+  font-weight: var(--weight-regular);
+  font-style: var(--font-style);
   color: var(--text);
   color-scheme: dark;
 }
