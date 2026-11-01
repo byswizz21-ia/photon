@@ -8,7 +8,7 @@ export type VolumeSettings = Record<string, never>
 const manifest: WidgetManifest<VolumeSettings> = {
   name: 'Son',
   icon: SpeakerHighIcon,
-  size: { w: 3, h: 3, minW: 2, minH: 2 },
+  size: { w: 3, h: 3, minW: 2, minH: 1 },
   defaults: {},
   component: Volume
 }

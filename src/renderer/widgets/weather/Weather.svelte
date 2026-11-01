@@ -132,6 +132,13 @@
     white-space: nowrap;
   }
 
+  /* Carte basse (1 case) : icône, température et ciel seulement. */
+  @container (max-height: 110px) {
+    .place {
+      display: none;
+    }
+  }
+
   /* Carte large : prévisions des jours suivants. */
   @container (min-width: 420px) and (min-height: 200px) {
     .days {

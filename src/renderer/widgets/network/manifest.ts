@@ -8,7 +8,7 @@ export type NetworkSettings = Record<string, never>
 const manifest: WidgetManifest<NetworkSettings> = {
   name: 'Réseau',
   icon: WifiHighIcon,
-  size: { w: 3, h: 2, minW: 2, minH: 2 },
+  size: { w: 3, h: 2, minW: 2, minH: 1 },
   defaults: {},
   component: Network
 }

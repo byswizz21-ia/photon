@@ -9,7 +9,7 @@ export type ClipboardSettings = Record<string, never>
 const manifest: WidgetManifest<ClipboardSettings> = {
   name: 'Presse-papiers',
   icon: ClipboardTextIcon,
-  size: { w: 3, h: 4, minW: 2, minH: 2 },
+  size: { w: 3, h: 4, minW: 2, minH: 1 },
   defaults: {},
   component: Clipboard
 }

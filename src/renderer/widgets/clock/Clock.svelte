@@ -91,13 +91,16 @@
     text-overflow: ellipsis;
   }
 
-  /* Carte trop basse : la date s'efface pour laisser toute la place à l'heure. */
+  /* Carte trop basse : date et case « secondes » s'effacent, toute la place va à l'heure. */
   @container (max-height: 110px) {
-    .widget {
+    .widget,
+    .widget.editing {
       --date-rows: 0px;
+      --edit-rows: 0px;
     }
 
-    .date {
+    .date,
+    .widget .field {
       display: none;
     }
   }

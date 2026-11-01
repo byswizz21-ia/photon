@@ -9,7 +9,7 @@ export type UsageSettings = Record<string, never>
 const manifest: WidgetManifest<UsageSettings> = {
   name: 'Usage Claude',
   icon: GaugeIcon,
-  size: { w: 3, h: 2, minW: 2, minH: 2 },
+  size: { w: 3, h: 2, minW: 2, minH: 1 },
   defaults: {},
   component: Usage
 }

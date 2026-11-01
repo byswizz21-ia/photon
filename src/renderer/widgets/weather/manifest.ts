@@ -8,7 +8,7 @@ export type WeatherSettings = { city: string }
 const manifest: WidgetManifest<WeatherSettings> = {
   name: 'Météo',
   icon: CloudSunIcon,
-  size: { w: 3, h: 2, minW: 2, minH: 2 },
+  size: { w: 3, h: 2, minW: 2, minH: 1 },
   defaults: { city: '' },
   component: Weather
 }

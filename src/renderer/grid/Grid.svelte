@@ -78,6 +78,8 @@
           disableResize: true,
           draggable: { cancel: 'button, input, select, textarea, a, [data-no-drag]' },
           resizable: { handles: 'se' },
+          // Poignée visible en permanence en mode édition (sinon seulement au survol de la carte).
+          alwaysShowResizeHandle: true,
           // La grille se réorganise selon la largeur (mode fenêtre) ; la disposition 12 est gardée.
           columnOpts: {
             breakpoints: [

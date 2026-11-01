@@ -8,7 +8,7 @@ export type SystemSettings = Record<string, never>
 const manifest: WidgetManifest<SystemSettings> = {
   name: 'Système',
   icon: CpuIcon,
-  size: { w: 3, h: 2, minW: 2, minH: 2 },
+  size: { w: 3, h: 2, minW: 2, minH: 1 },
   defaults: {},
   component: System
 }

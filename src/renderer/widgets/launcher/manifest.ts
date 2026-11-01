@@ -8,7 +8,7 @@ export type LauncherSettings = { apps: string[] } // chemins absolus
 const manifest: WidgetManifest<LauncherSettings> = {
   name: 'Lanceur',
   icon: RocketLaunchIcon,
-  size: { w: 6, h: 2, minW: 2, minH: 2 },
+  size: { w: 6, h: 2, minW: 1, minH: 1 },
   defaults: { apps: [] },
   component: Launcher
 }

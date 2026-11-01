@@ -9,7 +9,7 @@ export type NotesSettings = { own: boolean }
 const manifest: WidgetManifest<NotesSettings> = {
   name: 'Notes',
   icon: NoteIcon,
-  size: { w: 3, h: 3, minW: 2, minH: 2 },
+  size: { w: 3, h: 3, minW: 2, minH: 1 },
   defaults: { own: false },
   component: Notes
 }

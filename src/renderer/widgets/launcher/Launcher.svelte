@@ -304,6 +304,36 @@
     color: var(--text-muted);
   }
 
+  /* Carte basse (1 case) : une rangée d'icônes seules, sans titre ni noms (nom au survol). */
+  @container (max-height: 130px) {
+    /* safe : s'il y a trop d'icônes, le haut ne sort pas de la carte (défilement normal). */
+    .scroll {
+      justify-content: safe center;
+    }
+
+    .label,
+    .name {
+      display: none;
+    }
+
+    .tiles {
+      gap: 10px;
+    }
+
+    .tile {
+      width: auto;
+    }
+
+    .square {
+      width: 48px;
+      height: 48px;
+    }
+
+    .hint {
+      height: 48px;
+    }
+  }
+
   .drop {
     position: absolute;
     inset: 0;
