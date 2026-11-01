@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { defaultProfile, parseProfile } from './model'
+import { defaultProfile, parseProfile, parseSettings } from './model'
 
 describe('parseProfile', () => {
   test('aller-retour JSON sans perte', () => {
@@ -32,4 +32,15 @@ describe('parseProfile', () => {
       widgets: [{ id: 'a', type: 'clock', x: 0, y: 3, w: 12, h: 1, settings: { seconds: true } }]
     })
   })
+})
+
+test('réglages multi-écran : valeurs invalides → défaut', () => {
+  const bounds = { x: 0, y: 0, width: 800, height: 600 }
+  const s = parseSettings({
+    screen: '../x',
+    windowBoundsByScreens: { a: bounds, b: 'nope', c: { x: 'z' } }
+  })
+  expect(s.screen).toBe('mouse')
+  expect(s.windowBoundsByScreens).toEqual({ a: bounds })
+  expect(parseSettings({ screen: '2779098405' }).screen).toBe('2779098405')
 })

@@ -13,6 +13,7 @@ import {
 import { join } from 'node:path'
 import icon from '../../assets/icon.ico?asset'
 import { data, saveSettings } from './data'
+import { screensKey, targetDisplay } from './screens'
 
 const DEFAULT_SIZE = { width: 1100, height: 720 }
 const MIN_SIZE = { width: 380, height: 320 }
@@ -95,19 +96,32 @@ export function applyMode(): void {
   win.setSkipTaskbar(fullscreen)
   win.setAlwaysOnTop(fullscreen || data.settings.alwaysOnTop)
   win.setMinimumSize(fullscreen ? 0 : MIN_SIZE.width, fullscreen ? 0 : MIN_SIZE.height)
-  if (win.isVisible()) place(screen.getDisplayNearestPoint(screen.getCursorScreenPoint()))
+  if (win.isVisible()) place(screen.getDisplayMatching(win.getBounds()))
 }
 
-export function showWindow(): void {
+// Écran choisi par la règle multi-écran (src/main/screens.ts) ; aucun écran libre : barre seule.
+export async function showWindow(): Promise<void> {
+  const startedAt = performance.now()
+  const target = await targetDisplay(data.settings.screen)
+  if (target.mini) return showBar(target.display, startedAt)
+  showStartedAt = startedAt
   if (mini) {
     mini = false
     applyMode() // la barre seule avait changé taille, premier plan et redimensionnement
   }
-  showStartedAt = performance.now()
+  place(target.display)
+  // Révélation depuis le curseur, ou depuis le centre si Photon s'ouvre sur un autre écran.
   const cursor = screen.getCursorScreenPoint()
-  place(screen.getDisplayNearestPoint(cursor))
   const bounds = win.getBounds()
-  send('photon:show', { origin: { x: cursor.x - bounds.x, y: cursor.y - bounds.y }, mini: false })
+  const inside =
+    cursor.x >= bounds.x &&
+    cursor.y >= bounds.y &&
+    cursor.x < bounds.x + bounds.width &&
+    cursor.y < bounds.y + bounds.height
+  const origin = inside
+    ? { x: cursor.x - bounds.x, y: cursor.y - bounds.y }
+    : { x: bounds.width / 2, y: bounds.height / 2 }
+  send('photon:show', { origin, mini: false })
   win.show()
   win.focus()
 }
@@ -121,15 +135,18 @@ export function hideWindow(reason: string): void {
 
 export function toggleWindow(): void {
   if (win.isVisible() && win.isFocused()) hideWindow('raccourci')
-  else showWindow()
+  else void showWindow()
 }
 
-// Mini-mode : la barre seule, centrée en haut de l'écran de la souris (façon Spotlight).
-// Sa hauteur suit le contenu (resizeBar), la largeur est fixe.
-export function showBar(): void {
+// Mini-mode : la barre seule, centrée en haut de l'écran (de la souris par défaut), façon
+// Spotlight. Sa hauteur suit le contenu (resizeBar), la largeur est fixe.
+export function showBar(
+  display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()),
+  startedAt = performance.now()
+): void {
   mini = true
-  showStartedAt = performance.now()
-  const area = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea
+  showStartedAt = startedAt
+  const area = display.workArea
   win.setResizable(false)
   win.setSkipTaskbar(true)
   win.setAlwaysOnTop(true)
@@ -187,7 +204,7 @@ function place(display: Display): void {
 // Mode fenêtre : position mémorisée ; sur un autre écran, même position relative, bornée.
 function windowBoundsOn(display: Display): Rectangle {
   const area = display.workArea
-  const saved = data.settings.windowBounds
+  const saved = data.settings.windowBoundsByScreens[screensKey()] ?? data.settings.windowBounds
   const width = Math.min(saved?.width ?? DEFAULT_SIZE.width, area.width)
   const height = Math.min(saved?.height ?? DEFAULT_SIZE.height, area.height)
   if (!saved) {
@@ -209,7 +226,13 @@ function windowBoundsOn(display: Display): Rectangle {
 
 function rememberBounds(): void {
   if (!mini && data.settings.mode === 'window' && win.isVisible()) {
-    void saveSettings({ windowBounds: win.getBounds() })
+    const bounds = win.getBounds()
+    const byScreens = { ...data.settings.windowBoundsByScreens }
+    delete byScreens[screensKey()] // réinséré en dernier : les plus anciennes partent en premier
+    void saveSettings({
+      windowBounds: bounds,
+      windowBoundsByScreens: { ...byScreens, [screensKey()]: bounds }
+    })
   }
 }
 

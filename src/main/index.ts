@@ -21,6 +21,7 @@ import {
   toggleBar,
   toggleWindow
 } from './window'
+import { startScreens } from './screens'
 
 // Argument passé par le lancement au démarrage de Windows : rester caché dans la zone de notif.
 const HIDDEN_ARG = '--hidden'
@@ -57,7 +58,7 @@ async function updateSettings(patch: Partial<Settings>): Promise<Settings> {
 
 // Interface prête : on affiche au lancement manuel, ou on renvoie l'état si déjà visible.
 function onRendererReady(): void {
-  if (isVisible() || (!booted && !startHidden)) showWindow()
+  if (isVisible() || (!booted && !startHidden)) void showWindow()
   booted = true
 }
 
@@ -86,5 +87,6 @@ if (!app.requestSingleInstanceLock()) {
     startCalendars()
     startWeather()
     loadMusic()
+    startScreens()
   })
 }

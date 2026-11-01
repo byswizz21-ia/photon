@@ -24,6 +24,7 @@ import { openResult, resultIcon, search } from './search/search'
 import { sharedLoad, sharedSave } from './shared'
 import { cpuRam, disks, fileIcon, launch, network, pickApps, pickFolders } from './system'
 import { temperatures } from './temperatures'
+import { displayList } from './screens'
 import { onWeatherProfile, weather } from './weather'
 import { hideWindow, logShown, ownsSender, resizeBar } from './window'
 
@@ -44,6 +45,7 @@ const EDITABLE: readonly string[] = [
   'barShortcut',
   'mode',
   'alwaysOnTop',
+  'screen',
   'reduceMotion'
 ]
 
@@ -92,6 +94,7 @@ export function registerIpc(actions: IpcActions): void {
   on('photon:shown', logShown)
   handle('photon:cpuRam', cpuRam)
   handle('photon:temperatures', temperatures)
+  handle('photon:displays', displayList)
   handle('photon:disks', disks)
   handle('photon:fileIcon', (path) => (typeof path === 'string' ? fileIcon(path) : null))
   // Lancer une app depuis Photon le cache, seulement si Windows a pu l'ouvrir.

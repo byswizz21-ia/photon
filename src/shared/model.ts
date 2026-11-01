@@ -17,6 +17,8 @@ export interface Settings {
   mode: WindowMode
   alwaysOnTop: boolean // mode fenêtre uniquement
   windowBounds: Bounds | null // dernière position en mode fenêtre
+  windowBoundsByScreens: Record<string, Bounds> // la même, par configuration d'écrans
+  screen: string // 'mouse' (écran de la souris), 'primary' (principal) ou id d'un écran
   activeProfile: string // nom de fichier dans profiles/, sans .json
   theme: string // thème global, nom de fichier dans themes/
   reduceMotion: boolean
@@ -80,6 +82,8 @@ export const defaultSettings = (): Settings => ({
   mode: 'fullscreen',
   alwaysOnTop: false,
   windowBounds: null,
+  windowBoundsByScreens: {},
+  screen: 'mouse',
   activeProfile: 'default',
   theme: 'default',
   reduceMotion: false
@@ -138,6 +142,16 @@ function parseBounds(v: unknown): Bounds | null {
     : null
 }
 
+const MAX_SCREEN_SETUPS = 10 // configurations d'écrans mémorisées
+
+function parseBoundsMap(v: unknown): Record<string, Bounds> {
+  if (!isObject(v)) return {}
+  const entries = Object.entries(v)
+    .map(([key, value]) => [key.slice(0, 500), parseBounds(value)] as const)
+    .filter((entry): entry is readonly [string, Bounds] => entry[1] !== null)
+  return Object.fromEntries(entries.slice(-MAX_SCREEN_SETUPS))
+}
+
 export function parseSettings(raw: unknown): Settings {
   const v = root(raw)
   const d = defaultSettings()
@@ -147,6 +161,11 @@ export function parseSettings(raw: unknown): Settings {
     mode: oneOf(v.mode, ['fullscreen', 'window'], d.mode),
     alwaysOnTop: typeof v.alwaysOnTop === 'boolean' ? v.alwaysOnTop : d.alwaysOnTop,
     windowBounds: parseBounds(v.windowBounds),
+    windowBoundsByScreens: parseBoundsMap(v.windowBoundsByScreens),
+    screen:
+      typeof v.screen === 'string' && /^(mouse|primary|\d{1,20})$/.test(v.screen)
+        ? v.screen
+        : d.screen,
     activeProfile: isName(v.activeProfile) ? v.activeProfile : d.activeProfile,
     theme: isName(v.theme) ? v.theme : d.theme,
     reduceMotion: typeof v.reduceMotion === 'boolean' ? v.reduceMotion : d.reduceMotion

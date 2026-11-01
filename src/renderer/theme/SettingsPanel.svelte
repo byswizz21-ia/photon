@@ -9,6 +9,7 @@
     type Settings,
     type Theme
   } from '../../shared/model'
+  import type { DisplayInfo } from '../../shared/api'
   import { app, saveTheme } from '../state.svelte'
   import { resolvedAccent } from './apply.svelte'
 
@@ -47,6 +48,18 @@
     list.includes(current) ? list : [current, ...list]
   const shortcuts = $derived(withCurrent(app.settings.shortcut, SHORTCUTS))
   const barShortcuts = $derived(withCurrent(app.settings.barShortcut, BAR_SHORTCUTS))
+
+  // Écrans branchés, lus à l'ouverture du panneau. Écran fixe débranché : gardé dans la liste.
+  let displays = $state<DisplayInfo[]>([])
+  void window.photon.displays().then((list) => (displays = list))
+  const screens = $derived([
+    { id: 'mouse', label: 'Écran de la souris' },
+    { id: 'primary', label: 'Écran principal' },
+    ...displays,
+    ...(/^\d+$/.test(app.settings.screen) && !displays.some((d) => d.id === app.settings.screen)
+      ? [{ id: app.settings.screen, label: 'Écran débranché' }]
+      : [])
+  ])
 
   let panel: HTMLElement
 
@@ -253,6 +266,18 @@
       />
       <span>Toujours au-dessus</span>
       {#if app.settings.mode !== 'window'}<small>Mode fenêtre uniquement</small>{/if}
+    </label>
+    <label class="field">
+      <span class="line">Écran</span>
+      <select
+        value={app.settings.screen}
+        onchange={(event) => setting({ screen: event.currentTarget.value })}
+      >
+        {#each screens as option (option.id)}
+          <option value={option.id}>{option.label}</option>
+        {/each}
+      </select>
+      <small>Jamais par-dessus un jeu ou une vidéo en plein écran s'il y a un autre écran</small>
     </label>
     <label class="field">
       <span class="line">Raccourci</span>
@@ -552,6 +577,11 @@
 
   .check small {
     grid-column: 2;
+    color: var(--text-faint);
+    font-size: 12px;
+  }
+
+  .field small {
     color: var(--text-faint);
     font-size: 12px;
   }

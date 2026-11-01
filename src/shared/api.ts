@@ -42,6 +42,12 @@ export interface Temperatures {
   lhm: boolean // serveur web de LibreHardwareMonitor joignable
 }
 
+// Écran proposé dans les réglages (id Electron en texte).
+export interface DisplayInfo {
+  id: string
+  label: string // « DELL U2719D (2560×1440), principal »
+}
+
 export interface Disk {
   mount: string // « C: »
   total: number // octets
@@ -192,6 +198,7 @@ export interface PhotonApi {
   // Système, pour les widgets : à lire seulement fenêtre visible (lib/poll.svelte.ts)
   cpuRam(): Promise<CpuRam>
   temperatures(): Promise<Temperatures>
+  displays(): Promise<DisplayInfo[]>
   disks(): Promise<Disk[]>
   // Apps
   fileIcon(path: string): Promise<string | null> // data URL PNG 32 px, null si introuvable
