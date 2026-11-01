@@ -207,6 +207,9 @@ export interface MarketQuote {
   points: number[] // cours de la journée, du plus ancien au plus récent
 }
 
+// Symboles d'un widget Cours jamais réglé : partagés par le widget et le téléchargement en fond.
+export const DEFAULT_MARKET_SYMBOLS = 'BTC-EUR, ETH-EUR'
+
 export interface MarketFeed {
   quotes: MarketQuote[] // dans l'ordre du widget, seulement ceux déjà lus
   missing: string[] // symboles introuvables ou illisibles

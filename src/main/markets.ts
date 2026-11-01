@@ -2,7 +2,7 @@
 // (démarrage, puis toutes les 5 min), jamais à l'ouverture de Photon. L'interface ne lit que le
 // cache. Symboles Yahoo : BTC-EUR, ETH-USD, AAPL, MC.PA, ^FCHI…
 import { net } from 'electron'
-import type { MarketFeed, MarketQuote } from '../shared/api'
+import { DEFAULT_MARKET_SYMBOLS, type MarketFeed, type MarketQuote } from '../shared/api'
 import { data } from './data'
 
 const REFRESH_MS = 5 * 60_000
@@ -25,10 +25,14 @@ export function parseSymbols(raw: unknown): string[] {
   return [...new Set(symbols)].slice(0, MAX_SYMBOLS)
 }
 
-function watchedSymbols(): string[] {
+// Widget jamais réglé (réglages vides) : il affiche les symboles par défaut, on les lit donc aussi.
+export function watchedSymbols(): string[] {
   const all = data.profile.widgets
     .filter((widget) => widget.type === 'markets')
-    .flatMap((widget) => parseSymbols(widget.settings['symbols']))
+    .flatMap((widget) => {
+      const symbols = widget.settings['symbols']
+      return parseSymbols(typeof symbols === 'string' ? symbols : DEFAULT_MARKET_SYMBOLS)
+    })
   return [...new Set(all)]
 }
 

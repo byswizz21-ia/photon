@@ -1,8 +1,18 @@
 import { expect, test, vi } from 'vitest'
 
 vi.mock('electron', () => ({ net: {} }))
-vi.mock('./data', () => ({ data: { profile: { widgets: [] } } }))
-const { parseChart, parseSymbols } = await import('./markets')
+const widgets: { type: string; settings: Record<string, unknown> }[] = []
+vi.mock('./data', () => ({ data: { profile: { widgets } } }))
+const { parseChart, parseSymbols, watchedSymbols } = await import('./markets')
+
+test('symboles lus en fond : ceux du widget, ou ceux par défaut si jamais réglé', () => {
+  widgets.push(
+    { type: 'markets', settings: {} },
+    { type: 'markets', settings: { symbols: 'aapl' } }
+  )
+  expect(watchedSymbols()).toEqual(['BTC-EUR', 'ETH-EUR', 'AAPL'])
+  widgets.length = 0
+})
 
 test('symboles : majuscules, doublons et entrées invalides retirés', () => {
   expect(parseSymbols('btc-eur, AAPL;^fchi  btc-eur ../x mc.pa')).toEqual([
