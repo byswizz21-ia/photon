@@ -2,6 +2,7 @@
 import { clipboard, ipcMain, type IpcMainEvent, type IpcMainInvokeEvent } from 'electron'
 import type { AppState } from '../shared/api'
 import type { Settings } from '../shared/model'
+import { audio, audioDevice, audioMute, audioVolume } from './audio'
 import { pickImage } from './background'
 import { calendar, onProfileSaved } from './calendar'
 import {
@@ -142,4 +143,8 @@ export function registerIpc(actions: IpcActions): void {
     recentFiles(12).map(({ path, name, folder }) => ({ path, name, folder }))
   )
   handle('photon:pickFolders', pickFolders)
+  handle('photon:audio', audio)
+  handle('photon:audioVolume', audioVolume) // valeurs validées dans audio.ts
+  handle('photon:audioMute', audioMute)
+  handle('photon:audioDevice', audioDevice)
 }

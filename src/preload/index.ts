@@ -60,6 +60,10 @@ const photon: PhotonApi = {
   network: () => ipcRenderer.invoke('photon:network'),
   recentFiles: () => ipcRenderer.invoke('photon:recentFiles'),
   pickFolders: () => ipcRenderer.invoke('photon:pickFolders'),
+  audio: () => ipcRenderer.invoke('photon:audio'),
+  audioVolume: (volume) => ipcRenderer.invoke('photon:audioVolume', volume),
+  audioMute: (muted) => ipcRenderer.invoke('photon:audioMute', muted),
+  audioDevice: (id) => ipcRenderer.invoke('photon:audioDevice', id),
   pickImage: () => ipcRenderer.invoke('photon:pickImage')
 }
 

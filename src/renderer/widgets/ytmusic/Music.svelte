@@ -344,37 +344,6 @@
     width: 72px;
   }
 
-  /* Barre fine remplie jusqu'au curseur (--fill). */
-  input[type='range'] {
-    flex: 1;
-    min-width: 0;
-    height: 4px;
-    margin: 0;
-    appearance: none;
-    border-radius: 2px;
-    background: linear-gradient(
-      to right,
-      var(--text) var(--fill),
-      rgb(255 255 255 / 0.15) var(--fill)
-    );
-    cursor: pointer;
-  }
-
-  input[type='range']::-webkit-slider-thumb {
-    appearance: none;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--text);
-    opacity: 0;
-    transition: opacity 150ms var(--ease-out);
-  }
-
-  input[type='range']:hover::-webkit-slider-thumb,
-  input[type='range']:focus-visible::-webkit-slider-thumb {
-    opacity: 1;
-  }
-
   button:focus-visible,
   input:focus-visible {
     outline: 2px solid var(--accent);

@@ -1,6 +1,7 @@
 // Commandes de la barre (préfixe « > ») : système Windows et actions de Photon.
 // Les commandes lourdes (redémarrer, éteindre…) demandent une 2e validation dans la barre.
 import { spawn } from 'node:child_process'
+import { audioOutputs, audioDevice, toggleMute } from '../audio'
 import { musicAvailable, musicControl, openMusic } from '../music'
 import { pomodoroCommand } from '../pomodoro'
 
@@ -135,6 +136,29 @@ export const COMMANDS: readonly Command[] = [
     false,
     pomodoroCommand('reset')
   ),
+  system(
+    'audio-mute',
+    'Couper / rétablir le son',
+    'son muet mute volume silence',
+    false,
+    () => void toggleMute()
+  ),
   ui('edit', 'Modifier la grille', 'widgets ajouter edition'),
   ui('settings', 'Réglages de Photon', 'parametres theme fond raccourci')
 ]
+
+// Une sortie audio (autre que l'actuelle) = une commande « Sortie audio : Casque ».
+export const audioCommands = (): Command[] => {
+  const state = audioOutputs()
+  return (state?.devices ?? [])
+    .filter((d) => d.id !== state?.current)
+    .map((d) =>
+      system(
+        `audio:${d.id}`,
+        `Sortie audio : ${d.name}`,
+        'son sortie audio casque enceintes haut-parleurs ecouteurs',
+        false,
+        () => void audioDevice(d.id)
+      )
+    )
+}

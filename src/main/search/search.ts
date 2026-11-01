@@ -12,7 +12,7 @@ import { readJson, writeJson } from '../store'
 import { fileIcon, launch } from '../system'
 import { launchStoreApp, listApps, startApps, type AppEntry } from './apps'
 import { calculate } from './calc'
-import { COMMANDS, type Command } from './commands'
+import { audioCommands, COMMANDS, type Command } from './commands'
 import { findFiles, recentFiles, startFiles, type FileHit } from './files'
 import { matchScore, usageBoost, type Usage } from './rank'
 
@@ -139,7 +139,7 @@ const profileCommands = (): Command[] =>
       run: () => {}
     }))
 
-const allCommands = (): Command[] => [...COMMANDS, ...profileCommands()]
+const allCommands = (): Command[] => [...COMMANDS, ...profileCommands(), ...audioCommands()]
 
 const fixed = (
   id: string,

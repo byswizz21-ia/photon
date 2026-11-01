@@ -142,6 +142,18 @@ export interface NetworkRate {
   up: number // octets/s envoyés
 }
 
+export interface AudioDevice {
+  id: string
+  name: string // « Casque (Realtek Audio) »
+}
+
+export interface AudioState {
+  volume: number // 0 à 100, sortie par défaut
+  muted: boolean
+  current: string // identifiant de la sortie par défaut
+  devices: AudioDevice[] // sorties actives
+}
+
 export interface RecentFile {
   path: string
   name: string
@@ -211,6 +223,11 @@ export interface PhotonApi {
   network(): Promise<NetworkRate | null> // null : 1re lecture, la suivante donne le débit
   recentFiles(): Promise<RecentFile[]> // derniers fichiers et dossiers ouverts dans Windows
   pickFolders(): Promise<string[]> // boîte de dialogue ; [] si annulée
+  // Son : null si l'outil natif ne répond pas ; chaque réglage renvoie le nouvel état
+  audio(): Promise<AudioState | null>
+  audioVolume(volume: number): Promise<AudioState | null> // 0 à 100
+  audioMute(muted: boolean): Promise<AudioState | null>
+  audioDevice(id: string): Promise<AudioState | null> // une sortie de la dernière liste lue
   // Thème
   pickImage(): Promise<string | null> // boîte de dialogue ; null si annulée
 }
