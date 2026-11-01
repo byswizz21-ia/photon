@@ -74,7 +74,8 @@ const photon: PhotonApi = {
   clipboardClear: () => ipcRenderer.send('photon:clipboardClear'),
   batteries: () => ipcRenderer.invoke('photon:batteries'),
   markets: (symbols) => ipcRenderer.invoke('photon:markets', symbols),
-  pickImage: () => ipcRenderer.invoke('photon:pickImage')
+  pickImage: () => ipcRenderer.invoke('photon:pickImage'),
+  importImage: (path) => ipcRenderer.invoke('photon:importImage', path)
 }
 
 contextBridge.exposeInMainWorld('photon', photon)

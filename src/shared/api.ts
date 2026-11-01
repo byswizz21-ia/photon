@@ -303,6 +303,7 @@ export interface PhotonApi {
   markets(symbols: string): Promise<MarketFeed> // cache seulement, aucun appel réseau
   // Thème
   pickImage(): Promise<string | null> // boîte de dialogue ; null si annulée
+  importImage(path: string): Promise<string | null> // widget Image : copie, nom pour photon://images/
 }
 
 declare global {
