@@ -9,6 +9,8 @@ import { registerIpc } from './ipc'
 import { loadSearch } from './search/search'
 import { loadMusic } from './music'
 import { startWeather } from './weather'
+import { startMarkets } from './markets'
+import { syncClipboard } from './clipboard'
 import { registerShortcut } from './shortcut'
 import { createTray, refreshTray } from './tray'
 import {
@@ -91,6 +93,8 @@ if (!app.requestSingleInstanceLock()) {
     enableLaunchAtLogin()
     startCalendars()
     startWeather()
+    startMarkets()
+    syncClipboard()
     loadMusic()
     startScreens()
     startAuto()

@@ -1,4 +1,4 @@
-// Script ponctuel : génère le logo « point en orbite » (SVG, PNG, .ico) dans assets/.
+// Script ponctuel : génère le logo « photon en orbite » (SVG, PNG, .ico) dans assets/.
 // Lancer depuis Windows : npm run icons. Aucune dépendance : Electron dessine, les .ico sont écrits à la main.
 import { app, BrowserWindow } from 'electron'
 import { writeFileSync } from 'node:fs'
@@ -9,19 +9,72 @@ const ACCENT = '#7CC4FF'
 const INK_LIGHT = '#F3F4F6'
 const INK_DARK = '#141414'
 
-// Grand : arc fin + point lumineux. 20 px et moins : arc épais, point plus gros, sans lueur.
-function logo(px, ink, dot) {
-  if (px <= 20) {
-    return (
-      `<path d="M51.1 26.1 A20 20 0 1 1 37.9 12.9" fill="none" stroke="${ink}" stroke-width="6.5" stroke-linecap="round" opacity="0.7"/>` +
-      `<circle cx="46.14" cy="17.86" r="9.5" fill="${dot}"/>`
+// Couleurs : mélange linéaire de deux hex (t = 0 → a, t = 1 → b).
+const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+const mix = (a, b, t) =>
+  '#' +
+  rgb(a)
+    .map((v, i) =>
+      Math.round(v + (rgb(b)[i] - v) * t)
+        .toString(16)
+        .padStart(2, '0')
     )
+    .join('')
+
+// Point de l'orbite (r = 20, centre 32,32) à l'angle θ en degrés, compté depuis le haut, sens horaire.
+const at = (deg) => {
+  const rad = (deg * Math.PI) / 180
+  return [(32 + 20 * Math.sin(rad)).toFixed(2), (32 - 20 * Math.cos(rad)).toFixed(2)]
+}
+
+// Traînée : 330° qui s'allument en approchant du point (à 45°), comme le conic de Logo.svelte.
+// Découpée en segments : couleur et opacité suivent les mêmes arrêts.
+function trail(ink, dot, small) {
+  const stops = small
+    ? [
+        [0, ink, 0.3],
+        [210, ink, 0.75],
+        [320, dot, 1],
+        [330, dot, 1]
+      ]
+    : [
+        [0, ink, 0],
+        [110, ink, 0.1],
+        [245, ink, 0.52],
+        [312, dot, 0.95],
+        [330, dot, 1]
+      ]
+  const N = 48
+  let out = ''
+  for (let i = 0; i < N; i++) {
+    const a = (i * 330) / N
+    const b = ((i + 1) * 330) / N
+    const m = (a + b) / 2
+    const k = stops.findIndex(([deg]) => deg >= m)
+    const [d0, c0, o0] = stops[k - 1]
+    const [d1, c1, o1] = stops[k]
+    const t = (m - d0) / (d1 - d0)
+    const opacity = o0 + (o1 - o0) * t
+    if (opacity < 0.01) continue
+    const [x1, y1] = at(75 + a - 0.3)
+    const [x2, y2] = at(75 + b + 0.3)
+    out += `<path d="M${x1} ${y1} A20 20 0 0 1 ${x2} ${y2}" fill="none" stroke="${mix(c0, c1, t)}" stroke-opacity="${opacity.toFixed(3)}" stroke-width="${small ? 6.5 : 3.5}"/>`
   }
-  // Lueur = drop-shadow de size/10 px dans la maquette, soit un écart-type constant de 3.2 unités.
+  return out
+}
+
+// Grand : traînée fine + point à cœur blanc et lueur. 20 px et moins : traînée épaisse, point plein.
+function logo(px, ink, dot) {
+  if (px <= 20)
+    return trail(ink, dot, true) + `<circle cx="46.14" cy="17.86" r="9.5" fill="${dot}"/>`
   return (
-    `<defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="0" stdDeviation="3.2" flood-color="${dot}"/></filter></defs>` +
-    `<path d="M50.13 23.55 A20 20 0 1 1 40.45 13.87" fill="none" stroke="${ink}" stroke-width="3.5" stroke-linecap="round" opacity="0.6"/>` +
-    `<circle cx="46.14" cy="17.86" r="7" fill="${dot}" filter="url(#glow)"/>`
+    `<defs>` +
+    `<radialGradient id="core" cx="38%" cy="36%" r="62%"><stop offset="0" stop-color="${mix(dot, '#FFFFFF', 1)}"/><stop offset="0.26" stop-color="${mix(dot, '#FFFFFF', 0.65)}"/><stop offset="0.64" stop-color="${dot}"/><stop offset="1" stop-color="${mix(dot, '#000000', 0.28)}"/></radialGradient>` +
+    `<filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feDropShadow dx="0" dy="0" stdDeviation="3.2" flood-color="${dot}"/></filter>` +
+    `</defs>` +
+    `<circle cx="32" cy="32" r="20" fill="none" stroke="${ink}" stroke-opacity="0.07" stroke-width="0.8"/>` +
+    trail(ink, dot, false) +
+    `<circle cx="46.14" cy="17.86" r="7" fill="url(#core)" filter="url(#glow)"/>`
   )
 }
 

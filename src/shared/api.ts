@@ -168,6 +168,40 @@ export interface AudioState {
   devices: AudioDevice[] // sorties actives
 }
 
+// Usage de Claude Code, lu dans ses journaux (src/main/usage.ts). Tokens = entrée + sortie +
+// écriture en cache.
+export interface ClaudeUsage {
+  session: number // fenêtre de 5 h en cours ; 0 si aucune
+  messages: number // réponses dans cette fenêtre
+  resetsAt: number | null // fin de la fenêtre en cours (ms) ; null si aucune
+  today: number
+  week: number // 7 derniers jours
+  sources: number // dossiers de journaux trouvés (0 : Claude Code jamais lancé)
+}
+
+// Batterie d'un appareil sans fil connu (src/main/batteries.cs).
+export interface Battery {
+  name: string
+  level: number | null // % ; null : éteint ou hors de portée
+  charging: boolean
+}
+
+// Cours (src/main/markets.ts) : cache lu en fond.
+export interface MarketQuote {
+  symbol: string // BTC-EUR, AAPL…
+  name: string
+  price: number
+  previous: number // clôture de la veille (crypto : il y a 24 h)
+  currency: string
+  points: number[] // cours de la journée, du plus ancien au plus récent
+}
+
+export interface MarketFeed {
+  quotes: MarketQuote[] // dans l'ordre du widget, seulement ceux déjà lus
+  missing: string[] // symboles introuvables ou illisibles
+  updatedAt: number | null // dernière lecture réussie ; null = jamais
+}
+
 export interface RecentFile {
   path: string
   name: string
@@ -246,6 +280,12 @@ export interface PhotonApi {
   audioVolume(volume: number): Promise<AudioState | null> // 0 à 100
   audioMute(muted: boolean): Promise<AudioState | null>
   audioDevice(id: string): Promise<AudioState | null> // une sortie de la dernière liste lue
+  // Widgets ajoutés après la V3
+  claudeUsage(): Promise<ClaudeUsage> // 1re lecture lente (journaux), ensuite incrémentale
+  clipboardHistory(): Promise<string[]> // textes copiés, le plus récent d'abord (en mémoire)
+  clipboardClear(): void
+  batteries(): Promise<Battery[] | null> // null : outil natif indisponible
+  markets(symbols: string): Promise<MarketFeed> // cache seulement, aucun appel réseau
   // Thème
   pickImage(): Promise<string | null> // boîte de dialogue ; null si annulée
 }

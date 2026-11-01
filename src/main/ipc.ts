@@ -4,6 +4,7 @@ import type { AppState } from '../shared/api'
 import type { Settings } from '../shared/model'
 import { audio, audioDevice, audioMute, audioVolume } from './audio'
 import { pickImage } from './background'
+import { batteries } from './batteries'
 import { calendar, onProfileSaved } from './calendar'
 import {
   answerApproval,
@@ -16,7 +17,9 @@ import {
   stopAnswer,
   validFiles
 } from './claude'
+import { clipboardClear, clipboardHistory, syncClipboard } from './clipboard'
 import { createProfile, data, deleteProfile, saveProfile, saveTheme, switchProfile } from './data'
+import { markets, onMarketsProfile } from './markets'
 import { musicControl, musicSeek, musicState, musicVolume, openMusic, syncMusic } from './music'
 import { pomodoro, pomodoroControl } from './pomodoro'
 import { recentFiles } from './search/files'
@@ -27,6 +30,7 @@ import { temperatures } from './temperatures'
 import { displayList } from './screens'
 import { syncFocus } from './focus'
 import { pickAutoApps } from './auto'
+import { claudeUsage } from './usage'
 import { onWeatherProfile, weather } from './weather'
 import { hideWindow, logShown, ownsSender, resizeBar } from './window'
 
@@ -81,6 +85,8 @@ export function registerIpc(actions: IpcActions): void {
     void syncFocus(data.profile.focus) // option Focus cochée ou décochée
     onProfileSaved()
     onWeatherProfile()
+    onMarketsProfile()
+    syncClipboard()
     syncMusic()
   })
   // Profil changé : agendas et lecteur YT Music suivent les widgets du nouveau profil.
@@ -89,6 +95,8 @@ export function registerIpc(actions: IpcActions): void {
     void syncFocus(data.profile.focus)
     onProfileSaved()
     onWeatherProfile()
+    onMarketsProfile()
+    syncClipboard()
     syncMusic()
     return { ...data }
   }
@@ -158,4 +166,9 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:audioVolume', audioVolume) // valeurs validées dans audio.ts
   handle('photon:audioMute', audioMute)
   handle('photon:audioDevice', audioDevice)
+  handle('photon:claudeUsage', claudeUsage)
+  handle('photon:clipboardHistory', clipboardHistory)
+  on('photon:clipboardClear', clipboardClear)
+  handle('photon:batteries', batteries)
+  handle('photon:markets', markets) // symboles validés dans markets.ts
 }
