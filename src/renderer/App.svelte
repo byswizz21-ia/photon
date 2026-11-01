@@ -169,8 +169,9 @@
       );
   }
 
+  /* Fond net et juste assombri : c'est le panneau qui le floute, d'où l'effet de verre. */
   .fullscreen .veil {
-    background-color: rgb(7 8 11 / 0.55);
+    background-color: rgb(7 8 11 / 0.3);
   }
 
   .light {
@@ -200,17 +201,21 @@
     flex-direction: column;
     gap: 20px;
     overflow: auto;
-    background: var(--panel-bg);
+    background: var(--glass-sheen), var(--panel-bg);
   }
 
-  /* Plein écran : panneau centré, comme la maquette « Photon en situation ». */
+  /* Plein écran : panneau de verre centré, qui floute le fond d'écran derrière lui. */
   .fullscreen .panel {
     width: min(1280px, calc(100% - 96px));
     height: auto;
     max-height: calc(100% - 96px);
     margin: 48px auto;
-    border: 1px solid var(--line);
+    border: 1px solid var(--glass-edge);
     border-radius: var(--radius-panel);
+    backdrop-filter: var(--glass-filter);
+    box-shadow:
+      var(--glass-rim),
+      0 40px 100px -30px rgb(0 0 0 / 0.65);
   }
 
   .bar {

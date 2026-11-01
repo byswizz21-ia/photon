@@ -31,7 +31,7 @@ export type Density = 'compact' | 'comfortable'
 export interface Theme {
   background: Background
   accent: 'auto' | string // 'auto' = extraite du fond, sinon '#rrggbb'
-  blur: number // px, flou du fond en plein écran
+  blur: number // px, flou du panneau de verre en plein écran
   opacity: number // 0..1, opacité du verre
   radius: number // px, arrondi des cartes
   density: Density

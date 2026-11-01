@@ -209,7 +209,7 @@
 
   <section>
     <h3>Verre</h3>
-    {@render range('Flou du fond', app.theme.blur, 0, 120, 1, px, (blur) => patchTheme({ blur }))}
+    {@render range('Flou du verre', app.theme.blur, 0, 120, 1, px, (blur) => patchTheme({ blur }))}
     {@render range('Opacité du verre', app.theme.opacity, 0, 1, 0.01, percent, (opacity) =>
       patchTheme({ opacity })
     )}
@@ -290,10 +290,13 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
-    border: 1px solid var(--line);
+    border: 1px solid var(--glass-edge);
     border-radius: var(--radius-panel);
-    background: rgb(14 16 22 / 0.92);
-    box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.7);
+    background: var(--glass-sheen), rgb(14 16 22 / 0.6);
+    backdrop-filter: blur(30px) saturate(1.7);
+    box-shadow:
+      var(--glass-rim),
+      0 24px 60px -20px rgb(0 0 0 / 0.7);
     -webkit-app-region: no-drag;
     animation: open 180ms var(--ease-out);
   }

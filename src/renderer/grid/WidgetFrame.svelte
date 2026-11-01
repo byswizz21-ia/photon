@@ -68,8 +68,11 @@
     box-sizing: border-box;
     height: 100%;
     border-radius: var(--radius);
-    background: var(--card-bg);
-    border: 1px solid var(--line);
+    background: var(--glass-sheen);
+    border: 1px solid var(--glass-edge);
+    box-shadow:
+      var(--glass-rim),
+      0 10px 30px -14px rgb(0 0 0 / 0.55);
     transition: transform 450ms var(--ease-spring);
   }
 

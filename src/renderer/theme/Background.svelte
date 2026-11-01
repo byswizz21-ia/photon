@@ -24,14 +24,12 @@
 {/if}
 
 <style>
-  /* Le zoom cache les bords devenus transparents à cause du flou. */
+  /* Net : le flou est fait par le panneau de verre posé dessus (backdrop-filter). */
   .layer {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: blur(var(--blur));
-    transform: scale(1.08);
   }
 </style>

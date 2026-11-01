@@ -52,9 +52,12 @@
     padding: 6px;
     list-style: none;
     border-radius: 14px;
-    background: rgb(20 22 29 / 0.96);
-    border: 1px solid var(--line);
-    box-shadow: 0 16px 40px -16px rgb(0 0 0 / 0.6);
+    background: var(--glass-sheen), rgb(20 22 29 / 0.6);
+    backdrop-filter: blur(24px) saturate(1.7);
+    border: 1px solid var(--glass-edge);
+    box-shadow:
+      var(--glass-rim),
+      0 16px 40px -16px rgb(0 0 0 / 0.6);
   }
 
   .menu button {

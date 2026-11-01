@@ -15,10 +15,19 @@
   --on-accent: #07080b; /* texte posé sur l'accent, choisi selon son contraste */
   --glow-secondary: #7a5cff;
   --glass: 0.5; /* opacité du verre, réglée par le thème */
-  --blur: 48px; /* flou du fond (plein écran), réglé par le thème */
+  --blur: 48px; /* flou du verre (plein écran), réglé par le thème */
   --panel-bg: rgb(16 18 24 / var(--glass));
   --line: rgb(255 255 255 / 0.08);
-  --card-bg: rgb(255 255 255 / 0.04);
+  /* Verre façon Apple : reflet en biais, liseré clair en haut, bord plus lumineux que le fond. */
+  --glass-edge: rgb(255 255 255 / 0.13);
+  --glass-sheen: linear-gradient(
+    165deg,
+    rgb(255 255 255 / 0.11),
+    rgb(255 255 255 / 0.03) 38%,
+    rgb(255 255 255 / 0.015)
+  );
+  --glass-rim: inset 0 1px 0 rgb(255 255 255 / 0.24), inset 0 -1px 0 rgb(255 255 255 / 0.05);
+  --glass-filter: blur(var(--blur)) saturate(1.7);
   --radius-panel: 28px;
   --radius: 20px;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
