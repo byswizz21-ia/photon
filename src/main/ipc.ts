@@ -3,6 +3,7 @@ import { clipboard, ipcMain, type IpcMainEvent, type IpcMainInvokeEvent } from '
 import type { AppState } from '../shared/api'
 import type { Settings } from '../shared/model'
 import { audio, audioDevice, audioMute, audioVolume } from './audio'
+import { awake, awakeStart, awakeStop } from './awake'
 import { importFile, pickFile } from './background'
 import { batteries } from './batteries'
 import { calendar, onProfileSaved } from './calendar'
@@ -195,4 +196,7 @@ export function registerIpc(actions: IpcActions): void {
     if (opened) hideWindow('VS Code ouvert')
     return opened
   })
+  handle('photon:awake', awake)
+  handle('photon:awakeStart', awakeStart) // durée et choix de l'écran validés dans awake.ts
+  handle('photon:awakeStop', awakeStop)
 }

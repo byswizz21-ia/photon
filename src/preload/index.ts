@@ -81,6 +81,9 @@ const photon: PhotonApi = {
   processClose: (name) => ipcRenderer.invoke('photon:processClose', name),
   gitStatus: (paths) => ipcRenderer.invoke('photon:gitStatus', paths),
   gitOpen: (path) => ipcRenderer.invoke('photon:gitOpen', path),
+  awake: () => ipcRenderer.invoke('photon:awake'),
+  awakeStart: (minutes, screen) => ipcRenderer.invoke('photon:awakeStart', minutes, screen),
+  awakeStop: () => ipcRenderer.invoke('photon:awakeStop'),
   pickFile: (kind) => ipcRenderer.invoke('photon:pickFile', kind),
   importFile: (kind, path) => ipcRenderer.invoke('photon:importFile', kind, path)
 }

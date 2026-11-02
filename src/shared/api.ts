@@ -254,6 +254,13 @@ export interface GitRepo {
   error: string | null // « Pas un dépôt Git », « Dossier introuvable »…
 }
 
+// Anti-veille (src/main/awake.ts) : un seul, partagé par tous les profils.
+export interface AwakeState {
+  on: boolean
+  screen: boolean // l'écran reste allumé aussi
+  until: number | null // ms depuis 1970 ; null : jusqu'à l'arrêt
+}
+
 export interface RecentFile {
   path: string
   name: string
@@ -346,6 +353,9 @@ export interface PhotonApi {
   processClose(name: string): Promise<boolean> // fenêtres fermées comme la croix, sinon arrêt
   gitStatus(paths: string[]): Promise<GitRepo[]> // aucun appel réseau
   gitOpen(path: string): Promise<boolean> // ouvre dans VS Code puis cache Photon
+  awake(): Promise<AwakeState>
+  awakeStart(minutes: number | null, screen: boolean): Promise<AwakeState> // null : sans fin
+  awakeStop(): Promise<AwakeState>
   // Thème
   pickFile(kind: 'image' | 'font'): Promise<string | null> // boîte de dialogue ; null si annulée
   // Copie chez Photon ; nom pour photon://images/<nom> ou photon://fonts/<nom>, null si refusé
