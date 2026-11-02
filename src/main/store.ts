@@ -52,15 +52,19 @@ async function write(file: string, json: string, parse: (raw: unknown) => unknow
 }
 
 // Le .bak garde la dernière version valide : jamais un fichier corrompu ou rejeté par le modèle.
-// Copie « au mieux » : un .bak verrouillé ne doit pas faire échouer la sauvegarde.
+// Un fichier présent mais illisible (abîmé, ou écrit par une autre version de Photon) n'est pas
+// écrasé en silence : il est mis de côté en `.broken-<date>`, récupérable à la main.
+// Copies « au mieux » : un .bak verrouillé ne doit pas faire échouer la sauvegarde.
 async function backup(file: string, parse: (raw: unknown) => unknown): Promise<void> {
+  const current = await fs.readFile(file, 'utf8').catch(() => null)
+  if (current === null) return // pas encore de fichier
   try {
-    const current = await fs.readFile(file, 'utf8')
     parse(JSON.parse(current))
-    await fs.writeFile(`${file}.bak`, current, 'utf8')
   } catch {
-    // pas d'ancienne version valide, ou .bak indisponible : on garde l'ancien .bak
+    await fs.writeFile(`${file}.broken-${Date.now()}`, current, 'utf8').catch(() => undefined)
+    return
   }
+  await fs.writeFile(`${file}.bak`, current, 'utf8').catch(() => undefined)
 }
 
 // Sous Windows, un antivirus ou l'indexeur peut verrouiller le fichier quelques millisecondes.

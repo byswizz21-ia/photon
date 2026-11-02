@@ -28,7 +28,12 @@ Dans `%APPDATA%\Photon\`, en JSON lisible et modifiable à la main :
   `data/<clé>-<profil>.json` quand le widget est « propre au profil » (`profileKey`)
 
 Chaque fichier est écrit de façon atomique avec une copie `.bak`. Un fichier abîmé est remplacé par
-sa copie, puis par les valeurs par défaut. Les fichiers sont créés au premier changement.
+sa copie, puis par les valeurs par défaut ; avant d'être réécrit, il est mis de côté en
+`.broken-<date>`. Les fichiers sont créés au premier changement.
+
+Mises à jour : un widget qui n'existe plus reste dans le profil (invisible) et revient s'il est
+réinstallé ; un réglage inconnu est gardé tel quel. Pour un widget publié, ne renomme ni son
+dossier ni ses clés de réglage : sinon, convertir l'ancien format dans `parseProfile`.
 
 ## Créer un widget
 

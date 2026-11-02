@@ -57,6 +57,19 @@ describe('writeJson', () => {
     expect(await readBak()).toEqual({ value: 1 })
   })
 
+  test('met de côté un fichier illisible au lieu de l’écraser', async () => {
+    await fs.mkdir(join(file, '..'), { recursive: true })
+    await fs.writeFile(file, '{"widgets": "version future"}', 'utf8')
+    await write(1)
+    const dir = await fs.readdir(join(file, '..'))
+    const broken = dir.filter((name) => name.startsWith('doc.json.broken-'))
+    expect(broken).toHaveLength(1)
+    expect(await fs.readFile(join(file, '..', broken[0]!), 'utf8')).toBe(
+      '{"widgets": "version future"}'
+    )
+    expect(await read()).toEqual({ value: 1 })
+  })
+
   test('les écritures simultanées passent dans l’ordre : la dernière gagne', async () => {
     await Promise.all([1, 2, 3, 4, 5].map(write))
     expect(await read()).toEqual({ value: 5 })

@@ -15,8 +15,10 @@
   const settings = $derived(mergeSettings(manifest.defaults, widget.settings))
   const Widget = $derived(manifest.component)
 
+  // Les clés inconnues de cette version (réglage d'une version plus récente ou plus ancienne)
+  // sont gardées : changer de version de Photon ne fait perdre aucun réglage.
   function save(next: WidgetSettings): void {
-    widget.settings = { ...next }
+    widget.settings = { ...widget.settings, ...next }
     saveProfile()
   }
 

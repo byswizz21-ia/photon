@@ -7,6 +7,21 @@ describe('parseProfile', () => {
     expect(parseProfile(JSON.parse(JSON.stringify(profile)))).toEqual(profile)
   })
 
+  test("profil d'une ancienne version : champs manquants complétés, widget inconnu et réglages gardés", () => {
+    const old = {
+      name: 'Jeux',
+      widgets: [{ id: 'radar', type: 'radar', x: 2, y: 3, w: 4, h: 2, settings: { zone: 'eu' } }]
+    }
+    expect(parseProfile(old)).toEqual({
+      name: 'Jeux',
+      createdAt: 0,
+      theme: null,
+      focus: false,
+      auto: { apps: [], hours: null },
+      widgets: old.widgets
+    })
+  })
+
   test('racine invalide : erreur (le store reprend alors le .bak)', () => {
     expect(() => parseProfile(null)).toThrow()
     expect(() => parseProfile([])).toThrow()

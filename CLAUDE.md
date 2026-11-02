@@ -32,6 +32,13 @@ Un `npm install` lancé dans WSL installerait les binaires Linux d'Electron.
 - Code : TS strict, un fichier = un rôle, noms en anglais, commentaires courts en français.
   Pas de dépendance hors stack sans raison écrite.
 
+## Profils compatibles d'une version à l'autre
+
+Les profils de Hugo doivent survivre à chaque mise à jour. Champ nouveau = optionnel, avec valeur
+par défaut dans `parse*` (`src/shared/model.ts`). Ne jamais renommer un dossier de widget, une clé
+de réglage ni changer son type sans conversion de l'ancien format dans `parseProfile` (avec test).
+Un widget retiré reste dans le JSON, invisible ; ses réglages inconnus sont gardés.
+
 ## Ajouter un widget
 
 Copier `src/renderer/widgets/_template/` vers `src/renderer/widgets/<nom>/`, puis remplir `manifest.ts`
