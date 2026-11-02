@@ -43,7 +43,10 @@ export function isZone(tz: string): boolean {
 // Heure murale du fuseau, rangée dans un timestamp « comme si c'était UTC » : la soustraction
 // de deux de ces valeurs donne le décalage entre les fuseaux.
 function wall(tz: string | undefined, now: Date): number {
-  if (!tz) return now.getTime() - now.getTimezoneOffset() * 60_000
+  if (!tz) {
+    const local = now.getTime() - now.getTimezoneOffset() * 60_000
+    return local - (local % 60_000) // à la minute, comme les fuseaux lus par Intl
+  }
   const parts = Object.fromEntries(
     format(tz)
       .formatToParts(now)

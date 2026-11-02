@@ -23,6 +23,12 @@ test('heure d’été décalée : écart de 5 h entre Paris et New York fin mars
   expect(zoneTime('America/New_York', march, 'Europe/Paris').diff).toBe(-5 * 60)
 })
 
+test('heure locale à la seconde près : décalage toujours en minutes entières', () => {
+  const late = new Date(2026, 10, 2, 16, 44, 50) // 50 s : ne doit pas arrondir à la minute suivante
+  const there = zoneTime('UTC', late)
+  expect(Math.abs(there.diff % 60)).toBe(0) // abs : -60 % 60 donne -0
+})
+
 test('libellés et recherche', () => {
   expect(diffLabel(0)).toBe('même heure')
   expect(diffLabel(360)).toBe('+6 h')

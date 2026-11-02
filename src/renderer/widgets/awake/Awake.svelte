@@ -206,7 +206,7 @@
     }
   }
 
-  @container (max-width: 120px) {
+  @container (max-width: 160px) {
     .widget {
       grid-template-columns: 1fr;
       justify-items: center;

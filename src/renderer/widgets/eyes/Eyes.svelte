@@ -17,7 +17,10 @@
   let now = $state(Date.now())
 
   $effect(() => {
-    void window.photon.eyesSet(settings.on, minutes).then((s) => (current = s))
+    void window.photon.eyesSet(settings.on, minutes).then((s) => {
+      current = s
+      now = Date.now()
+    })
   })
 
   // Relu toutes les 15 s : le compte à rebours avance sans tourner pour rien.
@@ -168,7 +171,7 @@
     }
   }
 
-  @container (max-width: 120px) {
+  @container (max-width: 160px) {
     .widget {
       grid-template-columns: 1fr;
       justify-items: center;
