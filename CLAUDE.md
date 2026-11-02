@@ -35,9 +35,9 @@ Un `npm install` lancé dans WSL installerait les binaires Linux d'Electron.
 ## Profils compatibles d'une version à l'autre
 
 Les profils de Hugo doivent survivre à chaque mise à jour. Champ nouveau = optionnel, avec valeur
-par défaut dans `parse*` (`src/shared/model.ts`). Ne jamais renommer un dossier de widget, une clé
-de réglage ni changer son type sans conversion de l'ancien format dans `parseProfile` (avec test).
-Un widget retiré reste dans le JSON, invisible ; ses réglages inconnus sont gardés.
+par défaut dans `parse*` (`src/shared/model.ts`). Renommer un dossier de widget, une clé de réglage
+ou changer un type = ajouter une étape à la fin de `MIGRATIONS` (avec test), jamais modifier une
+étape publiée. Champs, widgets et réglages inconnus sont gardés tels quels (retour en arrière).
 
 ## Ajouter un widget
 

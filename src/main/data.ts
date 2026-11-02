@@ -9,6 +9,7 @@ import {
   defaultTheme,
   isName,
   parseProfile,
+  PROFILE_VERSION,
   parseSettings,
   parseTheme,
   type Profile,
@@ -117,7 +118,8 @@ export async function createProfile(source: unknown): Promise<boolean> {
             widgets: template.widgets()
           }
   if (!base) return false
-  const profile = parseProfile({ ...base, createdAt: Date.now() })
+  // Modèles et profil vierge sont au format actuel : aucune conversion à leur appliquer.
+  const profile = parseProfile({ version: PROFILE_VERSION, ...base, createdAt: Date.now() })
   let n = profile.createdAt
   while (data.profiles.some((p) => p.id === `p${n.toString(36)}`)) n++
   const id = `p${n.toString(36)}`

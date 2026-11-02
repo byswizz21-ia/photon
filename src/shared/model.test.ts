@@ -1,5 +1,12 @@
 import { describe, expect, test } from 'vitest'
-import { defaultProfile, parseProfile, parseSettings, parseTheme } from './model'
+import {
+  defaultProfile,
+  migrateProfile,
+  parseProfile,
+  parseSettings,
+  parseTheme,
+  PROFILE_VERSION
+} from './model'
 
 describe('parseProfile', () => {
   test('aller-retour JSON sans perte', () => {
@@ -13,6 +20,7 @@ describe('parseProfile', () => {
       widgets: [{ id: 'radar', type: 'radar', x: 2, y: 3, w: 4, h: 2, settings: { zone: 'eu' } }]
     }
     expect(parseProfile(old)).toEqual({
+      version: PROFILE_VERSION,
       name: 'Jeux',
       createdAt: 0,
       theme: null,
@@ -20,6 +28,33 @@ describe('parseProfile', () => {
       auto: { apps: [], hours: null },
       widgets: old.widgets
     })
+  })
+
+  test('conversions : seules les étapes manquantes, dans l’ordre', () => {
+    const steps = [
+      (p: Record<string, unknown>) => ({ ...p, log: [...(p.log as string[]), '0→1'] }),
+      (p: Record<string, unknown>) => ({ ...p, log: [...(p.log as string[]), '1→2'] })
+    ]
+    expect(migrateProfile({ log: [] }, steps)).toEqual({ log: ['0→1', '1→2'], version: 2 })
+    expect(migrateProfile({ version: 1, log: [] }, steps)).toEqual({ log: ['1→2'], version: 2 })
+    expect(migrateProfile({ version: 2, log: [] }, steps)).toEqual({ log: [], version: 2 })
+  })
+
+  test("profil d'une version plus récente : numéro et champs inconnus gardés", () => {
+    const future = {
+      version: PROFILE_VERSION + 3,
+      name: 'Futur',
+      layout: 'masonry',
+      widgets: [{ id: 'clock', type: 'clock', x: 0, y: 0, w: 2, h: 2, locked: true, settings: {} }]
+    }
+    const profile = parseProfile(future)
+    expect(profile).toMatchObject({
+      version: PROFILE_VERSION + 3,
+      layout: 'masonry',
+      widgets: [{ id: 'clock', locked: true }]
+    })
+    // aller-retour : rien de perdu à la sauvegarde
+    expect(parseProfile(JSON.parse(JSON.stringify(profile)))).toEqual(profile)
   })
 
   test('racine invalide : erreur (le store reprend alors le .bak)', () => {
@@ -41,6 +76,7 @@ describe('parseProfile', () => {
       ]
     })
     expect(profile).toEqual({
+      version: PROFILE_VERSION,
       name: 'Principal',
       createdAt: 0,
       theme: null,

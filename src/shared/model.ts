@@ -69,6 +69,7 @@ export interface AutoRules {
 }
 
 export interface Profile {
+  version: number // format du fichier (PROFILE_VERSION) : dit quelles conversions lui appliquer
   name: string
   createdAt: number // ms ; ordre des pastilles et de Ctrl+1, Ctrl+2…
   theme: string | null // thème attaché au profil, sinon thème global
@@ -124,6 +125,7 @@ export const defaultTheme = (): Theme => ({
 })
 
 export const defaultProfile = (): Profile => ({
+  version: PROFILE_VERSION,
   name: 'Principal',
   createdAt: 0,
   theme: null,
@@ -244,6 +246,7 @@ export function parseTheme(raw: unknown): Theme {
 function parseWidget(v: unknown): WidgetInstance | null {
   if (!isObject(v) || typeof v.id !== 'string' || !v.id || !isName(v.type)) return null
   return {
+    ...v, // champs d'une autre version de Photon : gardés tels quels, ignorés ici
     id: v.id,
     type: v.type,
     x: int(v.x, 0, 1000, 0),
@@ -277,13 +280,34 @@ export function parseAuto(v: unknown): AutoRules {
   return { apps: [...new Set(apps)].slice(0, MAX_AUTO_APPS), hours }
 }
 
+// Conversions du format des profils : MIGRATIONS[n] passe un profil de la version n à n + 1.
+// Renommer un widget ou une clé de réglage, changer un type = ajouter une étape à la fin (avec
+// test), ne jamais modifier une étape publiée. Exemple, widget « gif » renommé « animation » :
+// l'étape parcourt p.widgets et remplace type 'gif' par 'animation'.
+type Migration = (profile: Json) => Json
+const MIGRATIONS: Migration[] = [
+  (p) => p // 0 → 1 : profils d'avant la numérotation, même format
+]
+export const PROFILE_VERSION = MIGRATIONS.length
+
+// Applique les étapes manquantes. Profil d'une version plus récente : laissé tel quel (la
+// validation garde ce qu'elle comprend, le reste est conservé).
+export function migrateProfile(v: Json, steps: Migration[] = MIGRATIONS): Json {
+  const from = int(v.version, 0, Number.MAX_SAFE_INTEGER, 0)
+  let profile = v
+  for (let n = from; n < steps.length; n++) profile = root(steps[n]!(profile))
+  return { ...profile, version: Math.max(from, steps.length) }
+}
+
 export function parseProfile(raw: unknown): Profile {
-  const v = root(raw)
+  const v = migrateProfile(root(raw))
   if (!Array.isArray(v.widgets)) throw new Error('Profil invalide : liste de widgets attendue')
   const widgets = v.widgets.map(parseWidget).filter((w) => w !== null)
   // Un id en double casserait la grille : on garde la première occurrence.
   const unique = widgets.filter((w, i) => widgets.findIndex((o) => o.id === w.id) === i)
   return {
+    ...v, // champs d'une autre version de Photon : gardés tels quels
+    version: v.version as number,
     name:
       typeof v.name === 'string' && v.name.trim()
         ? v.name.trim().slice(0, MAX_PROFILE_NAME)

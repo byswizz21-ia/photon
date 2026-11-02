@@ -1,39 +1,99 @@
+<div align="center">
+
+<img src="assets/logo.svg" alt="" width="88" />
+
 # Photon
 
-Une fenêtre de verre qui s'ouvre d'un raccourci (Win+Alt+Espace par défaut) et remplace le bureau :
-une grille de widgets à disposer soi-même. Electron + Svelte 5 + TypeScript + gridstack.js.
+**Une fenêtre de verre pleine de widgets, à un raccourci de distance.**
 
-Design doc (source de vérité) : https://claude.ai/artifact/PozosXRE6sFL3Cmswz6uB1
+Windows 10 / 11 · Electron · Svelte 5 · TypeScript · gridstack.js
 
-## Lancer
+</div>
 
-Toujours depuis Windows (PowerShell ou terminal VS Code Windows), jamais depuis WSL :
+---
+
+Photon s'ouvre d'un raccourci (**Win+Alt+Espace** par défaut) par-dessus tout le reste et remplace le
+bureau : une grille de widgets que tu disposes toi-même, sur un panneau de verre flouté. Il est
+créé au démarrage puis seulement affiché ou caché : l'ouverture est instantanée.
+
+## Ce qu'il fait
+
+- **Grille libre** : déplace, redimensionne, ajoute ou retire des widgets (crayon en haut à droite).
+- **Barre de commande** : **Alt+Espace** ouvre la barre seule. Elle lance une app ou un fichier ; tape
+  `>` pour les commandes (son, musique, pomodoro, mise en veille…).
+- **Profils** : une disposition par usage (Travail, Chill, Gaming, Focus, Minimal ou vierge),
+  avec bascule automatique au lancement d'une app ou selon l'heure. Un profil Focus active « Ne pas
+  déranger » et le pomodoro.
+- **Thèmes** : fond d'écran, image, dégradé ou scène lumineuse ; accent extrait du fond ; flou,
+  opacité, arrondi, densité et police réglables, par profil ou pour tous.
+- **Plein écran ou fenêtre**, au choix de l'écran, avec flou en direct en mode fenêtre.
+
+## Widgets
+
+| Catégorie     | Widgets                                                                                    |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| Système       | Système, Disques, Réseau, Processus, Batteries, Son, Ports, Anti-veille, Minuteur d'arrêt  |
+| Organisation  | Horloge, Fuseaux horaires, Agenda, Compte à rebours, Jours fériés, To-do, Notes, Habitudes |
+| Concentration | Pomodoro, Suivi du temps, Pause des yeux                                                   |
+| Musique       | Spotify, Deezer, SoundCloud, YT Music : design sobre ou « Adapté » au service, volume      |
+| Raccourcis    | Lanceur, Dossiers, Presse-papiers, Projets Git, Outils dev, Pipette                        |
+| Infos         | Météo, Cours (bourse et crypto), Claude, Usage Claude, Micro-entreprise, Moyenne           |
+| Décor         | Image, GIF, Vidéo                                                                          |
+
+## Installer
+
+Lance `Photon-Setup-<version>.exe` (construit avec `npm run dist`, voir plus bas). Photon s'ouvre
+une première fois, puis reste dans la zone de notification : rouvre-le avec le raccourci.
+
+## Développer
+
+Toutes les commandes se lancent **depuis Windows** (PowerShell ou terminal VS Code Windows), jamais
+depuis WSL : `npm install` y installerait les binaires Linux d'Electron.
 
 ```powershell
 npm install
-npm run dev        # lance Photon avec rechargement à chaud
-npm run dist       # construit l'installateur .exe dans dist/
+npm run dev        # Photon avec rechargement à chaud
+npm run dist       # installateur dist/Photon-Setup-<version>.exe
 ```
 
-Vérifications à garder au vert : `npm run typecheck`, `npm run lint`, `npm test`.
+Avant chaque commit : `npm run typecheck`, `npm run lint` et `npm test` au vert.
 
-## Où sont les données
+```
+src/
+├─ main/       processus principal : fenêtre, raccourcis, fichiers, accès à Windows
+├─ preload/    pont window.photon, seule porte entre l'interface et Windows
+├─ shared/     modèle des données (validation, versions) et contrat de window.photon
+└─ renderer/   interface Svelte : grille, barre, profils, thèmes, widgets/
+```
+
+Sécurité : `contextIsolation` et `sandbox` actifs, pas de `nodeIntegration`. L'interface ne parle
+à Windows que via `window.photon` (`src/shared/api.ts`).
+
+## Où sont tes données
 
 Dans `%APPDATA%\Photon\`, en JSON lisible et modifiable à la main :
 
-- `settings.json` : raccourci, mode (plein écran / fenêtre), profil actif, thème global
-- `themes/default.json` : fond, accent, flou, opacité, arrondi, densité
-- `profiles/<id>.json` : un fichier par profil (nom, widgets : type, position, taille, réglages) ; un profil supprimé devient `<id>.json.deleted`
-- `data/<clé>.json` : données partagées entre profils (notes, to-do), lues par `lib/shared.svelte.ts` ;
-  `data/<clé>-<profil>.json` quand le widget est « propre au profil » (`profileKey`)
+| Fichier              | Contenu                                                                        |
+| -------------------- | ------------------------------------------------------------------------------ |
+| `settings.json`      | raccourcis, mode, écran, profil actif, thème global                            |
+| `themes/<nom>.json`  | fond, accent, flou, opacité, arrondi, densité, police                          |
+| `profiles/<id>.json` | un profil : nom, règles, widgets (type, position, taille, réglages)            |
+| `data/<clé>.json`    | données partagées (notes, to-do…) ; `<clé>-<profil>.json` si propres au profil |
 
 Chaque fichier est écrit de façon atomique avec une copie `.bak`. Un fichier abîmé est remplacé par
 sa copie, puis par les valeurs par défaut ; avant d'être réécrit, il est mis de côté en
-`.broken-<date>`. Les fichiers sont créés au premier changement.
+`.broken-<date>`. Un profil supprimé devient `<id>.json.deleted`.
 
-Mises à jour : un widget qui n'existe plus reste dans le profil (invisible) et revient s'il est
-réinstallé ; un réglage inconnu est gardé tel quel. Pour un widget publié, ne renomme ni son
-dossier ni ses clés de réglage : sinon, convertir l'ancien format dans `parseProfile`.
+### Mises à jour sans casse
+
+Les profils portent un numéro de format (`version`). À la lecture, Photon applique les conversions
+qui manquent (`MIGRATIONS` dans `src/shared/model.ts`) ; tout champ absent prend sa valeur par
+défaut. Ce qu'une version ne connaît pas est gardé tel quel : un widget retiré reste dans le profil
+(invisible) et revient s'il est réinstallé, un réglage ou un champ d'une version plus récente
+survit à un retour en arrière.
+
+Pour un widget publié, ne renomme ni son dossier ni ses clés de réglage sans ajouter une étape de
+conversion (avec test).
 
 ## Créer un widget
 
@@ -95,11 +155,14 @@ rien d'autre à modifier.
 
 Règles : la carte de verre, le survol et la gestion des pannes sont fournis par Photon (un widget qui
 plante affiche une erreur dans sa case seulement). Anime uniquement `transform` et `opacity`. Pour un
-chiffre qui change, utilise `lib/RollingNumber.svelte` (les chiffres défilent). Dimensionne le
-contenu sur la carte avec les unités `cqw` / `cqh`.
+chiffre qui change, utilise `lib/RollingNumber.svelte`. Dimensionne le contenu sur la carte avec
+les unités `cqw` / `cqh`. Couleurs, rayons, ombres, tailles et durées : tokens de
+`src/renderer/tokens.css`, jamais en dur.
 
 ## Crédits
 
 - Police [Satoshi](https://www.fontshare.com/fonts/satoshi) (Indian Type Foundry), licence ITF Free
   Font License : intégrée telle quelle, à ne pas modifier ni redistribuer seule.
 - Icônes [Phosphor](https://phosphoricons.com) (MIT).
+
+Design doc : https://claude.ai/artifact/PozosXRE6sFL3Cmswz6uB1
