@@ -8,6 +8,8 @@ export type PortsSettings = { all: boolean } // false : seulement les programmes
 
 const manifest: WidgetManifest<PortsSettings> = {
   name: 'Ports',
+  category: 'dev',
+  description: 'Quel programme écoute sur quel port, et le fermer.',
   icon: PlugsConnectedIcon,
   size: { w: 4, h: 3, minW: 3, minH: 2 },
   defaults: { all: false },

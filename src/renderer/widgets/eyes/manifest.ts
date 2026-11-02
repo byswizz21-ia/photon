@@ -8,6 +8,8 @@ export type EyesSettings = { on: boolean; minutes: number }
 
 const manifest: WidgetManifest<EyesSettings> = {
   name: 'Pause des yeux',
+  category: 'organize',
+  description: 'Rappel régulier de reposer ses yeux (règle 20-20-20).',
   icon: EyeIcon,
   size: { w: 3, h: 2, minW: 1, minH: 1 },
   defaults: { on: false, minutes: 20 },

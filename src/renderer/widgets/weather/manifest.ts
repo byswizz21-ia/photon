@@ -7,6 +7,8 @@ export type WeatherSettings = { city: string }
 
 const manifest: WidgetManifest<WeatherSettings> = {
   name: 'Météo',
+  category: 'info',
+  description: 'Température et prévisions de la ville choisie.',
   icon: CloudSunIcon,
   size: { w: 3, h: 2, minW: 2, minH: 1 },
   defaults: { city: '' },

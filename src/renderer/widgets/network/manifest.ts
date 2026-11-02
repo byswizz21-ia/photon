@@ -7,6 +7,8 @@ export type NetworkSettings = Record<string, never>
 
 const manifest: WidgetManifest<NetworkSettings> = {
   name: 'Réseau',
+  category: 'system',
+  description: 'Débit descendant et montant en direct.',
   icon: WifiHighIcon,
   size: { w: 3, h: 2, minW: 2, minH: 1 },
   defaults: {},

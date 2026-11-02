@@ -8,6 +8,8 @@ export type DisksSettings = { drives: string[] }
 
 const manifest: WidgetManifest<DisksSettings> = {
   name: 'Disques',
+  category: 'system',
+  description: 'Espace libre de chaque disque.',
   icon: HardDrivesIcon,
   size: { w: 3, h: 2, minW: 2, minH: 1 },
   defaults: { drives: [] },

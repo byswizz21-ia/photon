@@ -8,6 +8,8 @@ export type TimetrackSettings = Record<string, never>
 
 const manifest: WidgetManifest<TimetrackSettings> = {
   name: 'Suivi du temps',
+  category: 'time',
+  description: 'Un chrono par client ou projet, totaux du jour et de la semaine.',
   icon: HourglassIcon,
   size: { w: 3, h: 3, minW: 2, minH: 2 },
   defaults: {},

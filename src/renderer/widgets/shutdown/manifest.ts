@@ -9,6 +9,8 @@ export type ShutdownSettings = { action: ShutdownAction; minutes: number }
 
 const manifest: WidgetManifest<ShutdownSettings> = {
   name: "Minuteur d'arrêt",
+  category: 'tools',
+  description: 'Éteint, redémarre ou met en veille le PC dans N minutes.',
   icon: PowerIcon,
   size: { w: 3, h: 3, minW: 2, minH: 2 },
   defaults: { action: 'shutdown', minutes: 60 },

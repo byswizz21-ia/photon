@@ -7,6 +7,8 @@ export type VolumeSettings = Record<string, never>
 
 const manifest: WidgetManifest<VolumeSettings> = {
   name: 'Son',
+  category: 'media',
+  description: 'Volume de Windows, muet et choix de la sortie audio.',
   icon: SpeakerHighIcon,
   size: { w: 3, h: 3, minW: 2, minH: 1 },
   defaults: {},

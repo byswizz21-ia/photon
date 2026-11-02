@@ -7,6 +7,8 @@ export type FoldersSettings = { folders: string[] }
 
 const manifest: WidgetManifest<FoldersSettings> = {
   name: 'Dossiers',
+  category: 'tools',
+  description: 'Dossiers favoris et derniers fichiers ouverts.',
   icon: FolderOpenIcon,
   size: { w: 4, h: 3, minW: 2, minH: 1 },
   defaults: { folders: [] },

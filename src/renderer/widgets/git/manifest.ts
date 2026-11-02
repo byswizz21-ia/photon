@@ -7,6 +7,8 @@ export type GitSettings = { folders: string[] }
 
 const manifest: WidgetManifest<GitSettings> = {
   name: 'Projets Git',
+  category: 'dev',
+  description: 'Branche, fichiers modifiés et commits non poussés des projets choisis.',
   icon: GitBranchIcon,
   size: { w: 4, h: 3, minW: 2, minH: 1 },
   defaults: { folders: [] },

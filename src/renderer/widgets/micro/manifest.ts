@@ -14,6 +14,8 @@ export type MicroSettings = {
 
 const manifest: WidgetManifest<MicroSettings> = {
   name: 'Micro-entreprise',
+  category: 'organize',
+  description: "Chiffre d'affaires face aux plafonds, cotisations et prochaine déclaration URSSAF.",
   icon: BriefcaseIcon,
   size: { w: 4, h: 4, minW: 3, minH: 2 },
   defaults: { activity: 'services', period: 'mois', rate: 0 },

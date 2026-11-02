@@ -113,6 +113,8 @@ rien d'autre à modifier.
 
    const manifest: WidgetManifest<WeatherSettings> = {
      name: 'Météo', // nom dans le menu « Ajouter »
+     category: 'info', // rubrique du menu et du catalogue (liste : CATEGORIES dans widgets/types.ts)
+     description: 'Température et prévisions de la ville choisie.', // une phrase : ce qu'il fait
      icon: SunIcon, // icône Phosphor (import par chemin, suffixe Icon)
      size: { w: 3, h: 2, minW: 2, minH: 2 }, // en cases ; la grille a 12 colonnes
      defaults: { city: 'Paris' }, // réglages d'une nouvelle instance
@@ -140,6 +142,9 @@ rien d'autre à modifier.
    - `settings` : les réglages de cette instance (valeurs par défaut si absents ou abîmés).
    - `editing` : vrai en mode édition ; montre alors tes réglages.
    - `save(nouveauxRéglages)` : enregistre les réglages dans le profil.
+   - `preview` : vrai dans l'aperçu du catalogue (« Voir tous les widgets »). Le widget y tourne
+     avec ses réglages par défaut et des vraies données, sans clic possible. S'il envoie un réglage
+     à Photon dès le montage (comme « Pause des yeux »), il ne doit pas le faire en aperçu.
 
 4. Pour lire le système, passe par `window.photon` (liste dans `src/shared/api.ts`) et rafraîchis
    seulement quand Photon est affiché :

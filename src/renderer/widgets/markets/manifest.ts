@@ -9,6 +9,8 @@ export type MarketsSettings = { symbols: string }
 
 const manifest: WidgetManifest<MarketsSettings> = {
   name: 'Cours',
+  category: 'info',
+  description: 'Cours de cryptos, actions et indices.',
   icon: ChartLineUpIcon,
   size: { w: 3, h: 3, minW: 2, minH: 2 },
   defaults: { symbols: DEFAULT_MARKET_SYMBOLS },

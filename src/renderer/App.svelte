@@ -4,6 +4,7 @@
   import PencilSimpleIcon from 'phosphor-svelte/lib/PencilSimpleIcon'
   import CommandBar from './bar/CommandBar.svelte'
   import AddMenu from './grid/AddMenu.svelte'
+  import Catalog from './grid/Catalog.svelte'
   import Grid from './grid/Grid.svelte'
   import Logo from './lib/Logo.svelte'
   import { flushShared } from './lib/shared.svelte'
@@ -19,6 +20,7 @@
   let root: HTMLElement
   let gear = $state<HTMLButtonElement>()
   let settingsOpen = $state(false)
+  let catalogOpen = $state(false)
   let pressedVoid = false // le clic a commencé dans le vide (sinon : curseur glissé hors d'un contrôle)
   let claudeBusy = $state(false) // le logo tourne en continu pendant une réponse de Claude
   let place = $state<Placement | null>(null) // écran sous la fenêtre (flou réglable)
@@ -41,6 +43,7 @@
       app.visible = false
       app.editing = false
       settingsOpen = false
+      catalogOpen = false
       flushProfile()
       flushTheme()
       flushShared()
@@ -105,12 +108,13 @@
     switchProfile(profile.id)
   }
 
-  // Échap : ferme d'abord les réglages, puis quitte le mode édition, sinon ferme Photon.
+  // Échap : ferme d'abord le catalogue ou les réglages, puis quitte le mode édition, sinon ferme Photon.
   function onKeydown(event: KeyboardEvent): void {
     typeToSearch(event)
     profileShortcut(event)
     if (event.key !== 'Escape') return
-    if (settingsOpen) closeSettings()
+    if (catalogOpen) catalogOpen = false
+    else if (settingsOpen) closeSettings()
     else if (app.editing) app.editing = false
     else window.photon.hide('Échap')
   }
@@ -162,7 +166,7 @@
         <CommandBar onaction={runAction} />
         <div class="actions">
           {#if app.editing}
-            <AddMenu />
+            <AddMenu oncatalog={() => (catalogOpen = true)} />
             <button type="button" class="action primary" onclick={() => (app.editing = false)}>
               <CheckIcon size={16} weight="bold" aria-hidden="true" />
               Terminé
@@ -199,6 +203,7 @@
       {#key app.settings.activeProfile}<Grid />{/key}
     </main>
     {#if settingsOpen}<SettingsPanel onclose={closeSettings} />{/if}
+    {#if catalogOpen}<Catalog onclose={() => (catalogOpen = false)} />{/if}
   {/if}
 </div>
 

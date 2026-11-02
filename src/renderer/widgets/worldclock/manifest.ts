@@ -8,6 +8,8 @@ export type WorldClockSettings = { zones: Zone[] }
 
 const manifest: WidgetManifest<WorldClockSettings> = {
   name: 'Fuseaux horaires',
+  category: 'time',
+  description: "L'heure de plusieurs villes et le décalage avec ici.",
   icon: GlobeHemisphereWestIcon,
   size: { w: 3, h: 3, minW: 2, minH: 1 },
   defaults: {

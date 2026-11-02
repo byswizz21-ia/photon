@@ -9,6 +9,8 @@ export type DevToolsSettings = { tool: Tool }
 
 const manifest: WidgetManifest<DevToolsSettings> = {
   name: 'Outils dev',
+  category: 'dev',
+  description: 'Base64, URL, JSON, horodatage, SHA-256 et UUID.',
   icon: CodeIcon,
   size: { w: 4, h: 4, minW: 3, minH: 3 },
   defaults: { tool: 'base64' },

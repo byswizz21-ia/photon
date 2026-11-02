@@ -7,6 +7,8 @@ export type ClockSettings = { seconds: boolean }
 
 const manifest: WidgetManifest<ClockSettings> = {
   name: 'Horloge',
+  category: 'time',
+  description: 'Heure en grand et date du jour.',
   icon: ClockIcon,
   size: { w: 6, h: 2, minW: 1, minH: 1 },
   defaults: { seconds: false },

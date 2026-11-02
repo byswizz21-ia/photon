@@ -9,6 +9,8 @@ export type GradesSettings = { title: string; target: number; grades: Grade[] }
 
 const manifest: WidgetManifest<GradesSettings> = {
   name: 'Moyenne',
+  category: 'organize',
+  description: "Moyenne d'une matière et note à viser au prochain contrôle.",
   icon: GraduationCapIcon,
   size: { w: 3, h: 3, minW: 2, minH: 1 },
   defaults: { title: '', target: 12, grades: [] },

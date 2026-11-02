@@ -8,6 +8,10 @@
   // eslint-disable-next-line svelte/prefer-svelte-reactivity
   const placing = new Set<string>()
 
+  // Hauteur d'une case et marge par côté (l'écart entre deux cartes vaut le double), en px.
+  export const CELL = { comfortable: 100, compact: 80 }
+  export const MARGIN = { comfortable: 10, compact: 6 }
+
   export function addWidget(type: string): void {
     const manifest = Object.hasOwn(widgets, type) ? widgets[type] : undefined
     if (!manifest) return
@@ -30,10 +34,6 @@
   import type { WidgetManifest } from '../widgets/types'
   import { COLUMNS, applyLayout, cellsFor, mergeSettings } from './layout'
   import WidgetFrame from './WidgetFrame.svelte'
-
-  // Hauteur d'une case et marge par côté (l'écart entre deux cartes vaut le double), en px.
-  const CELL = { comfortable: 100, compact: 80 }
-  const MARGIN = { comfortable: 10, compact: 6 }
 
   let grid: GridStack | undefined
 

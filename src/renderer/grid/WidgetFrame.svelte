@@ -6,11 +6,20 @@
   import type { WidgetManifest, WidgetSettings } from '../widgets/types'
   import { mergeSettings } from './layout'
 
+  // preview : aperçu du catalogue, jamais en édition, rien d'enregistré.
   let {
     widget,
     manifest,
-    onremove
-  }: { widget: WidgetInstance; manifest: WidgetManifest; onremove: () => void } = $props()
+    onremove,
+    preview = false
+  }: {
+    widget: WidgetInstance
+    manifest: WidgetManifest
+    onremove?: () => void
+    preview?: boolean
+  } = $props()
+
+  const editing = $derived(app.editing && !preview)
 
   const settings = $derived(mergeSettings(manifest.defaults, widget.settings))
   const Widget = $derived(manifest.component)
@@ -18,6 +27,7 @@
   // Les clés inconnues de cette version (réglage d'une version plus récente ou plus ancienne)
   // sont gardées : changer de version de Photon ne fait perdre aucun réglage.
   function save(next: WidgetSettings): void {
+    if (preview) return
     widget.settings = { ...widget.settings, ...next }
     saveProfile()
   }
@@ -36,19 +46,13 @@
   }
 </script>
 
-<article
-  class="card"
-  class:editing={app.editing}
-  data-reveal
-  aria-label={manifest.name}
-  onpointermove={track}
->
+<article class="card" class:editing data-reveal aria-label={manifest.name} onpointermove={track}>
   <span class="ring" aria-hidden="true">
     <span class="spot" style:transform="translate({light.x}px, {light.y}px)"></span>
   </span>
   <div class="content">
     <svelte:boundary onerror={logError}>
-      <Widget {settings} editing={app.editing} {save} />
+      <Widget {settings} {editing} {save} {preview} />
       {#snippet failed(error, reset)}
         <div class="failed" role="alert">
           <p title={String(error)}>Ce widget a rencontré un problème.</p>
@@ -57,7 +61,7 @@
       {/snippet}
     </svelte:boundary>
   </div>
-  {#if app.editing}
+  {#if editing && onremove}
     <button class="remove" type="button" aria-label="Supprimer {manifest.name}" onclick={onremove}>
       <XIcon size={14} weight="bold" aria-hidden="true" />
     </button>

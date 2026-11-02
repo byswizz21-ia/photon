@@ -8,6 +8,8 @@ export type HolidaysSettings = { alsace: boolean } // Alsace-Moselle : 2 férié
 
 const manifest: WidgetManifest<HolidaysSettings> = {
   name: 'Jours fériés',
+  category: 'time',
+  description: 'Prochains jours fériés et ponts possibles.',
   icon: ConfettiIcon,
   size: { w: 3, h: 3, minW: 2, minH: 1 },
   defaults: { alsace: false },

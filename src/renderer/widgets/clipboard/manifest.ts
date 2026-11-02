@@ -8,6 +8,8 @@ export type ClipboardSettings = Record<string, never>
 
 const manifest: WidgetManifest<ClipboardSettings> = {
   name: 'Presse-papiers',
+  category: 'tools',
+  description: 'Derniers textes copiés et textes épinglés.',
   icon: ClipboardTextIcon,
   size: { w: 3, h: 4, minW: 2, minH: 1 },
   defaults: {},

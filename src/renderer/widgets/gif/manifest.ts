@@ -8,6 +8,8 @@ export type GifSettings = { file: string; fit: string } // nom de la copie ; 'co
 
 const manifest: WidgetManifest<GifSettings> = {
   name: 'GIF',
+  category: 'media',
+  description: 'Un GIF animé pour décorer (fichier, Giphy, Tenor).',
   icon: GifIcon,
   size: { w: 3, h: 3, minW: 1, minH: 1 },
   defaults: { file: '', fit: 'cover' },

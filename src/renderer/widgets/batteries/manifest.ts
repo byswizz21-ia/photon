@@ -8,6 +8,8 @@ export type BatteriesSettings = Record<string, never>
 
 const manifest: WidgetManifest<BatteriesSettings> = {
   name: 'Batteries',
+  category: 'system',
+  description: 'Batterie des appareils sans fil (casque…).',
   icon: BatteryHighIcon,
   size: { w: 3, h: 2, minW: 2, minH: 1 },
   defaults: {},

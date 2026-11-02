@@ -8,6 +8,8 @@ export type TodoSettings = { own: boolean }
 
 const manifest: WidgetManifest<TodoSettings> = {
   name: 'To-do',
+  category: 'organize',
+  description: 'Liste de tâches à cocher.',
   icon: ListChecksIcon,
   size: { w: 3, h: 3, minW: 2, minH: 2 },
   defaults: { own: false },

@@ -7,6 +7,8 @@ export type CountdownSettings = { title: string; date: string } // date « 2026-
 
 const manifest: WidgetManifest<CountdownSettings> = {
   name: 'Compte à rebours',
+  category: 'time',
+  description: 'Jours restants avant une date (échéance, vacances…).',
   icon: HourglassIcon,
   size: { w: 3, h: 2, minW: 1, minH: 1 },
   defaults: { title: '', date: '' },

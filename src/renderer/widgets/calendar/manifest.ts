@@ -7,6 +7,8 @@ export type CalendarSettings = { url: string }
 
 const manifest: WidgetManifest<CalendarSettings> = {
   name: 'Agenda',
+  category: 'time',
+  description: "Prochains événements d'un agenda (Google Agenda, iCal).",
   icon: CalendarDotsIcon,
   size: { w: 4, h: 3, minW: 3, minH: 2 },
   defaults: { url: '' },

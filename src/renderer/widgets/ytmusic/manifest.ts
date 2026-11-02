@@ -8,6 +8,8 @@ import Music from './Music.svelte'
 
 const manifest: WidgetManifest<MusicSettings> = {
   name: 'YT Music',
+  category: 'media',
+  description: 'Écoute YouTube Music sans ouvrir de fenêtre.',
   icon: MusicNotesIcon,
   size: { w: 4, h: 2, minW: 2, minH: 2 },
   defaults: MUSIC_DEFAULTS,

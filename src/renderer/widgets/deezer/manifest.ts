@@ -8,6 +8,8 @@ import Deezer from './Deezer.svelte'
 
 const manifest: WidgetManifest<MusicSettings> = {
   name: 'Deezer',
+  category: 'media',
+  description: 'Écoute Deezer sans ouvrir de fenêtre.',
   icon: WaveformIcon,
   size: { w: 4, h: 2, minW: 2, minH: 2 },
   defaults: MUSIC_DEFAULTS,

@@ -8,6 +8,8 @@ export type UsageSettings = Record<string, never>
 
 const manifest: WidgetManifest<UsageSettings> = {
   name: 'Usage Claude',
+  category: 'dev',
+  description: 'Tokens Claude Code utilisés (5 h, jour, semaine).',
   icon: GaugeIcon,
   size: { w: 3, h: 2, minW: 2, minH: 1 },
   defaults: {},

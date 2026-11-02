@@ -8,6 +8,8 @@ export type HabitsSettings = { own: boolean }
 
 const manifest: WidgetManifest<HabitsSettings> = {
   name: 'Habitudes',
+  category: 'organize',
+  description: 'Cocher chaque jour ses habitudes et suivre sa série.',
   icon: FlameIcon,
   size: { w: 4, h: 3, minW: 3, minH: 2 },
   defaults: { own: false },

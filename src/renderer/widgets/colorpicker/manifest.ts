@@ -8,6 +8,8 @@ export type ColorPickerSettings = { colors: string[] } // « #rrggbb », la plus
 
 const manifest: WidgetManifest<ColorPickerSettings> = {
   name: 'Pipette',
+  category: 'tools',
+  description: "Prend une couleur n'importe où sur l'écran et la copie.",
   icon: EyedropperIcon,
   size: { w: 3, h: 3, minW: 2, minH: 2 },
   defaults: { colors: [] },

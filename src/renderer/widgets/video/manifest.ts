@@ -8,6 +8,8 @@ export type VideoSettings = { file: string; fit: string; sound: boolean }
 
 const manifest: WidgetManifest<VideoSettings> = {
   name: 'Vidéo',
+  category: 'media',
+  description: 'Une vidéo en boucle pour décorer.',
   icon: FilmStripIcon,
   size: { w: 4, h: 3, minW: 1, minH: 1 },
   defaults: { file: '', fit: 'cover', sound: false },

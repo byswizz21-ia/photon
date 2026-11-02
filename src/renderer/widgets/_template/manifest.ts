@@ -8,6 +8,8 @@ export type TemplateSettings = { label: string }
 
 const manifest: WidgetManifest<TemplateSettings> = {
   name: 'Modèle',
+  category: 'tools',
+  description: 'Une phrase : ce que fait le widget.',
   icon: CubeIcon,
   size: { w: 3, h: 2, minW: 2, minH: 1 },
   defaults: { label: 'Bonjour' },

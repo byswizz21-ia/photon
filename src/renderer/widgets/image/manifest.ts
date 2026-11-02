@@ -8,6 +8,8 @@ export type ImageSettings = { image: string; fit: string } // nom du fichier cop
 
 const manifest: WidgetManifest<ImageSettings> = {
   name: 'Image',
+  category: 'media',
+  description: 'Une image pour décorer.',
   icon: ImageIcon,
   size: { w: 3, h: 3, minW: 1, minH: 1 },
   defaults: { image: '', fit: 'cover' },

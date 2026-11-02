@@ -8,6 +8,8 @@ export type NotesSettings = { own: boolean }
 
 const manifest: WidgetManifest<NotesSettings> = {
   name: 'Notes',
+  category: 'organize',
+  description: 'Bloc-notes toujours sous la main.',
   icon: NoteIcon,
   size: { w: 3, h: 3, minW: 2, minH: 1 },
   defaults: { own: false },

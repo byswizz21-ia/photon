@@ -7,6 +7,8 @@ export type ClaudeSettings = Record<string, never>
 
 const manifest: WidgetManifest<ClaudeSettings> = {
   name: 'Claude',
+  category: 'dev',
+  description: 'Pose une question à Claude, réponse mot par mot.',
   icon: SparkleIcon,
   size: { w: 5, h: 5, minW: 4, minH: 4 },
   defaults: {},

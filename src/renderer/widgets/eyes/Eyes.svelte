@@ -8,7 +8,7 @@
   import type { WidgetProps } from '../types'
   import type { EyesSettings } from './manifest'
 
-  let { settings, save }: WidgetProps<EyesSettings> = $props()
+  let { settings, save, preview }: WidgetProps<EyesSettings> = $props()
 
   const INTERVALS = [20, 30, 45, 60]
   const minutes = $derived(INTERVALS.includes(settings.minutes) ? settings.minutes : 20)
@@ -16,7 +16,9 @@
   let current: EyesState = $state({ on: false, minutes: 20, next: null })
   let now = $state(Date.now())
 
+  // Aperçu du catalogue : il montre l'état réel sans le changer.
   $effect(() => {
+    if (preview) return
     void window.photon.eyesSet(settings.on, minutes).then((s) => {
       current = s
       now = Date.now()

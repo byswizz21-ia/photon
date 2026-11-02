@@ -8,6 +8,8 @@ import Spotify from './Spotify.svelte'
 
 const manifest: WidgetManifest<MusicSettings> = {
   name: 'Spotify',
+  category: 'media',
+  description: "Pilote l'app Spotify : pochette, morceau, lecture.",
   icon: SpotifyLogoIcon,
   size: { w: 4, h: 2, minW: 2, minH: 2 },
   defaults: MUSIC_DEFAULTS,

@@ -7,6 +7,8 @@ export type ProcessesSettings = { sort: 'cpu' | 'ram' }
 
 const manifest: WidgetManifest<ProcessesSettings> = {
   name: 'Processus',
+  category: 'system',
+  description: 'Programmes les plus gourmands, avec un bouton fermer.',
   icon: GaugeIcon,
   size: { w: 4, h: 3, minW: 2, minH: 2 },
   defaults: { sort: 'cpu' },
