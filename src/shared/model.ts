@@ -119,7 +119,7 @@ export const defaultTheme = (): Theme => ({
   accent: 'auto',
   blur: 48,
   opacity: 0.5,
-  radius: 20,
+  radius: 24,
   density: 'comfortable',
   font: { family: '', weight: 0, scale: 1 }
 })

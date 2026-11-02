@@ -279,6 +279,7 @@
     flex-direction: column;
     gap: 20px;
     overflow: auto;
+    border-radius: var(--radius-window); /* bordure en dégradé qui suit les coins de Windows */
     background: var(--grain), var(--panel-light), var(--panel-sheen), var(--panel-tint);
     box-shadow: var(--panel-rim);
   }

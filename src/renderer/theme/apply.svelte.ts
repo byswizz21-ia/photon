@@ -100,7 +100,6 @@ export function useTheme(): void {
     style.setProperty('--on-accent', onAccent(accent))
     style.setProperty('--glass', String(theme.opacity))
     style.setProperty('--radius', `${theme.radius}px`)
-    style.setProperty('--radius-panel', `${theme.radius + 8}px`)
     style.setProperty('--blur', `${theme.blur}px`)
     style.setProperty('--font-sans', fontStack(theme.font.family))
     style.setProperty('--weight-shift', String(theme.font.weight))

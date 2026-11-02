@@ -332,7 +332,7 @@
     height: 32px;
     display: grid;
     place-items: center;
-    border-radius: var(--radius-bar);
+    border-radius: var(--radius-kbd);
     overflow: hidden;
     background: var(--white-6);
     color: var(--text-faint);

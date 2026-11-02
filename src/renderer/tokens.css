@@ -148,23 +148,26 @@
     0 50px 120px -30px rgb(0 0 0 / 0.8),
     0 0 120px -30px color-mix(in srgb, var(--accent) 45%, transparent);
 
-  /* Arrondis : imbriqués (panneau = carte + 8) ; boutons, pastilles et puces toujours ronds */
-  --radius-panel: 28px;
-  --radius: 20px; /* carte de widget (theme, 0 à 40) */
-  --radius-popover: 18px;
-  --radius-tile: 16px;
-  --radius-composer: 16px;
-  --radius-menu: 14px;
-  --radius-bubble: 14px;
-  --radius-row: 12px;
-  --radius-select: 12px;
-  --radius-input: 10px;
-  --radius-menu-item: 10px;
-  --radius-icon: 9px;
-  --radius-pre: 8px;
-  --radius-kbd: 6px;
-  --radius-check: 6px;
-  --radius-bar: 4px;
+  /* Arrondis : tous suivent celui des cartes (réglage du thème, 0 à 40), donc un thème plus
+     rond arrondit tout pareil. Plus l'élément est petit ou enfoncé dans la carte, plus le
+     rapport est faible (coins concentriques). Boutons, pastilles et puces toujours ronds. */
+  --radius: 24px; /* carte de widget */
+  --radius-panel: calc(var(--radius) + 8px);
+  --radius-popover: calc(var(--radius) * 0.8);
+  --radius-tile: calc(var(--radius) * 0.65);
+  --radius-composer: calc(var(--radius) * 0.65);
+  --radius-menu: calc(var(--radius) * 0.6);
+  --radius-bubble: calc(var(--radius) * 0.6);
+  --radius-row: calc(var(--radius) * 0.5);
+  --radius-select: calc(var(--radius) * 0.5);
+  --radius-input: calc(var(--radius) * 0.45);
+  --radius-menu-item: calc(var(--radius) * 0.45);
+  --radius-icon: calc(var(--radius) * 0.4);
+  --radius-pre: calc(var(--radius) * 0.35);
+  --radius-kbd: calc(var(--radius) * 0.25);
+  --radius-check: calc(var(--radius) * 0.25);
+  --radius-bar: 4px; /* barres fines et petites étiquettes : fixe */
+  --radius-window: 8px; /* coins que Windows 11 dessine autour de la fenêtre */
   --radius-pill: 999px;
 
   /* Ombres : longues, douces, étalement négatif, toujours avec le liseré */

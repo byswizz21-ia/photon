@@ -217,11 +217,13 @@
     overflow: visible;
   }
 
-  /* Poignée de redimensionnement : un quart d'arc lumineux dans le coin. */
+  /* Poignée de redimensionnement : un quart d'arc lumineux posé sur le coin de la carte
+     (même taille que l'arrondi, sinon l'arc ne suit pas la courbe). */
   .grid-stack :global(.ui-resizable-se) {
     transform: none;
-    width: 18px;
-    height: 18px;
+    box-sizing: border-box;
+    width: max(18px, var(--radius));
+    height: max(18px, var(--radius));
     background: none;
     border-right: 2px solid var(--accent);
     border-bottom: 2px solid var(--accent);

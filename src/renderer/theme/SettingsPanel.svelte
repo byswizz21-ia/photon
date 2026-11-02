@@ -451,7 +451,7 @@
     flex-direction: column;
     gap: 24px;
     border: 1px solid var(--glass-edge);
-    border-radius: var(--radius-panel);
+    border-radius: var(--radius);
     background: var(--glass-sheen), var(--drawer-bg);
     backdrop-filter: var(--glass-filter-drawer);
     box-shadow: var(--shadow-popover);

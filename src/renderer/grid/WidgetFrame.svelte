@@ -154,10 +154,11 @@
     overflow-y: auto;
   }
 
+  /* Bouton × centré sur l'arc du coin (à 0,29 × l'arrondi du bord), pas dans le vide. */
   .remove {
     position: absolute;
-    top: -8px;
-    right: -8px;
+    top: calc(var(--radius) * 0.29 - 14px);
+    right: calc(var(--radius) * 0.29 - 14px);
     width: 28px;
     height: 28px;
     display: grid;

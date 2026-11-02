@@ -534,7 +534,7 @@
     gap: 6px;
     padding: 8px 12px;
     border: 1px solid var(--glass-edge);
-    border-radius: 14px 14px 4px 14px;
+    border-radius: var(--radius-bubble) var(--radius-bubble) var(--radius-bar) var(--radius-bubble);
     background: var(--white-7);
   }
 

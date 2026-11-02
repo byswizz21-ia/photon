@@ -82,7 +82,7 @@
 
   code {
     padding: 1px 5px;
-    border-radius: 5px;
+    border-radius: var(--radius-kbd);
     background: var(--white-8);
     font-family: 'Cascadia Code', Consolas, monospace;
     font-size: 0.92em;
@@ -116,7 +116,7 @@
     place-items: center;
     padding: 0;
     border: 1px solid var(--line);
-    border-radius: 7px;
+    border-radius: var(--radius-kbd);
     background: var(--menu-bg-solid);
     cursor: pointer;
     opacity: 0;
