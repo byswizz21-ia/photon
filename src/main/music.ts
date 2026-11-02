@@ -3,7 +3,7 @@
 // seulement si un widget du service existe (≈ 300 Mo de RAM chacune). Spotify : son app Windows
 // (src/main/spotify.ts). Cookies de chaque service dans une session à part, jamais lus par Photon
 // (sauf la présence du cookie de connexion).
-import { app, BrowserWindow, nativeImage, net, session, shell } from 'electron'
+import { app, BrowserWindow, nativeImage, net, session, shell, type WebContents } from 'electron'
 import { join } from 'node:path'
 import icon from '../../assets/icon.ico?asset'
 import { MUSIC_SERVICES } from '../shared/api'
@@ -229,17 +229,47 @@ function create(service: WebService): void {
     event.preventDefault()
     win.hide()
   })
-  // Liens qui ouvrent une fenêtre : navigateur par défaut.
-  win.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith('https://')) void shell.openExternal(url)
-    return { action: 'deny' }
-  })
+  handlePopups(win.webContents)
   win.webContents.on('render-process-gone', (_event, { reason }) => {
     if (reason !== 'clean-exit' && !win.isDestroyed()) win.webContents.reload()
   })
   // Changement de morceau (titre de la page) : pochette préparée en fond, pas à l'ouverture.
   win.on('page-title-updated', () => void onTrack(service))
   void win.loadURL(config.home)
+}
+
+// Popup ouverte par script (« Continuer avec Google, Facebook, Apple » : about:blank puis le site
+// de connexion) : fenêtre Electron, même session, pour que le résultat revienne à la page.
+// En Firefox, sinon Google refuse (voir FIREFOX). Simple lien : navigateur par défaut.
+function handlePopups(contents: WebContents): void {
+  contents.setWindowOpenHandler(({ url, disposition }) => {
+    if (disposition === 'new-window') {
+      return { action: 'allow', overrideBrowserWindowOptions: { icon, autoHideMenuBar: true } }
+    }
+    if (url.startsWith('https://')) void shell.openExternal(url)
+    return { action: 'deny' }
+  })
+  contents.on('did-create-window', (popup) => {
+    firefox(popup.webContents)
+    handlePopups(popup.webContents)
+  })
+}
+
+// Bug Electron : une popup ignore setUserAgent (session comme fenêtre) et se présente en Electron.
+// L'outil DevTools de Chromium, lui, s'applique (en-tête et navigator.userAgent). Posé pendant
+// about:blank ; si le site de connexion a déjà commencé à charger, on le recharge.
+function firefox(contents: WebContents): void {
+  try {
+    contents.debugger.attach()
+  } catch {
+    return // DevTools déjà ouverts sur la popup
+  }
+  void contents.debugger
+    .sendCommand('Emulation.setUserAgentOverride', { userAgent: FIREFOX() })
+    .then(() => {
+      if (contents.getURL().startsWith('https://')) contents.reload()
+    })
+    .catch(() => {})
 }
 
 // Spotify n'a pas d'évènement de changement de morceau : relu toutes les 5 s, seulement si une
