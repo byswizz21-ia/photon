@@ -5,6 +5,7 @@ import type { Settings } from '../shared/model'
 import { audio, audioDevice, audioMute, audioVolume } from './audio'
 import { awake, awakeStart, awakeStop, syncAwake } from './awake'
 import { eyes, eyesSet, syncEyes } from './eyes'
+import { notifyTest } from './notify'
 import { pickColor } from './colorpicker'
 import { portClose, ports } from './ports'
 import { shutdownCancel, shutdownStart, shutdownState, syncShutdown } from './shutdown'
@@ -73,7 +74,8 @@ const EDITABLE: readonly string[] = [
   'reduceMotion',
   'autoProfiles',
   'liveBlur',
-  'sound'
+  'sound',
+  'notifications'
 ]
 
 const editable = (patch: unknown): Partial<Settings> =>
@@ -222,4 +224,5 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:shutdownStart', shutdownStart) // action et durée validées dans shutdown.ts
   handle('photon:shutdownCancel', shutdownCancel)
   handle('photon:pickColor', pickColor)
+  on('photon:notifyTest', notifyTest)
 }

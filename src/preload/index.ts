@@ -88,6 +88,7 @@ const photon: PhotonApi = {
   awakeStop: () => ipcRenderer.invoke('photon:awakeStop'),
   eyes: () => ipcRenderer.invoke('photon:eyes'),
   eyesSet: (on, minutes) => ipcRenderer.invoke('photon:eyesSet', on, minutes),
+  notifyTest: () => ipcRenderer.send('photon:notifyTest'),
   ports: () => ipcRenderer.invoke('photon:ports'),
   portClose: (pid) => ipcRenderer.invoke('photon:portClose', pid),
   shutdownState: () => ipcRenderer.invoke('photon:shutdownState'),

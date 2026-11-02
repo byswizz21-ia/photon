@@ -4,7 +4,6 @@ import { powerMonitor } from 'electron'
 import type { EyesState } from '../shared/api'
 import { data } from './data'
 import { notify } from './notify'
-import { showWindow } from './window'
 
 const AWAY_S = 120 // inactif depuis 2 min : il fait déjà une pause
 
@@ -13,14 +12,11 @@ let state: EyesState = { on: false, minutes: 20, next: null }
 
 function remind(): void {
   if (powerMonitor.getSystemIdleTime() < AWAY_S) {
-    notify(
-      {
-        title: 'Pause des yeux',
-        body: 'Regarde quelque chose au loin pendant 20 secondes.',
-        silent: true
-      },
-      showWindow
-    )
+    notify('eyes', {
+      title: 'Pause des yeux',
+      body: 'Regarde quelque chose au loin pendant 20 secondes.',
+      silent: true
+    })
   }
   schedule()
 }

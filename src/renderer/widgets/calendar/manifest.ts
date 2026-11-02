@@ -3,7 +3,8 @@ import CalendarDotsIcon from 'phosphor-svelte/lib/CalendarDotsIcon'
 import type { WidgetManifest } from '../types'
 import Calendar from './Calendar.svelte'
 
-export type CalendarSettings = { url: string }
+// remind : minutes avant chaque événement pour la notification (src/main/reminders.ts), 0 = aucune.
+export type CalendarSettings = { url: string; remind: number }
 
 const manifest: WidgetManifest<CalendarSettings> = {
   name: 'Agenda',
@@ -11,7 +12,7 @@ const manifest: WidgetManifest<CalendarSettings> = {
   description: "Prochains événements d'un agenda (Google Agenda, iCal).",
   icon: CalendarDotsIcon,
   size: { w: 4, h: 3, minW: 3, minH: 2 },
-  defaults: { url: '' },
+  defaults: { url: '', remind: 10 },
   component: Calendar
 }
 

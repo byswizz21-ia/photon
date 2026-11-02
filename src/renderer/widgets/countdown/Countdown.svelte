@@ -4,7 +4,7 @@
   import { pollWhileVisible } from '../../lib/poll.svelte'
   import RollingNumber from '../../lib/RollingNumber.svelte'
   import type { WidgetProps } from '../types'
-  import { daysUntil } from './days'
+  import { daysUntil } from '../../../shared/days'
   import type { CountdownSettings } from './manifest'
 
   let { settings, editing, save }: WidgetProps<CountdownSettings> = $props()

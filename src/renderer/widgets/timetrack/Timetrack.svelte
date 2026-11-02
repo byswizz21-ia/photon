@@ -8,7 +8,14 @@
   import { shared } from '../../lib/shared.svelte'
   import type { WidgetProps } from '../types'
   import type { TimetrackSettings } from './manifest'
-  import { duration, parseTime, spent, startOfDay, startOfWeek, toggle } from './time'
+  import {
+    duration,
+    parseTime,
+    spent,
+    startOfDay,
+    startOfWeek,
+    toggle
+  } from '../../../shared/timetrack'
 
   let { editing }: WidgetProps<TimetrackSettings> = $props()
 

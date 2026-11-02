@@ -25,6 +25,27 @@ export interface Settings {
   autoProfiles: boolean // bascule automatique selon les règles des profils
   liveBlur: boolean // mode fenêtre : flou fait par Photon (capture de l'écran), réglable
   sound: SoundSettings
+  notifications: NotifySettings
+}
+
+// Notifications Windows de Photon, par source : [nom, quand elle arrive]. L'avertissement du
+// minuteur d'arrêt n'est pas listé : il part toujours (sinon le PC s'éteindrait sans prévenir).
+export const NOTIFY_SOURCES = {
+  calendar: ['Agenda', 'Avant chaque événement (délai réglé dans le widget)'],
+  countdown: ['Compte à rebours', 'La veille et le jour J, à partir de 9 h'],
+  micro: ['Micro-entreprise', 'Déclaration URSSAF : 7 jours avant, puis le dernier jour'],
+  timetrack: ['Suivi du temps', 'Chrono qui tourne depuis plus de 4 h'],
+  pomodoro: ['Pomodoro', 'Fin du travail et de la pause'],
+  eyes: ['Pause des yeux', 'Regarder au loin, à intervalle réglé dans le widget'],
+  claude: ['Claude', "Demande d'accord, Photon caché"],
+  music: ['Musique', 'Changement de morceau (option de chaque lecteur)'],
+  profiles: ['Profils automatiques', 'Bascule vers un autre profil']
+} as const
+export type NotifySource = keyof typeof NOTIFY_SOURCES
+
+export interface NotifySettings {
+  enabled: boolean
+  sources: Record<string, boolean> // source absente = activée ; inconnues gardées (retour en arrière)
 }
 
 // Sons de l'interface (src/renderer/sound.svelte.ts), par famille.
@@ -122,7 +143,8 @@ export const defaultSettings = (): Settings => ({
   reduceMotion: false,
   autoProfiles: false,
   liveBlur: false,
-  sound: defaultSound()
+  sound: defaultSound(),
+  notifications: { enabled: true, sources: {} }
 })
 
 export const defaultSound = (): SoundSettings => ({
@@ -214,6 +236,16 @@ function parseSound(v: unknown): SoundSettings {
   }
 }
 
+function parseNotify(v: unknown): NotifySettings {
+  if (!isObject(v)) return { enabled: true, sources: {} }
+  const sources = isObject(v.sources)
+    ? Object.fromEntries(
+        Object.entries(v.sources).filter(([key, on]) => isName(key) && typeof on === 'boolean')
+      )
+    : {}
+  return { enabled: v.enabled !== false, sources: sources as Record<string, boolean> }
+}
+
 export function parseSettings(raw: unknown): Settings {
   const v = root(raw)
   const d = defaultSettings()
@@ -233,7 +265,8 @@ export function parseSettings(raw: unknown): Settings {
     reduceMotion: typeof v.reduceMotion === 'boolean' ? v.reduceMotion : d.reduceMotion,
     autoProfiles: v.autoProfiles === true,
     liveBlur: v.liveBlur === true,
-    sound: parseSound(v.sound)
+    sound: parseSound(v.sound),
+    notifications: parseNotify(v.notifications)
   }
 }
 

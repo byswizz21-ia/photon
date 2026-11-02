@@ -128,3 +128,12 @@ test('police du thème : défaut si absente, nom sans guillemet, bornes', () => 
   expect(parseTheme({ font: { family: 'x"; } body { color: red' } }).font.family).toBe('')
   expect(parseTheme({ font: { weight: 120 } }).font.weight).toBe(100)
 })
+
+test('parseSettings : notifications activées par défaut, sources inconnues gardées', () => {
+  expect(parseSettings({}).notifications).toEqual({ enabled: true, sources: {} })
+  expect(
+    parseSettings({
+      notifications: { enabled: false, sources: { music: false, futur: true, x: 1 } }
+    }).notifications
+  ).toEqual({ enabled: false, sources: { music: false, futur: true } })
+})

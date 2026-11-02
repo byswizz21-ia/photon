@@ -89,6 +89,7 @@ function switchTo(target: ProfileInfo): void {
   if (!previous) return
   // Annuler : seulement si personne n'a changé de profil entre-temps.
   notify(
+    'profiles',
     {
       title: `Profil « ${target.name} » activé`,
       body: `Cliquer pour revenir à « ${previous.name} »`,

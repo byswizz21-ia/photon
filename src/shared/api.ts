@@ -419,6 +419,7 @@ export interface PhotonApi {
   shutdownCancel(): Promise<ShutdownState>
   pickColor(): Promise<string | null> // « #rrggbb » cliqué à l'écran ; null : annulé
   eyesSet(on: boolean, minutes: number): Promise<EyesState> // 5 à 120 min
+  notifyTest(): void // notification d'essai (Réglages › Notifications)
   // Thème
   pickFile(kind: FileKind): Promise<string | null> // boîte de dialogue ; null si annulée
   // Copie chez Photon ; nom pour photon://images|videos|fonts/<nom>, null si refusé

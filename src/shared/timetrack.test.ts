@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { duration, parseTime, spent, startOfWeek, toggle } from './time'
+import { duration, parseTime, spent, startOfWeek, toggle } from './timetrack'
 
 const at = (day: number, h: number, m = 0): number => new Date(2026, 10, day, h, m).getTime()
 

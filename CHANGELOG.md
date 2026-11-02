@@ -1,5 +1,16 @@
 # Mises à jour
 
+## À venir
+
+### Nouveau
+
+- **Notifications** : toutes passent par un même système, réglable dans Réglages ›
+  Notifications (tout couper, ou source par source, et notification d'essai). L'avertissement
+  avant un arrêt du PC part toujours.
+- **Rappels** : Agenda (5 à 60 min avant chaque événement, réglé dans le widget), Compte à
+  rebours (la veille et le jour J), Micro-entreprise (déclaration URSSAF 7 jours avant puis le
+  dernier jour), Suivi du temps (chrono qui tourne depuis plus de 4 h).
+
 ## 1.1.0 · 2 novembre 2026
 
 ### Nouveau

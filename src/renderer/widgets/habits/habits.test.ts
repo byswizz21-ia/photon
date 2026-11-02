@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { dayKey } from '../../lib/day'
+import { dayKey } from '../../../shared/day'
 import { parseHabits, streak, toggleDay } from './habits'
 
 const now = new Date(2026, 10, 2, 9) // lundi 2 novembre 2026
