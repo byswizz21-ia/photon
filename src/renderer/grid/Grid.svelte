@@ -24,7 +24,7 @@
 <script lang="ts">
   import { GridStack, type GridItemHTMLElement, type GridStackWidget } from 'gridstack'
   import 'gridstack/dist/gridstack.min.css'
-  import { untrack } from 'svelte'
+  import { tick, untrack } from 'svelte'
   import type { WidgetInstance } from '../../shared/model'
   import { saveProfile } from '../state.svelte'
   import type { WidgetManifest } from '../widgets/types'
@@ -40,8 +40,8 @@
   // Seuls les widgets dont le dossier existe s'affichent ; les autres restent dans le profil.
   const items = $derived(app.profile.widgets.filter((w) => Object.hasOwn(widgets, w.type)))
 
-  // Profil affiché par cette grille : remontée à chaque bascule (App.svelte). Pendant son
-  // démontage, gridstack signale le retrait des cartes : rien à sauver, le profil a changé.
+  // Profil affiché par cette grille : remontée à chaque bascule (App.svelte). Une sauvegarde qui
+  // arrive après la bascule (glisser fini juste avant) ne touche pas le nouveau profil.
   const owner = untrack(() => app.profile)
 
   // Glisser, redimensionner, ajouter, supprimer : on relit la disposition 12 colonnes et on sauve.
@@ -112,22 +112,37 @@
           draggable: { cancel: 'button, input, select, textarea, a, [data-no-drag]' },
           resizable: { handles: 'se' },
           // Poignée visible en permanence en mode édition (sinon seulement au survol de la carte).
-          alwaysShowResizeHandle: true,
-          // La grille se réorganise selon la largeur (mode fenêtre) ; la disposition 12 est gardée.
-          columnOpts: {
-            breakpoints: [
-              { w: 560, c: 1 },
-              { w: 860, c: 6 }
-            ]
-          }
+          alwaysShowResizeHandle: true
         },
         el
       ) ?? undefined
-    untrack(() => el.querySelectorAll<HTMLElement>(':scope > .grid-stack-item').forEach(makeItem))
-    // Écouteurs posés après le premier placement : ouvrir Photon n'écrit rien sur le disque.
-    grid?.on('change', persist)
-    grid?.on('added', persist)
-    grid?.on('removed', persist)
+    // Les cartes se posent juste après (leurs propres attachements) : la suite attend le rendu.
+    const ready = grid
+    void tick().then(() => {
+      if (!ready || grid !== ready) return
+      untrack(() => el.querySelectorAll<HTMLElement>(':scope > .grid-stack-item').forEach(makeItem))
+      // Colonnes selon la largeur (mode fenêtre étroit) : activées une fois les cartes posées en
+      // 12 colonnes, pour que gridstack garde cette disposition et la rende quand la place
+      // revient. Une grille née étroite (retour du mini-mode : la fenêtre a encore la taille de
+      // la barre) rangeait sinon les cartes en 6 colonnes et perdait la vraie disposition.
+      // updateOptions ne trie pas comme l'init : seuils du plus large au plus étroit, maximum.
+      ready.updateOptions({
+        columnOpts: {
+          columnMax: COLUMNS,
+          breakpoints: [
+            { w: 860, c: 6 },
+            { w: 560, c: 1 }
+          ]
+        }
+      })
+      // Sauvé seulement sur une action : glisser, redimensionner, ajouter (supprimer : remove) ; écouteurs
+      // posés après le premier placement (ouvrir Photon n'écrit rien). Pas sur « change » :
+      // gridstack le lance aussi quand il réarrange seul. dragstop / resizestop partent avant la
+      // fin de sa mise à jour : lus juste après.
+      ready.on('dragstop', () => queueMicrotask(persist))
+      ready.on('resizestop', () => queueMicrotask(persist))
+      ready.on('added', persist)
+    })
     return () => {
       grid?.destroy(false)
       grid = undefined
@@ -136,14 +151,19 @@
 
   function setupItem(el: HTMLElement): () => void {
     untrack(() => makeItem(el))
+    // Retrait sans événement : quand toute la grille se démonte (mini-mode, profil), gridstack
+    // remonte les cartes restantes à chaque retrait ; sauver là écrivait un profil tassé (y = 0).
     return () => {
-      if ((el as GridItemHTMLElement).gridstackNode) grid?.removeWidget(el, false)
+      if ((el as GridItemHTMLElement).gridstackNode) grid?.removeWidget(el, false, false)
     }
   }
 
+  // Bouton « supprimer » : la carte part (setupItem), puis la disposition restante est sauvée.
   function remove(id: string): void {
     const index = app.profile.widgets.findIndex((w) => w.id === id)
-    if (index >= 0) app.profile.widgets.splice(index, 1)
+    if (index < 0) return
+    app.profile.widgets.splice(index, 1)
+    void tick().then(persist)
   }
 
   $effect(() => {
