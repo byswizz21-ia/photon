@@ -209,6 +209,13 @@
     overflow: hidden;
   }
 
+  /* Mode fenêtre : le flou de verre des menus et du tiroir n'agit pas (fenêtre transparente),
+     les widgets se liraient au travers. Fonds presque opaques à la place. */
+  .root:not(.fullscreen) {
+    --menu-bg: var(--menu-bg-solid);
+    --drawer-bg: var(--drawer-bg-solid);
+  }
+
   /* Mini-mode : la fenêtre (verre acrylic de Windows) ne contient que la barre. */
   .root.mini {
     height: auto;
@@ -241,7 +248,7 @@
 
   /* Fond net et assombri : c'est le panneau qui le floute, d'où l'effet de verre. */
   .fullscreen .veil {
-    background-color: rgb(7 8 11 / 0.4);
+    background-color: var(--veil-dark);
   }
 
   .light {

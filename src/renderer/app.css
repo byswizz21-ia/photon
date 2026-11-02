@@ -124,10 +124,25 @@ button {
   background: var(--white-6);
 }
 
-/* Barres de défilement fines et discrètes (listes des widgets, panneau). */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--white-18) transparent;
+/* Barres de défilement fines et discrètes (listes des widgets, panneau), sans les flèches que
+   Windows ajoute aux barres « thin » standard. */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: var(--white-18);
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
 }
 
 /* Curseur (volume, progression) : barre fine remplie jusqu'au curseur (--fill). */

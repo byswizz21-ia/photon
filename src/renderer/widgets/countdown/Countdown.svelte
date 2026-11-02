@@ -30,6 +30,7 @@
 
 <div class="widget" class:editing>
   {#if editing || days === null}
+    {#if !editing}<p class="hint">Choisis une date en mode édition</p>{/if}
     <label class="field" data-no-drag>
       Nom
       <input
@@ -74,7 +75,10 @@
     overflow: hidden;
   }
 
+  /* Mode édition : la case grandit avec ses réglages, la carte les fait défiler (WidgetFrame). */
   .widget.editing {
+    height: auto;
+    min-height: 100%;
     justify-content: flex-start;
     gap: 10px;
   }
@@ -156,12 +160,33 @@
     outline-offset: var(--focus-offset);
   }
 
-  /* Petite case : nombre et unité seulement ; en édition, les deux champs côte à côte. */
+  .hint {
+    display: none;
+    margin: 0;
+    font-size: var(--text-12);
+    color: var(--text-faint);
+  }
+
+  /* Case trop petite pour les champs, sans date : une phrase à la place (comme l'Agenda). */
+  @container (max-width: 220px) {
+    .widget:not(.editing) .hint {
+      display: block;
+    }
+
+    .widget:not(.editing) .field {
+      display: none;
+    }
+  }
+
+  /* Petite case : nombre et unité seulement ; en édition, les deux champs côte à côte s'ils
+     tiennent en largeur (sinon l'un sous l'autre, la carte défile). */
   @container (max-height: 120px) {
     .date {
       display: none;
     }
+  }
 
+  @container (max-height: 120px) and (min-width: 221px) {
     .widget.editing {
       flex-direction: row;
       align-items: flex-end;

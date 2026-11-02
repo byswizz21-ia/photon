@@ -258,7 +258,7 @@
   .delete:hover,
   .delete.confirm {
     color: var(--danger-text);
-    background: rgb(255 77 94 / 0.12);
+    background: var(--danger-surface);
   }
 
   /* Le panneau s'ouvre sous les pastilles, hors de leur zone qui défile (elle le couperait). */

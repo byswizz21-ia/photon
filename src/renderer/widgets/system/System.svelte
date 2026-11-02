@@ -167,4 +167,23 @@
       display: block;
     }
   }
+
+  /* Une seule rangée de haut : CPU, RAM et GPU côte à côte, sans le titre. */
+  @container (max-height: 110px) {
+    .widget {
+      flex-direction: row;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .label,
+    .temp {
+      display: none;
+    }
+
+    .measure {
+      flex: 1;
+      min-width: 0;
+    }
+  }
 </style>

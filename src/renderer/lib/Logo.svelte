@@ -98,7 +98,7 @@
   }
 
   .orbit.idle {
-    animation: cycle 10s infinite;
+    animation: cycle var(--dur-logo-cycle) infinite;
   }
 
   .orbit.spin {
@@ -106,7 +106,7 @@
   }
 
   .orbit.thinking {
-    animation: turn 1.25s linear infinite;
+    animation: turn var(--dur-logo-turn) linear infinite;
   }
 
   /* Traînée : s'allume en approchant du point, finit en accent ; 30° de vide derrière le point. */
@@ -159,16 +159,16 @@
       color-mix(in srgb, var(--accent) 22%, transparent) 36%,
       transparent 68%
     );
-    animation: breathe 5s ease-in-out infinite;
+    animation: breathe var(--dur-logo-breathe) ease-in-out infinite;
     will-change: transform, opacity;
   }
 
   .spin .halo {
-    animation: flare 1100ms ease-out;
+    animation: flare var(--dur-logo-flare) ease-out;
   }
 
   .thinking .halo {
-    animation-duration: 1.25s;
+    animation-duration: var(--dur-logo-turn);
   }
 
   .dot {

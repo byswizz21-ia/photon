@@ -35,6 +35,13 @@
   --danger-text-strong: #ff8a96;
   --danger-border: rgb(255 107 125 / 0.6);
   --danger-surface: rgb(255 77 94 / 0.12);
+  --danger-surface-soft: rgb(255 77 94 / 0.1);
+  --danger-surface-strong: rgb(255 77 94 / 0.18);
+  --danger-border-soft: rgb(255 77 94 / 0.45);
+  --white: #fff; /* pastille du curseur, texte sur rouge ou sur pochette */
+  --rise: #7ee2a8; /* cours en hausse */
+  --veil-dark: rgb(7 8 11 / 0.4); /* fond net assombri sous le panneau (plein écran) */
+  --veil-art: rgb(0 0 0 / 0.45); /* bouton posé sur une pochette */
 
   /* Surfaces sombres opaques */
   --surface-chip: #1b1d24; /* pastille « retirer » des cartes et tuiles */
@@ -80,6 +87,10 @@
   --panel-bg: rgb(16 18 24 / var(--glass));
   --menu-bg: rgb(20 22 29 / 0.6);
   --drawer-bg: rgb(14 16 22 / 0.6);
+  /* Mode fenêtre : Chromium ne floute pas derrière un élément quand la fenêtre est transparente
+     (verre acrylic de Windows) ; menus et tiroir y sont presque opaques pour rester lisibles. */
+  --menu-bg-solid: rgb(20 22 29 / 0.94);
+  --drawer-bg-solid: rgb(14 16 22 / 0.94);
   --popover-bg: rgb(16 18 24 / 0.86); /* résultats de la barre, réponse de Claude */
   /* Façon Apple : reflet en biais, liseré clair en haut, bord plus lumineux que le fond. */
   --glass-sheen: linear-gradient(
@@ -153,6 +164,9 @@
   --glow-bar: 0 0 10px var(--accent);
   --glow-dot: 0 0 8px var(--accent);
   --halo-bypass: inset 0 0 0 1px rgb(255 77 94 / 0.55), inset 0 0 120px -40px rgb(255 77 94 / 0.5);
+  --halo-bypass-card:
+    inset 0 0 0 1px rgb(255 77 94 / 0.7), inset 0 0 40px -10px rgb(255 77 94 / 0.45);
+  --shadow-thumb: 0 2px 6px rgb(0 0 0 / 0.5);
 
   /* Focus */
   --focus-ring: 2px solid var(--accent);
@@ -233,6 +247,11 @@
   --dur-spring: 300ms; /* retour en ressort des boutons */
   --dur-fill: 400ms; /* remplissage des jauges */
   --dur-spring-card: 450ms;
+  --dur-pulse: 1.2s; /* point « Claude réfléchit » */
+  --dur-logo-cycle: 10s; /* logo : couleurs qui tournent */
+  --dur-logo-turn: 1.25s; /* logo : un tour quand Claude réfléchit */
+  --dur-logo-breathe: 5s;
+  --dur-logo-flare: 1100ms; /* logo : éclat au clic (même durée que le minuteur de Logo.svelte) */
   --press-scale: 0.97;
   --hover-lift: -2px;
 }

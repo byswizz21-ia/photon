@@ -147,6 +147,11 @@
     border-radius: inherit;
   }
 
+  /* Réglages d'une petite case (mode édition) : ils défilent au lieu d'être coupés. */
+  .editing .content {
+    overflow-y: auto;
+  }
+
   .remove {
     position: absolute;
     top: -8px;

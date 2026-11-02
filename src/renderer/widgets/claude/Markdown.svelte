@@ -117,7 +117,7 @@
     padding: 0;
     border: 1px solid var(--line);
     border-radius: 7px;
-    background: rgb(20 22 29 / 0.8);
+    background: var(--menu-bg-solid);
     cursor: pointer;
     opacity: 0;
     transition: opacity var(--dur-fast) var(--ease-out);

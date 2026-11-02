@@ -114,4 +114,23 @@
     margin: 0;
     color: var(--text-faint);
   }
+
+  /* Une seule rangée de haut : la session seulement, sur une ligne. */
+  @container (max-height: 110px) {
+    .widget {
+      justify-content: center;
+      gap: 2px;
+    }
+
+    .label,
+    dl {
+      display: none;
+    }
+
+    .sub {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
 </style>

@@ -387,7 +387,6 @@
     flex-direction: column;
     gap: 10px;
     border-radius: inherit;
-    transition: box-shadow var(--dur-fast) var(--ease-out);
   }
 
   .widget.over {
@@ -409,9 +408,7 @@
 
   /* Bypass actif : halo rouge tant qu'il dure (le panneau de Photon aussi, voir App.svelte). */
   .widget[data-bypass] {
-    box-shadow:
-      inset 0 0 0 1px rgb(255 77 94 / 0.7),
-      inset 0 0 40px -10px rgb(255 77 94 / 0.45);
+    box-shadow: var(--halo-bypass-card);
   }
 
   .modes {
@@ -441,7 +438,7 @@
 
   .modes .bypass[aria-checked='true'] {
     color: var(--danger-text-strong);
-    background: rgb(255 77 94 / 0.18);
+    background: var(--danger-surface-strong);
   }
 
   .bypass-confirm {
@@ -449,9 +446,9 @@
     flex-direction: column;
     gap: 8px;
     padding: 10px 12px;
-    border: 1px solid rgb(255 77 94 / 0.45);
+    border: 1px solid var(--danger-border-soft);
     border-radius: var(--radius-menu);
-    background: rgb(255 77 94 / 0.1);
+    background: var(--danger-surface-soft);
     font-size: var(--text-12);
   }
 
@@ -468,7 +465,7 @@
   .chip.danger {
     border-color: transparent;
     background: var(--danger);
-    color: #fff;
+    color: var(--white);
   }
 
   .tools {
@@ -526,8 +523,6 @@
     gap: 14px;
     font-size: var(--text-13);
     user-select: text;
-    scrollbar-width: thin;
-    scrollbar-color: var(--white-15) transparent;
   }
 
   .user {
@@ -581,7 +576,7 @@
     border-radius: 50%;
     background: var(--accent);
     box-shadow: var(--glow-dot);
-    animation: pulse 1.2s var(--ease-out) infinite alternate;
+    animation: pulse var(--dur-pulse) var(--ease-out) infinite alternate;
   }
 
   @keyframes pulse {

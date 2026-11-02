@@ -115,10 +115,12 @@
               {#if armed === proc.name}Fermer ?{:else}<XIcon size={12} aria-hidden="true" />{/if}
             </button>
           {/if}
-          <span
-            class="bar"
-            style:--level="{((sort === 'cpu' ? proc.cpu : proc.memory) / top) * 100}%"
-          ></span>
+          <span class="bar">
+            <span
+              class="level"
+              style:transform="scaleX({(sort === 'cpu' ? proc.cpu : proc.memory) / top})"
+            ></span>
+          </span>
         </li>
       {/each}
     </ul>
@@ -227,8 +229,17 @@
     grid-column: 2 / -1;
     height: 3px;
     border-radius: var(--radius-bar);
-    background: linear-gradient(90deg, var(--accent) var(--level), var(--white-8) 0);
-    transition: background var(--dur-fill) var(--ease-out);
+    overflow: hidden;
+    background: var(--white-8);
+  }
+
+  /* Remplissage : seulement scaleX depuis la gauche (comme les jauges du widget Système). */
+  .level {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transform-origin: left;
+    transition: transform var(--dur-fill) var(--ease-out);
   }
 
   .close {

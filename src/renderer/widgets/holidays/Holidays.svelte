@@ -22,7 +22,7 @@
     days === 0 ? "aujourd'hui" : days === 1 ? 'demain' : `${days} j`
 </script>
 
-<div class="widget">
+<div class="widget" class:editing>
   <div class="head">
     <span class="label">Jours fériés</span>
     {#if editing}
@@ -60,6 +60,12 @@
     flex-direction: column;
     gap: 8px;
     overflow: hidden;
+  }
+
+  /* Mode édition : la case grandit avec ses réglages, la carte les fait défiler (WidgetFrame). */
+  .widget.editing {
+    height: auto;
+    min-height: 100%;
   }
 
   .head {

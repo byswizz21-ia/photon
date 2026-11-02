@@ -76,7 +76,7 @@
   }
 </script>
 
-<div class="widget">
+<div class="widget" class:editing>
   <div class="head">
     <span class="label">Micro-entreprise</span>
     <span class="year">CA {year}</span>
@@ -198,6 +198,12 @@
     flex-direction: column;
     gap: 8px;
     overflow: hidden;
+  }
+
+  /* Mode édition : la case grandit avec ses réglages, la carte les fait défiler (WidgetFrame). */
+  .widget.editing {
+    height: auto;
+    min-height: 100%;
   }
 
   .head {

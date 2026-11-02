@@ -138,7 +138,6 @@
     flex-direction: column;
     gap: 8px;
     border-radius: var(--radius);
-    transition: box-shadow var(--dur-hover) var(--ease-out);
   }
 
   .over {

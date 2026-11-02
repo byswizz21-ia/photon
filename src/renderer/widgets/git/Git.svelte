@@ -183,7 +183,6 @@
     flex-direction: column;
     gap: 8px;
     border-radius: var(--radius);
-    transition: box-shadow var(--dur-hover) var(--ease-out);
   }
 
   .over {
@@ -255,7 +254,6 @@
     align-items: stretch;
     gap: 3px;
     text-align: left;
-    transition: background var(--dur-fast) var(--ease-out);
   }
 
   .row:not(:disabled):hover {

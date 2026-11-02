@@ -263,7 +263,7 @@
       "Mode de l'accent",
       'accent',
       [
-        ['auto', 'Auto (extraite du fond)'],
+        ['auto', 'Selon le fond'],
         ['manual', 'Manuelle']
       ],
       manual ? 'manual' : 'auto',
@@ -614,10 +614,10 @@
     margin-top: -6px;
     border: 0;
     border-radius: 50%;
-    background: #fff;
+    background: var(--white);
     box-shadow:
       0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent),
-      0 2px 6px rgb(0 0 0 / 0.5);
+      var(--shadow-thumb);
     transition: transform var(--dur-fast) var(--ease-out);
   }
 

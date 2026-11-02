@@ -53,7 +53,7 @@
     save({ ...settings, zones: zones.filter((z) => z.tz !== tz) })
 </script>
 
-<div class="widget">
+<div class="widget" class:editing>
   <span class="label">Fuseaux horaires</span>
   <ul>
     {#each zones as zone (zone.tz)}
@@ -109,6 +109,12 @@
     flex-direction: column;
     gap: 8px;
     overflow: hidden;
+  }
+
+  /* Mode édition : la case grandit avec ses réglages, la carte les fait défiler (WidgetFrame). */
+  .widget.editing {
+    height: auto;
+    min-height: 100%;
   }
 
   .label {

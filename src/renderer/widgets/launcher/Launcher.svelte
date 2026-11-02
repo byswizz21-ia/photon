@@ -193,8 +193,6 @@
     flex-direction: column;
     gap: 12px;
     overflow: hidden auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgb(255 255 255 / 0.2) transparent;
   }
 
   .label {
@@ -255,7 +253,7 @@
   }
 
   .tile.failed .square {
-    border-color: rgb(255 107 125 / 0.6);
+    border-color: var(--danger-border);
   }
 
   .add .square {

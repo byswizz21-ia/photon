@@ -458,7 +458,6 @@
     padding: 5px 6px;
     border-radius: var(--radius-row);
     text-align: left;
-    transition: background var(--dur-fast) var(--ease-out);
   }
 
   .item:not(:disabled):hover {
@@ -689,8 +688,8 @@
   .overlay {
     position: absolute;
     display: none;
-    background: rgb(0 0 0 / 0.45);
-    color: #fff;
+    background: var(--veil-art);
+    color: var(--white);
   }
 
   /* Petite case : la pochette remplit tout, un seul bouton. */

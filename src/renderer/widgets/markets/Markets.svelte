@@ -100,7 +100,7 @@
   }
 
   li {
-    --trend: #7ee2a8;
+    --trend: var(--rise);
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(40px, 25%) auto;
     grid-template-rows: auto auto;

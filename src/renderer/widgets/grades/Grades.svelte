@@ -32,7 +32,7 @@
   }
 </script>
 
-<div class="widget">
+<div class="widget" class:editing>
   <span class="label">{settings.title || 'Moyenne'}</span>
   {#if editing}
     <label class="field" data-no-drag>
@@ -60,7 +60,9 @@
       {mean === null ? '—' : mark(mean)}<span class="unit">/20</span>
     </p>
     <p class="aim">
-      {#if aim <= 0}
+      {#if mean === null}
+        Objectif {mark(target)} · ajoute ta première note
+      {:else if aim <= 0}
         Objectif {mark(target)} assuré
       {:else if aim > 20}
         Objectif {mark(target)} hors de portée en un contrôle
@@ -113,6 +115,12 @@
     flex-direction: column;
     gap: 8px;
     overflow: hidden;
+  }
+
+  /* Mode édition : la case grandit avec ses réglages, la carte les fait défiler (WidgetFrame). */
+  .widget.editing {
+    height: auto;
+    min-height: 100%;
   }
 
   .label {
