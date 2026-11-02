@@ -3,7 +3,7 @@
 // seulement si un widget du service existe (≈ 300 Mo de RAM chacune). Spotify : son app Windows
 // (src/main/spotify.ts). Cookies de chaque service dans une session à part, jamais lus par Photon
 // (sauf la présence du cookie de connexion).
-import { app, BrowserWindow, nativeImage, net, Notification, session, shell } from 'electron'
+import { app, BrowserWindow, nativeImage, net, session, shell } from 'electron'
 import { join } from 'node:path'
 import icon from '../../assets/icon.ico?asset'
 import { MUSIC_SERVICES } from '../shared/api'
@@ -15,6 +15,7 @@ import type {
   MusicTrack
 } from '../shared/api'
 import { data } from './data'
+import { notify } from './notify'
 import {
   openSpotify,
   spotifyArtwork,
@@ -326,18 +327,18 @@ async function onTrack(service: MusicService): Promise<void> {
   if (key === previous) return
   lastTrack.set(service, key)
   if (previous === undefined || !track.playing || isVisible() || !notifyWanted(service)) return
-  if (!Notification.isSupported()) return
   const art = await (service === 'spotify'
     ? spotifyArtwork()
     : (players.get(service as WebService)?.artwork.ready ?? ''))
-  const notification = new Notification({
-    title: track.title,
-    body: track.artist,
-    silent: true,
-    ...(art ? { icon: nativeImage.createFromDataURL(art) } : {})
-  })
-  notification.on('click', () => void showWindow())
-  notification.show()
+  notify(
+    {
+      title: track.title,
+      body: track.artist,
+      silent: true,
+      ...(art ? { icon: nativeImage.createFromDataURL(art) } : {})
+    },
+    () => void showWindow()
+  )
 }
 
 async function download(raw: string, hosts: RegExp): Promise<string> {

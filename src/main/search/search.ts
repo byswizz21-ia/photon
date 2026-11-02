@@ -14,7 +14,7 @@ import { launchStoreApp, listApps, startApps, type AppEntry } from './apps'
 import { calculate } from './calc'
 import { audioCommands, COMMANDS, type Command } from './commands'
 import { findFiles, recentFiles, startFiles, type FileHit } from './files'
-import { matchScore, usageBoost, type Usage } from './rank'
+import { looksLikeSite, matchScore, usageBoost, type Usage } from './rank'
 
 const MAX_RESULTS = 8
 const MAX_QUERY = 200
@@ -149,11 +149,8 @@ const fixed = (
   run: Candidate['run']
 ): Candidate => ({ id, key: id, kind, title, subtitle, confirm: false, score: 0, path: null, run })
 
-// « ytb.com », « github.com/x », « https://… » : un site plutôt qu'une recherche.
-const SITE = /^(https?:\/\/)?[\w-]+(\.[\w-]+)*\.[a-z]{2,}(:\d+)?(\/\S*)?$/i
-
 function siteCandidate(text: string): Candidate | null {
-  if (!SITE.test(text)) return null
+  if (!looksLikeSite(text)) return null
   const url = /^https?:\/\//i.test(text) ? text : `https://${text}`
   return fixed(`site:${url}`, 'site', text, 'Ouvrir le site', async () => {
     await shell.openExternal(url)
@@ -197,19 +194,22 @@ function favorites(now: number): Candidate[] {
     const candidate = commandCandidate(command, 0)
     known.set(candidate.key, candidate)
   }
-  const top = Object.entries(usage)
-    .sort((a, b) => usageBoost(b[1], now) - usageBoost(a[1], now))
-    .map(([key]) => {
-      if (key.startsWith('file:')) {
-        const path = key.slice(5)
-        return existsSync(path)
-          ? fileCandidate({ path, name: basename(path), folder: false, score: 0 })
-          : null
-      }
-      return known.get(key) ?? null
-    })
-    .filter((c): c is Candidate => c !== null)
-    .slice(0, MAX_RESULTS)
+  // Vérifie qu'un fichier existe encore seulement jusqu'à en avoir assez (chaque test touche le
+  // disque) ; chemin réseau non testé : un serveur injoignable gèlerait Photon.
+  const top: Candidate[] = []
+  const ranked = Object.entries(usage).sort((a, b) => usageBoost(b[1], now) - usageBoost(a[1], now))
+  for (const [key] of ranked) {
+    if (top.length >= MAX_RESULTS) break
+    if (!key.startsWith('file:')) {
+      const candidate = known.get(key)
+      if (candidate) top.push(candidate)
+      continue
+    }
+    const path = key.slice(5)
+    if (path.startsWith('\\\\') || existsSync(path)) {
+      top.push(fileCandidate({ path, name: basename(path), folder: false, score: 0 }))
+    }
+  }
   const seen = new Set(top.map((c) => c.key))
   const recents = recentFiles(MAX_RESULTS * 2)
     .filter((hit) => !seen.has(`file:${hit.path}`))
@@ -257,7 +257,12 @@ function collect(query: string): Candidate[] {
     await shell.openExternal(`https://www.google.com/search?q=${encodeURIComponent(text)}`)
     return true
   })
-  return [calc, site, ...ranked, web, claudeRow(text)].filter((c): c is Candidate => c !== null)
+  // Identifiant lié au texte : Entrée sur une liste pas encore à jour (frappe rapide) ne lance
+  // pas la recherche Google ou le calcul du texte suivant (openResult ne le trouve pas).
+  const forText = (c: Candidate | null): Candidate | null => c && { ...c, id: `${c.id}:${text}` }
+  return [forText(calc), site, ...ranked, forText(web), claudeRow(text)].filter(
+    (c): c is Candidate => c !== null
+  )
 }
 
 export function search(raw: unknown): SearchResult[] {

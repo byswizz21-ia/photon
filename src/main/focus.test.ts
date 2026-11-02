@@ -2,12 +2,13 @@ import { expect, test, vi } from 'vitest'
 
 // Faux outil natif : « Ne pas déranger » simulé, aucune commande n'atteint Windows.
 let dnd = 'Microsoft.QuietHoursProfile.Unrestricted'
+let readable = true
 const sent: string[] = []
 vi.mock('./native', () => ({
   nativeTool: () => ({
     send: async (command: string) => {
       sent.push(command)
-      if (command === 'get') return dnd
+      if (command === 'get') return readable ? dnd : 'error 80070005'
       dnd = command.slice(4)
       return 'ok'
     }
@@ -43,4 +44,14 @@ test('DND déjà actif avant le Focus : laissé tel quel en sortant', async () =
   await syncFocus(false) // bascules rapides : appliquées dans l'ordre
   expect(sent).toEqual(['get'])
   expect(dnd).toBe('Microsoft.QuietHoursProfile.PriorityOnly')
+})
+
+test("réglage d'avant illisible : DND coupé en sortant, pas laissé allumé", async () => {
+  dnd = 'Microsoft.QuietHoursProfile.Unrestricted'
+  readable = false
+  await syncFocus(true)
+  expect(dnd).toBe('Microsoft.QuietHoursProfile.PriorityOnly')
+  await syncFocus(false)
+  expect(dnd).toBe('Microsoft.QuietHoursProfile.Unrestricted')
+  readable = true
 })

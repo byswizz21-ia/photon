@@ -11,7 +11,7 @@ const TIMEOUT_MS = 10_000
 const DAYS = 5
 
 const feeds = new Map<string, WeatherFeed>()
-const places = new Map<string, { name: string; latitude: number; longitude: number } | null>()
+const places = new Map<string, { name: string; latitude: number; longitude: number }>()
 const pending = new Map<string, Promise<boolean>>()
 let timer: NodeJS.Timeout | undefined
 
@@ -40,7 +40,8 @@ const numbers = (v: unknown): number[] =>
 async function locate(
   city: string
 ): Promise<{ name: string; latitude: number; longitude: number } | null> {
-  if (places.has(city)) return places.get(city) ?? null
+  const known = places.get(city)
+  if (known) return known
   const url = `https://geocoding-api.open-meteo.com/v1/search?count=1&language=fr&name=${encodeURIComponent(city)}`
   const first = ((await getJson(url))['results'] as Record<string, unknown>[] | undefined)?.[0]
   const place =
@@ -51,7 +52,7 @@ async function locate(
           longitude: first['longitude']
         }
       : null
-  places.set(city, place)
+  if (place) places.set(city, place) // introuvable : réessayé au prochain rafraîchissement
   return place
 }
 

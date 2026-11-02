@@ -148,8 +148,19 @@ export async function processes(sort: unknown): Promise<ProcessGroup[] | null> {
   if (!all) return null
   const key = sort === 'ram' ? 'memory' : 'cpu'
   const top = all.sort((a, b) => b[key] - a[key] || b.memory - a.memory).slice(0, TOP)
-  for (const group of top) await describe(group.name)
-  return top.map((g) => ({ ...g, label: infos.get(g.name)?.desc || g.name }))
+  await Promise.all(top.map((group) => describe(group.name)))
+  return withLabels(top, (name) => infos.get(name)?.desc ?? '')
+}
+
+// Nom lisible (« Google Chrome »), sinon celui de l'exécutable. Deux programmes qui se décrivent
+// pareil (deux copies d'Electron) : le nom de l'exécutable en plus, pour les distinguer.
+export function withLabels(groups: ProcessGroup[], desc: (name: string) => string): ProcessGroup[] {
+  const labels = groups.map((g) => desc(g.name) || g.name)
+  return groups.map((g, i) => {
+    const label = labels[i] ?? g.name
+    const twin = labels.some((other, j) => j !== i && other === label)
+    return { ...g, label: twin && label !== g.name ? `${label} (${g.name})` : label }
+  })
 }
 
 export async function processIcon(name: unknown): Promise<string | null> {

@@ -69,3 +69,57 @@ describe('parseEvents', () => {
     expect(parseEvents(ics, NOW, 3, 1)).toHaveLength(1)
   })
 })
+
+describe('récurrences anciennes', () => {
+  const old = (freq: string, start: string): string => `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+UID:${freq}
+DTSTART:${start}
+DTEND:${start.replace(/T(\d\d)/, (_m, h: string) => `T${String(Number(h) + 1).padStart(2, '0')}`)}
+RRULE:FREQ=${freq}
+SUMMARY:${freq}
+END:VEVENT
+END:VCALENDAR`
+
+  it('quotidien depuis 1990 : occurrence de demain trouvée, en peu de temps', () => {
+    const started = performance.now()
+    const events = parseEvents(old('DAILY', '19900101T120000Z'), NOW, 14, 50)
+    expect(events[0]?.start).toBe(Date.UTC(2026, 10, 2, 12))
+    expect(performance.now() - started).toBeLessThan(2000)
+  })
+
+  it('hebdomadaire depuis 2001, lundi et mercredi : le bon jour, à la bonne heure', () => {
+    const text = old('WEEKLY;BYDAY=MO,WE', '20010101T080000Z') // lundi 1er janvier 2001
+    const events = parseEvents(text, NOW, 3, 50)
+    expect(events.map((e) => e.start)).toEqual([Date.UTC(2026, 10, 4, 8)]) // mercredi 4
+  })
+
+  it('toutes les heures depuis 2020 : prochaine heure trouvée', () => {
+    const events = parseEvents(old('HOURLY', '20200101T000000Z'), NOW, 1, 50)
+    expect(events[0]?.start).toBe(Date.UTC(2026, 10, 2, 10)) // 9 h-10 h vient de finir
+  })
+
+  it('quotidien depuis 2000 avec fuseau, exception et date exclue après le saut', () => {
+    const text = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+UID:paris
+DTSTART;TZID=Europe/Paris:20000103T090000
+DTEND;TZID=Europe/Paris:20000103T093000
+RRULE:FREQ=DAILY
+EXDATE;TZID=Europe/Paris:20261103T090000
+SUMMARY:Café
+END:VEVENT
+BEGIN:VEVENT
+UID:paris
+RECURRENCE-ID;TZID=Europe/Paris:20261104T090000
+DTSTART;TZID=Europe/Paris:20261104T140000
+DTEND;TZID=Europe/Paris:20261104T143000
+SUMMARY:Café déplacé
+END:VEVENT
+END:VCALENDAR`
+    const titles = parseEvents(text, NOW, 3, 50).map((e) => e.title)
+    expect(titles).toEqual(['Café déplacé', 'Café'])
+  })
+})

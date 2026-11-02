@@ -2,7 +2,7 @@ import { expect, test, vi } from 'vitest'
 
 vi.mock('./system', () => ({ fileIcon: vi.fn() }))
 vi.mock('./native', () => ({ nativeTool: () => ({ send: vi.fn(), start: vi.fn() }) }))
-const { closable, groups, parseList } = await import('./processes')
+const { closable, groups, parseList, withLabels } = await import('./processes')
 
 test('liste native : lignes valides gardées, le reste ignoré', () => {
   const snap = parseList('[[10,"chrome",1000,500],[11,"x"],"oups",[12,"lsass",-1,20]]', 5)
@@ -36,4 +36,25 @@ test('Windows et Photon jamais fermables', () => {
   expect(closable('EXPLORER')).toBe(false)
   expect(closable('vmmemWSL')).toBe(false)
   expect(closable('chrome')).toBe(true)
+})
+
+test("deux programmes décrits pareil : nom de l'exécutable ajouté", () => {
+  const group = (name: string) => ({
+    name,
+    label: name,
+    count: 1,
+    cpu: 0,
+    memory: 0,
+    closable: true
+  })
+  const desc: Record<string, string> = {
+    electron: 'Electron',
+    'photon-test': 'Electron',
+    chrome: 'Google Chrome'
+  }
+  const labels = withLabels(
+    [group('electron'), group('photon-test'), group('chrome'), group('git')],
+    (n) => desc[n] ?? ''
+  ).map((g) => g.label)
+  expect(labels).toEqual(['Electron (electron)', 'Electron (photon-test)', 'Google Chrome', 'git'])
 })

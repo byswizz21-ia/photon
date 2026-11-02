@@ -1,7 +1,7 @@
 // Pomodoro, partagé par tous les profils : tenu ici, il continue Photon caché ou profil changé.
 // Fin du travail : notification et pause lancée d'office ; fin de la pause : notification.
-import { Notification } from 'electron'
 import type { PomodoroCommand, PomodoroState } from '../shared/api'
+import { notify } from './notify'
 import { showWindow } from './window'
 
 const MINUTE = 60_000
@@ -30,13 +30,8 @@ const reminderXml = (title: string, body: string): string =>
 const minutes = (v: unknown, fallback: number): number =>
   typeof v === 'number' && Number.isFinite(v) ? Math.min(Math.max(Math.round(v), 1), 180) : fallback
 
-function notify(title: string, body: string): void {
-  if (!Notification.isSupported()) return
-  const notification = new Notification(
-    reminders ? { title, toastXml: reminderXml(title, body) } : { title, body }
-  )
-  notification.on('click', showWindow)
-  notification.show()
+function ring(title: string, body: string): void {
+  notify(reminders ? { title, toastXml: reminderXml(title, body) } : { title, body }, showWindow)
 }
 
 function run(phase: 'focus' | 'pause', total: number, left = total): void {
@@ -47,10 +42,10 @@ function run(phase: 'focus' | 'pause', total: number, left = total): void {
 
 function finish(): void {
   if (state.phase === 'focus') {
-    notify('Pause !', `${Math.round(pauseMs / MINUTE)} min pour souffler.`)
+    ring('Pause !', `${Math.round(pauseMs / MINUTE)} min pour souffler.`)
     run('pause', pauseMs)
   } else {
-    notify('Pause terminée', 'Prêt pour un nouveau pomodoro ?')
+    ring('Pause terminée', 'Prêt pour un nouveau pomodoro ?')
     reset()
   }
 }

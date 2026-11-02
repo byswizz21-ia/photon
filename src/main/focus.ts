@@ -6,6 +6,7 @@ import { pomodoro, pomodoroControl, setReminders } from './pomodoro'
 
 const tool = nativeTool(source, 'Photon.Dnd')
 const DND_ON = 'Microsoft.QuietHoursProfile.PriorityOnly'
+const DND_OFF = 'Microsoft.QuietHoursProfile.Unrestricted' // réglage par défaut de Windows
 const PROFILE = /^Microsoft\.QuietHoursProfile\.\w+$/ // seule valeur transmise à l'outil
 
 let active = false
@@ -24,12 +25,13 @@ async function apply(on: boolean): Promise<void> {
   setReminders(on) // fins de pomodoro en rappels : ils passent « Ne pas déranger »
   if (on) {
     if (pomodoro().phase === 'idle') pomodoroControl('start')
+    // Réglage d'avant illisible : on rendra « désactivé », sinon Windows resterait en Ne pas déranger.
     const current = await tool.send('get')
-    before = current && PROFILE.test(current) ? current : null
+    before = current && PROFILE.test(current) ? current : DND_OFF
     if (before !== DND_ON) await setDnd(DND_ON)
-    console.log(`[photon] focus activé (avant : ${before ?? 'inconnu'})`)
+    console.log(`[photon] focus activé (avant : ${current ?? 'illisible'})`)
   } else {
-    // Déjà actif avant le Focus, ou réglage inconnu : on ne touche à rien.
+    // Déjà actif avant le Focus : on ne touche à rien.
     if (before && before !== DND_ON) await setDnd(before)
     before = null
     console.log('[photon] focus désactivé')
@@ -43,5 +45,5 @@ export function syncFocus(on: boolean): Promise<void> {
   return queue
 }
 
-// Fermeture de Photon : l'outil lit sa dernière ligne avant de s'arrêter.
-export const leaveFocus = (): void => void syncFocus(false)
+// Fermeture de Photon : attendue avant de quitter (src/main/index.ts), Windows retrouve son réglage.
+export const leaveFocus = (): Promise<void> => syncFocus(false)

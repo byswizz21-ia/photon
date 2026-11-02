@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { calculate } from './calc'
-import { matchScore, usageBoost } from './rank'
+import { looksLikeSite, matchScore, usageBoost } from './rank'
 
 describe('calculate', () => {
   it('priorités, parenthèses, virgule et puissance', () => {
@@ -9,6 +9,9 @@ describe('calculate', () => {
     expect(calculate('(3,5+1)/2')).toBe(2.25)
     expect(calculate('2^3^2')).toBe(512)
     expect(calculate('-2 × 3')).toBe(-6)
+    expect(calculate('-2^2')).toBe(-4)
+    expect(calculate('2^-1')).toBe(0.5)
+    expect(calculate('3*-2')).toBe(-6)
   })
 
   it('pas un calcul : null', () => {
@@ -17,6 +20,9 @@ describe('calculate', () => {
     expect(calculate('2+')).toBeNull()
     expect(calculate('1/0')).toBeNull()
     expect(calculate('alert(1)+2')).toBeNull()
+    expect(calculate('2026-11-02')).toBeNull()
+    expect(calculate('02/11/2026')).toBeNull()
+    expect(calculate('06-12-34-56-78')).toBeNull()
   })
 })
 
@@ -41,5 +47,16 @@ describe('usageBoost', () => {
     expect(usageBoost(undefined, now)).toBe(0)
     expect(usageBoost({ count: 1, last: now }, now)).toBe(22)
     expect(usageBoost({ count: 1000, last: 0 }, now)).toBe(30)
+  })
+})
+
+describe('looksLikeSite', () => {
+  it('site ou nom de fichier', () => {
+    expect(looksLikeSite('ytb.com')).toBe(true)
+    expect(looksLikeSite('github.com/x')).toBe(true)
+    expect(looksLikeSite('https://exemple.md')).toBe(true)
+    expect(looksLikeSite('rapport.pdf')).toBe(false)
+    expect(looksLikeSite('notes.md')).toBe(false)
+    expect(looksLikeSite('discord')).toBe(false)
   })
 })

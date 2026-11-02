@@ -84,8 +84,15 @@ export function startMarkets(): void {
 }
 
 // Profil enregistré ou changé : un symbole nouveau est lu tout de suite (geste de l'utilisateur).
+// Déjà en échec ou en cours de lecture : rien (chaque déplacement de widget enregistre le profil).
+const pending = new Set<string>()
+
 export function onMarketsProfile(): void {
-  for (const symbol of watchedSymbols()) if (!quotes.has(symbol)) void download(symbol)
+  for (const symbol of watchedSymbols()) {
+    if (quotes.has(symbol) || failed.has(symbol) || pending.has(symbol)) continue
+    pending.add(symbol)
+    void download(symbol).finally(() => pending.delete(symbol))
+  }
 }
 
 // Cache seulement : les symboles du widget, dans son ordre, ceux pas encore lus absents.

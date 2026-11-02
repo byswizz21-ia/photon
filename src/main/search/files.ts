@@ -6,7 +6,7 @@ import { statSync } from 'node:fs'
 import { readdir, stat } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { basename, join } from 'node:path'
-import { matchScore, normalize } from './rank'
+import { keyScore, normalize } from './rank'
 
 const REFRESH_MS = 30 * 60_000
 const MAX_ENTRIES = 300_000
@@ -103,12 +103,27 @@ export function findFiles(query: string, limit: number): FileHit[] {
   if (Date.now() - recentAt > 60_000) readRecent() // pour la recherche suivante
   const q = normalize(query)
   if (!q) return []
-  const hits: FileHit[] = []
+  // Scores en paliers (80, 65, 45…) : rangés par palier au fil du parcours, sans trier 100 000
+  // correspondances (« e » trouve presque tout). Chemin et bonus « récent » pour les retenus seulement.
+  const tiers = new Map<number, Entry[]>()
   for (const entry of entries) {
     if (!entry.key.includes(q)) continue
-    const path = join(dirs[entry.dir] ?? '', entry.name)
-    const score = matchScore(entry.name, query) + (recent.has(path) ? 15 : 0)
-    hits.push({ path, name: entry.name, folder: entry.folder, score })
+    const score = keyScore(entry.key, q)
+    let tier = tiers.get(score)
+    if (!tier) tiers.set(score, (tier = []))
+    if (tier.length < limit * 2) tier.push(entry)
+  }
+  const hits: FileHit[] = []
+  for (const [score, tier] of tiers) {
+    for (const entry of tier) {
+      const path = join(dirs[entry.dir] ?? '', entry.name)
+      hits.push({
+        path,
+        name: entry.name,
+        folder: entry.folder,
+        score: score + (recent.has(path) ? 15 : 0)
+      })
+    }
   }
   return hits.sort((a, b) => b.score - a.score).slice(0, limit)
 }
@@ -118,6 +133,7 @@ export function recentFiles(limit: number): FileHit[] {
   const hits: FileHit[] = []
   for (const path of recent.keys()) {
     if (hits.length >= limit) break
+    if (path.startsWith('\\\\')) continue // serveur peut-être injoignable : statSync gèlerait Photon
     try {
       hits.push({ path, name: basename(path), folder: statSync(path).isDirectory(), score: 0 })
     } catch {

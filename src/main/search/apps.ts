@@ -84,8 +84,7 @@ export function startApps(): void {
 // Identifiant venu de notre propre liste seulement.
 export function launchStoreApp(appId: string): void {
   if (!apps.some((a) => a.appId === appId)) return
-  spawn('explorer.exe', [`shell:AppsFolder\\${appId}`], {
-    detached: true,
-    windowsHide: true
-  }).unref()
+  spawn('explorer.exe', [`shell:AppsFolder\\${appId}`], { detached: true, windowsHide: true })
+    .on('error', (error) => console.warn(`[photon] app du Store introuvable (${error.message})`))
+    .unref()
 }

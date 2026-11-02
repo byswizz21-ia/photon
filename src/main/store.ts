@@ -29,6 +29,10 @@ export function writeJson<T>(file: string, data: T, parse: (raw: unknown) => T):
   return next
 }
 
+// Toutes les écritures en cours (avant de quitter Photon).
+export const allWrites = (): Promise<unknown> =>
+  Promise.all([...queues.values()].map((write) => write.catch(() => undefined)))
+
 // Attend la fin des écritures en cours d'un fichier (avant de le déplacer).
 export const pending = (file: string): Promise<void> =>
   (queues.get(file) ?? Promise.resolve()).catch(() => undefined)

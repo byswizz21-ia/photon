@@ -5,6 +5,7 @@ import { registerBackgroundScheme, serveBackgrounds } from './background'
 import { startCalendars } from './calendar'
 import { leaveBypass, loadClaude } from './claude'
 import { data, loadAll, saveSettings } from './data'
+import { allWrites } from './store'
 import { registerIpc } from './ipc'
 import { loadSearch } from './search/search'
 import { loadMusic } from './music'
@@ -17,6 +18,7 @@ import {
   allowQuit,
   applyMode,
   createWindow,
+  hideWindow,
   isVisible,
   send,
   showWindow,
@@ -34,6 +36,25 @@ const startHidden = process.argv.includes(HIDDEN_ARG)
 
 let activeShortcut: string | null = null
 let booted = false
+let leaving = false
+
+const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
+
+// Quitter (zone de notif, arrêt de Windows) : Photon ouvert se cache d'abord, ce qui fait partir
+// les sauvegardes en attente de l'interface ; on attend leur écriture et le retour du « Ne pas
+// déranger » d'avant le Focus, 3 s au plus, puis on quitte pour de bon.
+function beforeQuit(event: Electron.Event): void {
+  allowQuit()
+  if (leaving) return
+  leaving = true
+  event.preventDefault()
+  const visible = booted && isVisible()
+  if (visible) hideWindow('Photon quitte')
+  const settled = (visible ? delay(300) : Promise.resolve()).then(() =>
+    Promise.all([allWrites(), leaveFocus()])
+  )
+  void Promise.race([settled, delay(3000)]).finally(() => app.quit())
+}
 
 function enableLaunchAtLogin(): void {
   if (!app.isPackaged) return // en dev, on n'inscrit pas electron.exe au démarrage
@@ -70,11 +91,8 @@ function onRendererReady(): void {
 if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
-  app.on('before-quit', allowQuit)
-  app.on('will-quit', () => {
-    globalShortcut.unregisterAll()
-    leaveFocus() // Windows retrouve son « Ne pas déranger » d'avant
-  })
+  app.on('before-quit', beforeQuit)
+  app.on('will-quit', () => globalShortcut.unregisterAll())
   registerBackgroundScheme() // doit précéder app.whenReady()
 
   void app.whenReady().then(async () => {

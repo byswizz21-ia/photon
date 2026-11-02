@@ -21,7 +21,11 @@ function tokenize(text: string): Token[] | null {
 }
 
 // Résultat du calcul, ou null si ce n'est pas un calcul (au moins un opérateur entre deux nombres).
+// Dates et numéros de téléphone (« 2026-11-02 », « 02/11/2026 », « 06-12-34-56-78 ») : pas des calculs.
+const NOT_MATH = /^\s*\d{1,4}([-/.])\d{1,2}\1\d{1,4}(\1\d{1,4})*\s*$/
+
 export function calculate(text: string): number | null {
+  if (NOT_MATH.test(text)) return null
   const parsed = tokenize(text)
   if (!parsed || parsed.filter((t) => typeof t === 'number').length < 2) return null
   const tokens = parsed
@@ -35,30 +39,31 @@ export function calculate(text: string): number | null {
       value = tokens[pos++] === '+' ? value + term() : value - term()
     return value
   }
-  // terme = puissance (('*' | '/' | '%') puissance)*
+  // terme = unaire (('*' | '/' | '%') unaire)*
   function term(): number {
-    let value = power()
+    let value = unary()
     for (let op = peek(); op === '*' || op === '/' || op === '%'; op = peek()) {
       pos++
-      const right = power()
+      const right = unary()
       value = op === '*' ? value * right : op === '/' ? value / right : value % right
     }
     return value
   }
-  // puissance = unaire ('^' puissance)?  (associative à droite : 2^3^2 = 2^9)
-  function power(): number {
-    const base = unary()
-    if (peek() !== '^') return base
-    pos++
-    return base ** power()
-  }
+  // unaire = ('-' | '+') unaire | puissance : le signe s'applique après la puissance (-2^2 = -4)
   function unary(): number {
     if (peek() === '-') {
       pos++
       return -unary()
     }
     if (peek() === '+') pos++
-    return primary()
+    return power()
+  }
+  // puissance = primaire ('^' unaire)?  (associative à droite : 2^3^2 = 2^9 ; 2^-1 = 0,5)
+  function power(): number {
+    const base = primary()
+    if (peek() !== '^') return base
+    pos++
+    return base ** unary()
   }
   function primary(): number {
     const token = tokens[pos++]

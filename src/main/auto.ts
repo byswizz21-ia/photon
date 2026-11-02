@@ -4,9 +4,10 @@
 // La bascule passe par l'interface (photon:switchTo), comme un clic sur une pastille.
 import { execFile } from 'node:child_process'
 import { basename, extname } from 'node:path'
-import { Notification, shell } from 'electron'
+import { shell } from 'electron'
 import { isExeName, type AutoRules, type ProfileInfo } from '../shared/model'
 import { data } from './data'
+import { notify } from './notify'
 import { pickApps } from './system'
 import { send } from './window'
 
@@ -85,17 +86,18 @@ function switchTo(target: ProfileInfo): void {
   const previous = data.profiles.find((p) => p.id === data.settings.activeProfile)
   console.log(`[photon] profil auto : ${target.name}`)
   send('photon:switchTo', target.id)
-  if (!previous || !Notification.isSupported()) return
-  const notification = new Notification({
-    title: `Profil « ${target.name} » activé`,
-    body: `Cliquer pour revenir à « ${previous.name} »`,
-    silent: true
-  })
+  if (!previous) return
   // Annuler : seulement si personne n'a changé de profil entre-temps.
-  notification.on('click', () => {
-    if (data.settings.activeProfile === target.id) send('photon:switchTo', previous.id)
-  })
-  notification.show()
+  notify(
+    {
+      title: `Profil « ${target.name} » activé`,
+      body: `Cliquer pour revenir à « ${previous.name} »`,
+      silent: true
+    },
+    () => {
+      if (data.settings.activeProfile === target.id) send('photon:switchTo', previous.id)
+    }
+  )
 }
 
 export function startAuto(): void {

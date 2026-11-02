@@ -44,9 +44,12 @@
     void start(minutes, settings.screen)
   }
 
-  function screen(on: boolean): void {
+  // Anti-veille en cours : même heure de fin, seul l'écran change.
+  async function screen(on: boolean): Promise<void> {
     save({ ...settings, screen: on })
-    if (current.on) void start(settings.minutes, on)
+    if (!current.on) return
+    const left = current.until === null ? null : Math.ceil((current.until - Date.now()) / 60_000)
+    current = await window.photon.awakeStart(left === null ? null : Math.max(1, left), on)
   }
 </script>
 
@@ -79,7 +82,7 @@
       <input
         type="checkbox"
         checked={settings.screen}
-        onchange={(event) => screen(event.currentTarget.checked)}
+        onchange={(event) => void screen(event.currentTarget.checked)}
       />
       Écran allumé
     </label>

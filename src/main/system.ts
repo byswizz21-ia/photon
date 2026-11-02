@@ -172,13 +172,15 @@ function netstat(): Promise<{ received: number; sent: number } | null> {
 }
 
 // Octets par seconde depuis la lecture précédente ; null à la 1re lecture ou après une pause.
-// Plusieurs widgets Réseau : les appels rapprochés partagent la même mesure (comme cpuRam).
-let lastRate: NetworkRate | null = null
+// Plusieurs widgets Réseau : les appels rapprochés partagent la même mesure, même en cours
+// (sinon le 2e diviserait quelques octets par quelques ms : pics faux).
+let lastRate: { at: number; value: Promise<NetworkRate | null> } | null = null
 
-export async function network(): Promise<NetworkRate | null> {
-  if (lastNet && Date.now() - lastNet.at < SHARE_MS * 0.8) return lastRate
-  lastRate = await measureNetwork()
-  return lastRate
+export function network(): Promise<NetworkRate | null> {
+  if (!lastRate || Date.now() - lastRate.at > SHARE_MS * 0.8) {
+    lastRate = { at: Date.now(), value: measureNetwork() }
+  }
+  return lastRate.value
 }
 
 async function measureNetwork(): Promise<NetworkRate | null> {

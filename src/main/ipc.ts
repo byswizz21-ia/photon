@@ -3,8 +3,8 @@ import { clipboard, ipcMain, type IpcMainEvent, type IpcMainInvokeEvent } from '
 import type { AppState } from '../shared/api'
 import type { Settings } from '../shared/model'
 import { audio, audioDevice, audioMute, audioVolume } from './audio'
-import { awake, awakeStart, awakeStop } from './awake'
-import { eyes, eyesSet } from './eyes'
+import { awake, awakeStart, awakeStop, syncAwake } from './awake'
+import { eyes, eyesSet, syncEyes } from './eyes'
 import { importFile, pickFile } from './background'
 import { batteries } from './batteries'
 import { calendar, onProfileSaved } from './calendar'
@@ -102,6 +102,8 @@ export function registerIpc(actions: IpcActions): void {
     onMarketsProfile()
     syncClipboard()
     syncMusic()
+    syncEyes()
+    syncAwake()
   })
   // Profil changé : agendas et lecteurs de musique suivent les widgets du nouveau profil.
   const switched = (ok: boolean): AppState | null => {
@@ -112,6 +114,8 @@ export function registerIpc(actions: IpcActions): void {
     onMarketsProfile()
     syncClipboard()
     syncMusic()
+    syncEyes()
+    syncAwake()
     return { ...data }
   }
   handle('photon:switchProfile', async (id) => switched(await switchProfile(id)))

@@ -28,10 +28,13 @@ export class Shared<T> {
     this.#timer = setTimeout(() => this.flush(), SAVE_DELAY)
   }
 
+  // Pas encore lu sur le disque : la valeur par défaut écraserait le fichier (habitudes, notes…).
+  // Le changement fait trop tôt est perdu, remplacé par ce qui est lu.
   flush(): void {
     if (this.#timer === undefined) return
     clearTimeout(this.#timer)
     this.#timer = undefined
+    if (!this.ready) return
     void window.photon.sharedSave(this.key, $state.snapshot(this.value))
   }
 }

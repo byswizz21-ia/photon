@@ -3,7 +3,7 @@
 // demandée à l'utilisateur (Claude Code envoie can_use_tool, Photon répond) ; Bypass = agit sans
 // demander, activé exprès et rendu au mode Question dès que Photon se cache.
 // Réglages perso de Claude Code ignorés (hooks, MCP) : réponses neutres et ~1 s de démarrage en moins.
-import { app, Notification } from 'electron'
+import { app } from 'electron'
 import { spawn, type ChildProcess } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { existsSync, promises as fs } from 'node:fs'
@@ -17,6 +17,7 @@ import type {
   ClaudeState,
   Conversation
 } from '../shared/api'
+import { notify } from './notify'
 import { describeAction } from './permission'
 import { readJson, writeJson } from './store'
 import { isVisible, send, showWindow } from './window'
@@ -292,13 +293,8 @@ export function ask(text: string, files: string[]): boolean {
 
 // Photon caché pendant une demande d'accord : notification Windows qui le rouvre.
 function notifyApproval(): void {
-  if (isVisible() || !Notification.isSupported()) return
-  const notification = new Notification({
-    title: 'Claude attend ton accord',
-    body: approvals[0]?.title ?? ''
-  })
-  notification.on('click', showWindow)
-  notification.show()
+  if (isVisible()) return
+  notify({ title: 'Claude attend ton accord', body: approvals[0]?.title ?? '' }, showWindow)
 }
 
 export function stopAnswer(): void {

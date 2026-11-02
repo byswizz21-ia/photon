@@ -11,21 +11,25 @@ export const normalize = (text: string): string =>
 const WORD_START = /[\s\-_.()[\]]/
 
 // 0 = aucune correspondance. `fuzzy` : lettres dans l'ordre (« dscd » → Discord), pour les apps.
-export function matchScore(name: string, query: string, fuzzy = false): number {
-  const n = normalize(name)
-  const q = normalize(query)
+export const matchScore = (name: string, query: string, fuzzy = false): number =>
+  keyScore(normalize(name), normalize(query), fuzzy)
+
+// Même score sur des textes déjà normalisés (index des fichiers : 110 000 noms par frappe).
+export function keyScore(n: string, q: string, fuzzy = false): number {
   if (!q) return 0
   if (n === q) return 100
   if (n.startsWith(q)) return 80
   const at = n.indexOf(q)
   if (at > 0 && WORD_START.test(n[at - 1] ?? '')) return 65
   // Initiales : « vsc » → Visual Studio Code.
-  const initials = n
-    .split(WORD_START)
-    .filter(Boolean)
-    .map((word) => word[0])
-    .join('')
-  if (q.length >= 2 && initials.startsWith(q)) return 60
+  if (q.length >= 2) {
+    const initials = n
+      .split(WORD_START)
+      .filter(Boolean)
+      .map((word) => word[0])
+      .join('')
+    if (initials.startsWith(q)) return 60
+  }
   if (at > 0) return 45
   if (!fuzzy) return 0
   let i = 0
@@ -46,4 +50,20 @@ export function usageBoost(usage: Usage | undefined, now: number): number {
   const frequency = Math.min(30, 10 * Math.log2(1 + usage.count))
   const age = now - usage.last
   return frequency + (age < DAY_MS ? 12 : age < 7 * DAY_MS ? 6 : 0)
+}
+
+// « ytb.com », « github.com/x », « https://… » : un site plutôt qu'une recherche. Un nom de
+// fichier (« rapport.pdf », « notes.md ») n'en est pas un, sauf adresse complète ou avec chemin.
+const SITE = /^(https?:\/\/)?[\w-]+(\.[\w-]+)*\.([a-z]{2,})(:\d+)?(\/\S*)?$/i
+const FILE_EXTENSIONS = new Set(
+  'pdf md txt doc docx xls xlsx ppt pptx csv json js ts py exe msi zip rar png jpg jpeg gif webp mp3 mp4 mov svg lnk ini log bat ps1'.split(
+    ' '
+  )
+)
+
+export function looksLikeSite(text: string): boolean {
+  const match = SITE.exec(text)
+  if (!match) return false
+  const explicit = Boolean(match[1] || match[5])
+  return explicit || !FILE_EXTENSIONS.has((match[3] ?? '').toLowerCase())
 }

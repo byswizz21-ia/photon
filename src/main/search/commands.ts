@@ -17,7 +17,11 @@ export interface Command {
 }
 
 const start = (file: string, args: string[]) => (): void =>
-  spawn(file, args, { detached: true, windowsHide: true }).unref()
+  spawn(file, args, { detached: true, windowsHide: true })
+    .on('error', (error) =>
+      console.warn(`[photon] lancement impossible : ${file} (${error.message})`)
+    )
+    .unref()
 
 const powershell = (script: string): (() => void) =>
   start('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', script])

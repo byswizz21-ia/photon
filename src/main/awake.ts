@@ -2,6 +2,7 @@
 // ou jusqu'à l'arrêt. Tenu ici : continue Photon caché ; libéré par Windows si Photon quitte.
 import { powerSaveBlocker } from 'electron'
 import type { AwakeState } from '../shared/api'
+import { data } from './data'
 
 let blocker: number | null = null
 let timer: NodeJS.Timeout | undefined
@@ -30,3 +31,9 @@ export function awakeStart(minutes: unknown, screen: unknown): AwakeState {
 }
 
 export const awake = (): AwakeState => ({ ...state })
+
+// Profil enregistré ou changé : sans widget Anti-veille pour la couper, l'anti-veille s'arrête
+// (sinon « jusqu'à l'arrêt » tiendrait le PC éveillé sans aucun moyen de l'arrêter).
+export function syncAwake(): void {
+  if (state.on && !data.profile.widgets.some((w) => w.type === 'awake')) awakeStop()
+}

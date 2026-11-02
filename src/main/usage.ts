@@ -120,9 +120,12 @@ async function readNew(path: string, size: number, mtime: number): Promise<void>
     const data = rest.length ? Buffer.concat([rest, chunk as Buffer]) : (chunk as Buffer)
     let start = 0
     let end: number
+    let hit = -1 // prochain « usage » du morceau, cherché une fois (pas à chaque ligne)
     while ((end = data.indexOf(10, start)) !== -1) {
-      const hit = data.indexOf(USAGE, start)
-      if (hit !== -1 && hit < end) {
+      if (hit !== -1 && hit < start) hit = -1
+      if (hit === -1) hit = data.indexOf(USAGE, start)
+      if (hit === -1) hit = data.length // plus aucun dans ce morceau
+      if (hit < end) {
         const entry = parseLine(data.toString('utf8', start, end))
         if (entry) entries.set(...entry)
       }
