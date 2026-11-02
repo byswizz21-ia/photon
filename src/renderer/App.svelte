@@ -10,6 +10,7 @@
   import { flushShared } from './lib/shared.svelte'
   import Profiles from './profiles/Profiles.svelte'
   import { reveal } from './reveal'
+  import { clickSound, play, soundOnChange } from './sound.svelte'
   import { app, flushProfile, flushTheme, reducedMotion, switchProfile } from './state.svelte'
   import { useTheme } from './theme/apply.svelte'
   import Background from './theme/Background.svelte'
@@ -35,11 +36,13 @@
     const offShow = window.photon.onShow(({ origin, mini }) => {
       app.visible = true
       app.mini = mini
+      play('open')
       if (!reducedMotion()) reveal(root, origin)
       // Mesure : deux images après l'affichage ≈ fenêtre réellement à l'écran.
       requestAnimationFrame(() => requestAnimationFrame(() => window.photon.shown()))
     })
     const offHide = window.photon.onHide(() => {
+      play('close')
       app.visible = false
       app.editing = false
       settingsOpen = false
@@ -70,6 +73,19 @@
       off()
     }
   })
+
+  soundOnChange(
+    () => app.editing,
+    (editing) => (editing ? 'editOn' : 'editOff')
+  )
+  soundOnChange(
+    () => settingsOpen,
+    (open) => (open ? 'panelOpen' : 'panelClose')
+  )
+  soundOnChange(
+    () => app.settings.activeProfile,
+    () => 'profile'
+  )
 
   // « Réduire les animations » (Photon ou Windows) coupe toutes les transitions CSS.
   $effect(() => {
@@ -132,6 +148,7 @@
 <!-- Un fichier lâché hors d'un widget qui l'accepte ne fait rien (pas de navigation). -->
 <svelte:window
   onkeydown={onKeydown}
+  onclick={clickSound}
   ondragover={(event) => event.preventDefault()}
   ondrop={(event) => event.preventDefault()}
 />

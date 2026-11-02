@@ -98,6 +98,23 @@ test('réglages multi-écran : valeurs invalides → défaut', () => {
   expect(parseSettings({ screen: '2779098405' }).screen).toBe('2779098405')
 })
 
+test('sons : activés par défaut, volume borné, champ invalide → défaut', () => {
+  expect(parseSettings({}).sound).toEqual({
+    enabled: true,
+    volume: 0.5,
+    window: true,
+    clicks: true,
+    grid: true
+  })
+  expect(parseSettings({ sound: { enabled: false, volume: 3, clicks: 'non' } }).sound).toEqual({
+    enabled: false,
+    volume: 1,
+    window: true,
+    clicks: true,
+    grid: true
+  })
+})
+
 test("fond « Lumineux » conservé, type inconnu → fond d'écran", () => {
   expect(parseTheme({ background: { type: 'glow' } }).background).toEqual({ type: 'glow' })
   expect(parseTheme({ background: { type: 'nope' } }).background).toEqual({ type: 'wallpaper' })

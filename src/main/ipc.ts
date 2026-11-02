@@ -72,7 +72,8 @@ const EDITABLE: readonly string[] = [
   'screen',
   'reduceMotion',
   'autoProfiles',
-  'liveBlur'
+  'liveBlur',
+  'sound'
 ]
 
 const editable = (patch: unknown): Partial<Settings> =>

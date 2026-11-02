@@ -1,4 +1,5 @@
 <script module lang="ts">
+  import { play } from '../sound.svelte'
   import { app } from '../state.svelte'
   import { widgets } from '../widgets/registry'
   import { createInstance } from './layout'
@@ -22,6 +23,7 @@
     )
     placing.add(instance.id)
     app.profile.widgets.push(instance)
+    play('add')
   }
 </script>
 
@@ -139,8 +141,14 @@
       // posés après le premier placement (ouvrir Photon n'écrit rien). Pas sur « change » :
       // gridstack le lance aussi quand il réarrange seul. dragstop / resizestop partent avant la
       // fin de sa mise à jour : lus juste après.
-      ready.on('dragstop', () => queueMicrotask(persist))
-      ready.on('resizestop', () => queueMicrotask(persist))
+      ready.on('dragstop', () => {
+        play('drop')
+        queueMicrotask(persist)
+      })
+      ready.on('resizestop', () => {
+        play('drop')
+        queueMicrotask(persist)
+      })
       ready.on('added', persist)
     })
     return () => {
@@ -163,6 +171,7 @@
     const index = app.profile.widgets.findIndex((w) => w.id === id)
     if (index < 0) return
     app.profile.widgets.splice(index, 1)
+    play('remove')
     void tick().then(persist)
   }
 

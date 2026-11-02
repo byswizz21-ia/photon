@@ -43,6 +43,9 @@ export function createWindow(): BrowserWindow {
       sandbox: true,
       nodeIntegration: false,
       backgroundThrottling: false,
+      // Photon s'ouvre au raccourci clavier, sans clic dans la page : sans ça, le son
+      // d'ouverture (et celui d'une vidéo) attendrait un premier clic.
+      autoplayPolicy: 'no-user-gesture-required',
       spellcheck: false
     }
   })
