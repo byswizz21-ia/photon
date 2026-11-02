@@ -57,6 +57,7 @@
       flushShared()
     })
     const offSettings = window.photon.onSettings((settings) => (app.settings = settings))
+    const offSkip = window.photon.onSkipIntro(endIntro) // raccourci global pendant l'intro
     const offSwitch = window.photon.onSwitchTo(switchProfile) // bascule auto
     const offPlace = window.photon.onPlace((next) => (place = next))
     window.photon.ready()
@@ -64,6 +65,7 @@
       offShow()
       offHide()
       offSettings()
+      offSkip()
       offSwitch()
       offPlace()
     }

@@ -13,7 +13,8 @@
 - **Animation d'ouverture** : à la toute première ouverture, un point de lumière éclate, le nom
   « Photon » apparaît puis rejoint l'en-tête, l'interface et les widgets arrivent en cascade et
   le raccourci est montré. Deux variantes : plein écran (14 s) et fenêtre (10 s). Clic ou
-  touche pour passer ; Réglages › « Revoir l'animation d'ouverture ».
+  touche (ou le raccourci de Photon) pour passer ; Réglages › « Revoir l'animation
+  d'ouverture ».
 
 ## 1.1.0 · 2 novembre 2026
 

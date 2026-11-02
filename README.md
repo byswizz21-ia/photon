@@ -30,6 +30,8 @@ créé au démarrage puis seulement affiché ou caché : l'ouverture est instant
 - **Sons** : sound design discret, généré à la volée, réglable ou coupé.
 - **Menu « Ajouter »** : widgets par rubrique, recherche, et catalogue avec aperçu en direct.
 - **Plein écran ou fenêtre**, au choix de l'écran, avec flou en direct en mode fenêtre.
+- **Animation d'ouverture** à la toute première ouverture (passable d'un clic ou d'une touche,
+  à revoir dans Réglages › Général).
 
 ## Widgets
 

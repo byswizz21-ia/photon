@@ -29,8 +29,10 @@
 </script>
 
 <div class="widget" class:editing>
-  <p class="time" class:seconds={settings.seconds}><RollingNumber value={time} /></p>
-  <p class="date">{date}</p>
+  <p class="time" class:seconds={settings.seconds} data-intro="spin">
+    <RollingNumber value={time} />
+  </p>
+  <p class="date" data-intro="date">{date}</p>
   {#if editing}
     <label class="field" data-no-drag>
       <input

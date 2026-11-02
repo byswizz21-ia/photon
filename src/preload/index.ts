@@ -23,6 +23,8 @@ const photon: PhotonApi = {
   shown: () => ipcRenderer.send('photon:shown'),
   onShow: listen('photon:show'),
   onHide: listen('photon:hide'),
+  intro: (playing) => ipcRenderer.send('photon:intro', playing),
+  onSkipIntro: listen('photon:skipIntro'),
   onSettings: listen('photon:settings'),
   onSwitchTo: listen('photon:switchTo'),
   onPlace: listen('photon:place'),

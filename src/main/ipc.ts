@@ -51,7 +51,7 @@ import { syncFocus } from './focus'
 import { pickAutoApps } from './auto'
 import { claudeUsage } from './usage'
 import { onWeatherProfile, weather } from './weather'
-import { hideWindow, logShown, ownsSender, resizeBar } from './window'
+import { hideWindow, logShown, ownsSender, resizeBar, setIntro } from './window'
 
 interface IpcActions {
   ready: () => void
@@ -134,6 +134,7 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:deleteProfile', async () => switched(await deleteProfile()))
   on('photon:hide', (reason) => hideWindow(typeof reason === 'string' ? reason : 'interface'))
   on('photon:shown', logShown)
+  on('photon:intro', (playing) => setIntro(playing === true))
   handle('photon:cpuRam', cpuRam)
   handle('photon:temperatures', temperatures)
   handle('photon:displays', displayList)

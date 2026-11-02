@@ -339,6 +339,8 @@ export interface PhotonApi {
   shown(): void // première image après affichage (mesure du délai)
   onShow(callback: (event: ShowEvent) => void): () => void
   onHide(callback: () => void): () => void
+  intro(playing: boolean): void // animation d'ouverture : les raccourcis globaux la passent
+  onSkipIntro(callback: () => void): () => void
   onSettings(callback: (settings: Settings) => void): () => void
   onSwitchTo(callback: (profileId: string) => void): () => void // bascule auto (src/main/auto.ts)
   onPlace(callback: (place: Placement) => void): () => void // écran sous la fenêtre (flou réglable)

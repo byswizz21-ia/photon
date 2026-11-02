@@ -110,6 +110,20 @@ const WINDOW: Plan = {
   }
 }
 
+// Bande 0→9 (puis un 0, lib/Digit.svelte) posée sur v : descend jusqu'au 0 du bas, repart du 0
+// du haut (même chiffre, saut invisible) et revient sur v. Le ressort s'applique au tour entier.
+function fullTurn(strip: HTMLElement): Keyframe[] {
+  const v = Math.round(Math.abs(parseFloat(strip.style.transform.replace(/[^\d.-]/g, '')) || 0))
+  const k = Math.min((10 - v) / 10, 0.999)
+  const y = (n: number): string => `translateY(${-n}em)`
+  return [
+    { transform: y(v), offset: 0 },
+    { transform: y(10), offset: k },
+    { transform: y(0), offset: k },
+    { transform: y(v), offset: 1 }
+  ]
+}
+
 // hintTop : ligne du raccourci centrée sous le panneau (px) ; null = bulle en bas de l'écran.
 export const intro = $state({ playing: false, hintTop: null as number | null })
 
@@ -123,6 +137,7 @@ export function startIntro(): boolean {
     return false
   }
   intro.playing = true
+  window.photon.intro(true)
   return true
 }
 
@@ -133,6 +148,7 @@ export function endIntro(): void {
   running = []
   intro.playing = false
   intro.hintTop = null
+  window.photon.intro(false)
   markSeen()
 }
 
@@ -266,6 +282,22 @@ export function runIntro(root: HTMLElement): void {
     const to = `${(fx - 0.5) * box.width}px ${(fy - 0.5) * box.height}px`
     at(glow, [{ translate: '0 0' }, { translate: to }], plan.split, glide)
   }
+  // Puis elles dérivent lentement (±28 px, aller-retour de 6 à 8 s), ajouté au trajet ci-dessus.
+  const splitEnd = plan.split[0] + plan.split[1]
+  const drift = (el: Element | null, to: string, seconds: number): void => {
+    const timing = {
+      duration: seconds * 1000,
+      iterations: Infinity,
+      direction: 'alternate'
+    } as const
+    at(el, [{ translate: '0 0' }, { translate: to }], [splitEnd, seconds], 'ease-in-out', {
+      ...timing,
+      composite: 'add',
+      fill: 'none'
+    })
+  }
+  drift(glowA, '28px 20px', 7.8)
+  drift(glowB, '-28px -24px', 6.3)
   at(one('back'), [{ opacity: 1 }, { opacity: 0 }], plan.fade, glide)
 
   // 2. Nom : lettres qui montent sur le ressort, passent de l'accent au blanc. « Bienvenue ».
@@ -361,8 +393,19 @@ export function runIntro(root: HTMLElement): void {
     at(card, [{ opacity: 0 }, { opacity: 1 }], [s + 0.15, 0.4], out, halo)
     at(card, [{ opacity: 1 }, { opacity: 0 }], [s + 0.6, 1.0], glide, { ...halo, ...later })
     const cs = s + 0.35
+    // Horloge : chaque chiffre fait un tour complet (10 crans) avant de se poser ; les
+    // deux-points et la date arrivent en fondu.
+    const spin = item.querySelector('[data-intro="spin"]')
+    spin?.querySelectorAll('.strip').forEach((strip, i) => {
+      at(strip, fullTurn(strip as HTMLElement), [cs + 0.1 * i, 1.1], 'linear', { easing: spring })
+    })
+    spin?.querySelectorAll('.digits > :not(.digit)').forEach((colon) => {
+      at(colon, [{ opacity: 0, offset: 0 }], [cs, 0.5], out)
+    })
+    at(item.querySelector('[data-intro="date"]'), [{ opacity: 0, offset: 0 }], [cs + 0.5, 0.6], out)
     // Une seule image clé (offset 0) : l'arrivée est la vraie valeur affichée par le widget.
     item.querySelectorAll('.strip').forEach((strip, i) => {
+      if (spin?.contains(strip)) return
       at(strip, [{ transform: 'translateY(0)', offset: 0 }], [cs + 0.08 * i, 1], spring)
     })
     item.querySelectorAll('.fill').forEach((fill, i) => {

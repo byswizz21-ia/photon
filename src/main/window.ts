@@ -25,6 +25,7 @@ let modals = 0 // boîte de dialogue ouverte : la perte de focus ne doit pas cac
 let showStartedAt = 0
 let mini = false // seulement la barre de commande, petite et centrée
 let moving = false // fenêtre en train d'être glissée (flou réglable)
+let intro = false // animation d'ouverture en cours
 const BAR_WIDTH = 680
 const BAR_HEIGHT = { min: 64, max: 640 }
 
@@ -145,7 +146,19 @@ export function hideWindow(reason: string): void {
   console.log(`[photon] caché : ${reason}`)
 }
 
+// Pendant l'animation d'ouverture, les raccourcis globaux la passent au lieu de cacher Photon.
+export function setIntro(playing: boolean): void {
+  intro = playing
+}
+
+function skipIntro(): boolean {
+  if (!intro || !win.isVisible()) return false
+  send('photon:skipIntro')
+  return true
+}
+
 export function toggleWindow(): void {
+  if (skipIntro()) return
   if (win.isVisible() && win.isFocused()) hideWindow('raccourci')
   else void showWindow()
 }
@@ -175,6 +188,7 @@ export function showBar(
 }
 
 export function toggleBar(): void {
+  if (skipIntro()) return
   if (mini && win.isVisible() && win.isFocused()) hideWindow('raccourci de la barre')
   else showBar()
 }
