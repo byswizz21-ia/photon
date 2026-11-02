@@ -1,5 +1,5 @@
 // Widget « Image » : une image pour décorer. Choisie ou glissée, elle est copiée chez Photon
-// (%APPDATA%/Photon/images, src/main/background.ts) : l'original peut bouger.
+// (%APPDATA%/Photon/images, src/main/background.ts) : l'original peut bouger. Affichage : lib/MediaCard.svelte.
 import ImageIcon from 'phosphor-svelte/lib/ImageIcon'
 import type { WidgetManifest } from '../types'
 import Picture from './Picture.svelte'

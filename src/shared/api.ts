@@ -288,6 +288,18 @@ export interface RecentFile {
 export const WALLPAPER_URL = 'photon://wallpaper'
 export const IMAGE_URL = 'photon://image'
 
+// Fichiers que les widgets Image, GIF et Vidéo copient chez Photon (importFile, importUrl).
+export const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif', 'bmp']
+export const VIDEO_EXTENSIONS = ['mp4', 'webm', 'm4v', 'mov', 'ogv']
+const extensionOf = (name: string): string => name.split('.').pop()?.toLowerCase() ?? ''
+export const isVideo = (name: string): boolean => VIDEO_EXTENSIONS.includes(extensionOf(name))
+export const isImage = (name: string): boolean => IMAGE_EXTENSIONS.includes(extensionOf(name))
+// Adresse d'une copie : photon://videos/<nom> ou photon://images/<nom>.
+export const copyUrl = (name: string): string =>
+  `photon://${isVideo(name) ? 'videos' : 'images'}/${encodeURIComponent(name)}`
+
+export type FileKind = 'image' | 'video' | 'font'
+
 export interface PhotonApi {
   // Fenêtre et données
   load(): Promise<AppState>
@@ -377,9 +389,12 @@ export interface PhotonApi {
   eyes(): Promise<EyesState>
   eyesSet(on: boolean, minutes: number): Promise<EyesState> // 5 à 120 min
   // Thème
-  pickFile(kind: 'image' | 'font'): Promise<string | null> // boîte de dialogue ; null si annulée
-  // Copie chez Photon ; nom pour photon://images/<nom> ou photon://fonts/<nom>, null si refusé
-  importFile(kind: 'image' | 'font', path: string): Promise<string | null>
+  pickFile(kind: FileKind): Promise<string | null> // boîte de dialogue ; null si annulée
+  // Copie chez Photon ; nom pour photon://images|videos|fonts/<nom>, null si refusé
+  importFile(kind: FileKind, path: string): Promise<string | null>
+  // Télécharge un lien (image, vidéo, page Giphy ou Tenor) chez Photon ; nom de la copie
+  // (images ou videos, voir copyUrl), null si refusé. Appel réseau : sur action seulement.
+  importUrl(url: string): Promise<string | null>
 }
 
 declare global {
