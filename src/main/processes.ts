@@ -14,7 +14,7 @@ const SHARE_MS = 1000 // plusieurs widgets : même mesure
 const STALE_MS = 5000 // Photon était caché : mesure précédente périmée
 const FRESH_MS = 500
 
-// Jamais proposés à la fermeture : Windows lui-même, la machine virtuelle de WSL, l'antivirus, et
+// Jamais proposés à la fermeture : Windows lui-même, WSL et sa machine virtuelle, l'antivirus, et
 // Photon (dev : electron).
 const PROTECTED = new Set(
   [
@@ -39,6 +39,10 @@ const PROTECTED = new Set(
     'vmmem',
     'vmmemWSL',
     'vmcompute',
+    'vmms', // Hyper-V : fait tourner WSL
+    'wslservice',
+    'wslhost',
+    'wslrelay', // ports de WSL vus depuis Windows (localhost)
     'MsMpEng',
     'SecurityHealthService',
     'Photon',
