@@ -17,25 +17,25 @@
     { minutes: 0, label: '∞' }
   ]
 
-  let state: AwakeState = $state({ on: false, screen: false, until: null })
+  let current: AwakeState = $state({ on: false, screen: false, until: null })
   // Relu toutes les 5 s : la fin d'une durée se voit sans rouvrir Photon.
-  pollWhileVisible(async () => (state = await window.photon.awake()), 5_000)
+  pollWhileVisible(async () => (current = await window.photon.awake()), 5_000)
 
   const time = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' })
   const status = $derived(
-    !state.on
+    !current.on
       ? 'Veille normale'
-      : state.until === null
+      : current.until === null
         ? "Éveillé jusqu'à l'arrêt"
-        : `Éveillé jusqu'à ${time.format(state.until)}`
+        : `Éveillé jusqu'à ${time.format(current.until)}`
   )
 
   async function start(minutes: number, screen: boolean): Promise<void> {
-    state = await window.photon.awakeStart(minutes > 0 ? minutes : null, screen)
+    current = await window.photon.awakeStart(minutes > 0 ? minutes : null, screen)
   }
 
   async function toggle(): Promise<void> {
-    if (state.on) state = await window.photon.awakeStop()
+    if (current.on) current = await window.photon.awakeStop()
     else await start(settings.minutes, settings.screen)
   }
 
@@ -46,7 +46,7 @@
 
   function screen(on: boolean): void {
     save({ ...settings, screen: on })
-    if (state.on) void start(settings.minutes, on)
+    if (current.on) void start(settings.minutes, on)
   }
 </script>
 
@@ -54,16 +54,16 @@
   <button
     type="button"
     class="cup"
-    class:on={state.on}
-    aria-pressed={state.on}
-    aria-label={state.on ? "Couper l'anti-veille" : "Allumer l'anti-veille"}
+    class:on={current.on}
+    aria-pressed={current.on}
+    aria-label={current.on ? "Couper l'anti-veille" : "Allumer l'anti-veille"}
     onclick={toggle}
   >
-    <CoffeeIcon size={22} weight={state.on ? 'fill' : 'regular'} aria-hidden="true" />
+    <CoffeeIcon size={22} weight={current.on ? 'fill' : 'regular'} aria-hidden="true" />
   </button>
   <div class="text">
     <span class="label">Anti-veille</span>
-    <span class="status" class:on={state.on}>{status}</span>
+    <span class="status" class:on={current.on}>{status}</span>
   </div>
   <div class="durations" data-no-drag>
     {#each DURATIONS as d (d.minutes)}

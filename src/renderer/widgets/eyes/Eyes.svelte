@@ -13,21 +13,21 @@
   const INTERVALS = [20, 30, 45, 60]
   const minutes = $derived(INTERVALS.includes(settings.minutes) ? settings.minutes : 20)
 
-  let state: EyesState = $state({ on: false, minutes: 20, next: null })
+  let current: EyesState = $state({ on: false, minutes: 20, next: null })
   let now = $state(Date.now())
 
   $effect(() => {
-    void window.photon.eyesSet(settings.on, minutes).then((s) => (state = s))
+    void window.photon.eyesSet(settings.on, minutes).then((s) => (current = s))
   })
 
   // Relu toutes les 15 s : le compte à rebours avance sans tourner pour rien.
   pollWhileVisible(async () => {
-    state = await window.photon.eyes()
+    current = await window.photon.eyes()
     now = Date.now()
   }, 15_000)
 
   const left = $derived(
-    state.next === null ? 0 : Math.max(1, Math.ceil((state.next - now) / 60_000))
+    current.next === null ? 0 : Math.max(1, Math.ceil((current.next - now) / 60_000))
   )
 </script>
 
@@ -49,7 +49,7 @@
   <div class="text">
     <span class="label">Pause des yeux</span>
     <span class="status" class:on={settings.on}>
-      {settings.on && state.on ? `Prochaine pause dans ${left} min` : 'Rappels coupés'}
+      {settings.on && current.on ? `Prochaine pause dans ${left} min` : 'Rappels coupés'}
     </span>
   </div>
   <div class="intervals" data-no-drag>
