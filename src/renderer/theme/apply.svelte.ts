@@ -8,9 +8,16 @@ const SAMPLE = 48 // côté (px) de l'image réduite dont on lit les pixels
 
 let extracted = $state(DEFAULT_ACCENT) // accent calculé depuis le fond
 
-// Accent réellement affiché : celui du thème, ou celui extrait du fond.
+// Accent du thème : celui choisi, ou celui extrait du fond.
 export const resolvedAccent = (): string =>
   app.theme.accent === 'auto' ? extracted : app.theme.accent
+
+// Accent prêté par un widget (musique : couleur de la pochette pendant la lecture), affiché à la
+// place de celui du thème ; null le rend. Les réglages montrent toujours celui du thème.
+let borrowed = $state<string | null>(null)
+export const borrowAccent = (color: string | null): void => {
+  borrowed = color
+}
 
 // Adresse de l'image de fond ; null pour un dégradé. Le chemin dans l'URL force le rechargement.
 export const backgroundUrl = (bg: Background): string | null =>
@@ -87,7 +94,7 @@ export function useTheme(): void {
 
   $effect(() => {
     const { theme } = app
-    const accent = resolvedAccent()
+    const accent = borrowed ?? resolvedAccent()
     const style = document.documentElement.style
     style.setProperty('--accent', accent)
     style.setProperty('--on-accent', onAccent(accent))

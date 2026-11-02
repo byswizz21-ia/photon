@@ -1,9 +1,11 @@
 // Outil natif Spotify (src/main/spotify.ts) : l'app Spotify de Windows, lue et pilotée par les
 // contrôles média de Windows (ceux des touches multimédia), volume par son entrée du mélangeur.
 // Une commande par ligne, une réponse JSON par ligne :
-//   state | toggle | next | previous | seek <secondes> | volume <0-100>
+//   state | toggle | next | previous | shuffle | repeat | seek <secondes> | volume <0-100>
 //     → {"found":false} ou {"found":true,"title":…,"artist":…,"playing":…,"time":…,"duration":…,
-//        "canSeek":…,"volume":<0-100, -1 si Spotify ne joue sur aucune sortie>,"art":"<clé>"}
+//        "canSeek":…,"volume":<0-100, -1 si Spotify ne joue sur aucune sortie>,
+//        "shuffle":<true|false|null>,"repeat":<"none"|"all"|"one"|null>,"art":"<clé>"}
+//   repeat fait tourner : désactivé → toute la file → ce morceau → désactivé.
 //   art → {"data":"data:image/…;base64,…"} (pochette du morceau en cours, "" sans pochette)
 // Les API WinRT sont appelées par réflexion : Add-Type (C# 5 de .NET Framework) ne sait pas
 // référencer les .winmd de Windows.
@@ -80,6 +82,8 @@ namespace Photon {
 
     static readonly Type Manager = Media("Manager"), Session = Media(""), Props = Media("MediaProperties"),
       Timeline = Media("TimelineProperties"), Playback = Media("PlaybackInfo"), Controls = Media("PlaybackControls");
+    static readonly Type RepeatMode = Type.GetType("Windows.Media.MediaPlaybackAutoRepeatMode, Windows.Media" + WINRT, true);
+    static readonly string[] REPEAT = { "none", "one", "all" }; // valeurs de MediaPlaybackAutoRepeatMode
     static readonly Type StreamRef = Type.GetType("Windows.Storage.Streams.IRandomAccessStreamReference, Windows.Storage.Streams" + WINRT, true);
     static readonly Type StreamTyped = Type.GetType("Windows.Storage.Streams.IRandomAccessStreamWithContentType, Windows.Storage.Streams" + WINRT, true);
     static readonly Type ContentType = Type.GetType("Windows.Storage.Streams.IContentTypeProvider, Windows.Storage.Streams" + WINRT, true);
@@ -174,7 +178,11 @@ namespace Photon {
       object timeline = Call(session, Session, "GetTimelineProperties");
       object playback = Call(session, Session, "GetPlaybackInfo");
       bool playing = Get(playback, Playback, "PlaybackStatus").ToString() == "Playing";
-      bool canSeek = (bool)Get(Get(playback, Playback, "Controls"), Controls, "IsPlaybackPositionEnabled");
+      object controls = Get(playback, Playback, "Controls");
+      bool canSeek = (bool)Get(controls, Controls, "IsPlaybackPositionEnabled");
+      // Nullable : null si Spotify ne publie pas l'état.
+      object shuffle = (bool)Get(controls, Controls, "IsShuffleEnabled") ? Get(playback, Playback, "IsShuffleActive") : null;
+      object repeat = (bool)Get(controls, Controls, "IsRepeatEnabled") ? Get(playback, Playback, "AutoRepeatMode") : null;
       double duration = ((TimeSpan)Get(timeline, Timeline, "EndTime")).TotalSeconds;
       double time = ((TimeSpan)Get(timeline, Timeline, "Position")).TotalSeconds;
       // Spotify ne publie la position qu'aux changements : on avance depuis la dernière mise à jour.
@@ -185,6 +193,8 @@ namespace Photon {
       return "{\"found\":true,\"title\":" + Quote(title) + ",\"artist\":" + Quote(artist) +
         ",\"playing\":" + (playing ? "true" : "false") + ",\"time\":" + Number(time) + ",\"duration\":" + Number(duration) +
         ",\"canSeek\":" + (canSeek ? "true" : "false") + ",\"volume\":" + volume +
+        ",\"shuffle\":" + (shuffle == null ? "null" : (bool)shuffle ? "true" : "false") +
+        ",\"repeat\":" + (repeat == null ? "null" : Quote(REPEAT[Convert.ToInt32(repeat)])) +
         ",\"art\":" + Quote(title + "\n" + artist + "\n" + Get(props, Props, "AlbumTitle")) + "}";
     }
 
@@ -214,6 +224,17 @@ namespace Photon {
             case "toggle": Await(Call(session, Session, "TryTogglePlayPauseAsync"), typeof(bool)); break;
             case "next": Await(Call(session, Session, "TrySkipNextAsync"), typeof(bool)); break;
             case "previous": Await(Call(session, Session, "TrySkipPreviousAsync"), typeof(bool)); break;
+            case "shuffle": {
+              object active = Get(Call(session, Session, "GetPlaybackInfo"), Playback, "IsShuffleActive");
+              Await(Call(session, Session, "TryChangeShuffleActiveAsync", !(active is bool && (bool)active)), typeof(bool));
+              break;
+            }
+            case "repeat": {
+              object mode = Get(Call(session, Session, "GetPlaybackInfo"), Playback, "AutoRepeatMode");
+              int next = mode == null ? 2 : new[] { 2, 0, 1 }[Convert.ToInt32(mode)]; // none→all→one→none
+              Await(Call(session, Session, "TryChangeAutoRepeatModeAsync", Enum.ToObject(RepeatMode, next)), typeof(bool));
+              break;
+            }
             case "seek":
               long ticks = TimeSpan.FromSeconds(Math.Max(0, double.Parse(arg, System.Globalization.CultureInfo.InvariantCulture))).Ticks;
               Await(Call(session, Session, "TryChangePlaybackPositionAsync", ticks), typeof(bool));

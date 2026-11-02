@@ -1,20 +1,38 @@
+<script lang="ts" module>
+  // Réglages communs aux widgets de musique (notification, accent pris sur la pochette).
+  export type MusicSettings = { notify: boolean; accent: boolean }
+</script>
+
 <script lang="ts">
-  // Lecteur de musique partagé par les widgets YT Music, Deezer, SoundCloud et Spotify
-  // (src/main/music.ts) : morceau en cours relu chaque seconde fenêtre visible. Petite case :
-  // pochette + lecture ; plus grande : titre, progression, volume. La couleur de la pochette
-  // teinte le fond du widget.
+  // Lecteur partagé par les widgets YT Music, Deezer, SoundCloud et Spotify (src/main/music.ts) :
+  // morceau en cours relu chaque seconde fenêtre visible. Petite case : pochette + lecture ;
+  // moyenne : titre, like, progression, volume ; grande : aussi « je n'aime pas », aléatoire,
+  // répéter et, pour YT Music, la file « À suivre » (clic = jouer ce morceau). Ce qu'un service
+  // n'offre pas (état null) n'a pas de bouton. La couleur de la pochette teinte le fond du
+  // widget, et en option l'accent de toute l'app pendant la lecture.
   import ArrowSquareOutIcon from 'phosphor-svelte/lib/ArrowSquareOutIcon'
   import MusicNotesIcon from 'phosphor-svelte/lib/MusicNotesIcon'
   import PauseIcon from 'phosphor-svelte/lib/PauseIcon'
   import PlayIcon from 'phosphor-svelte/lib/PlayIcon'
+  import RepeatIcon from 'phosphor-svelte/lib/RepeatIcon'
+  import RepeatOnceIcon from 'phosphor-svelte/lib/RepeatOnceIcon'
+  import ShuffleIcon from 'phosphor-svelte/lib/ShuffleIcon'
   import SkipBackIcon from 'phosphor-svelte/lib/SkipBackIcon'
   import SkipForwardIcon from 'phosphor-svelte/lib/SkipForwardIcon'
   import SpeakerHighIcon from 'phosphor-svelte/lib/SpeakerHighIcon'
+  import ThumbsDownIcon from 'phosphor-svelte/lib/ThumbsDownIcon'
+  import ThumbsUpIcon from 'phosphor-svelte/lib/ThumbsUpIcon'
+  import { untrack } from 'svelte'
   import { MUSIC_SERVICES } from '../../shared/api'
-  import type { MusicCommand, MusicService, MusicState } from '../../shared/api'
+  import type { MusicCommand, MusicQueueItem, MusicService, MusicState } from '../../shared/api'
+  import { DEFAULT_ACCENT } from '../../shared/model'
+  import { accentFromPixels } from '../theme/accent'
+  import { borrowAccent } from '../theme/apply.svelte'
+  import type { WidgetProps } from '../widgets/types'
   import { pollWhileVisible } from './poll.svelte'
 
-  let { service }: { service: MusicService } = $props()
+  let { service, settings, editing, save }: WidgetProps<MusicSettings> & { service: MusicService } =
+    $props()
 
   const name = $derived(MUSIC_SERVICES[service])
 
@@ -31,24 +49,57 @@
 
   const track = $derived(music?.track ?? null)
 
+  // Grande case : file d'attente, relue toutes les 3 s seulement si elle est affichée.
+  let width = $state(0)
+  let height = $state(0)
+  const large = $derived(height >= 300 && width >= 380)
+  let queue = $state.raw<MusicQueueItem[]>([])
+  const readQueue = async (): Promise<void> => {
+    if (service !== 'ytmusic') return // seul YT Music expose sa file
+    queue = large && music?.ready ? await window.photon.musicQueue() : []
+  }
+  pollWhileVisible(readQueue, 3_000)
+  $effect(() => {
+    // untrack : relancé quand la case grandit, pas à chaque lecture du morceau.
+    if (large) untrack(() => void readQueue())
+  })
+
+  async function play(id: string): Promise<void> {
+    await window.photon.musicPlay(id)
+    setTimeout(() => void Promise.all([read(), readQueue()]), 400)
+  }
+
   async function control(command: MusicCommand): Promise<void> {
     await window.photon.musicControl(service, command)
     setTimeout(() => void read(), 250) // le service met son état à jour après le clic
   }
 
-  // Couleur moyenne de la pochette : l'image réduite à 1 pixel.
+  // Couleur moyenne de la pochette (l'image réduite à 1 pixel) pour le halo ; couleur vive
+  // (comme l'accent « auto » du fond) pour l'accent de l'app. Pochette grise : pas d'accent.
+  let coverAccent = $state<string | null>(null)
   $effect(() => {
     const src = track?.artwork
     if (!src) return
     const image = new Image()
     image.onload = () => {
-      const context = document.createElement('canvas').getContext('2d')
+      const canvas = document.createElement('canvas')
+      canvas.width = canvas.height = 48
+      const context = canvas.getContext('2d', { willReadFrequently: true })
       if (!context) return
       context.drawImage(image, 0, 0, 1, 1)
       const [r, g, b] = context.getImageData(0, 0, 1, 1).data
       tint = `rgb(${r} ${g} ${b})`
+      context.drawImage(image, 0, 0, 48, 48)
+      const accent = accentFromPixels(context.getImageData(0, 0, 48, 48).data)
+      coverAccent = accent === DEFAULT_ACCENT ? null : accent
     }
     image.src = src
+  })
+
+  $effect(() => {
+    if (!settings.accent || !track?.playing || !coverAccent) return
+    borrowAccent(coverAccent)
+    return () => borrowAccent(null)
   })
 
   const clock = (seconds: number): string => {
@@ -57,9 +108,37 @@
   }
 </script>
 
-<div class="widget" style:--tint={tint || 'transparent'} data-no-press>
+{#snippet toggle(label: string, checked: boolean, change: (value: boolean) => void)}
+  <label class="option" data-no-drag>
+    <input type="checkbox" {checked} onchange={(event) => change(event.currentTarget.checked)} />
+    <span>{label}</span>
+  </label>
+{/snippet}
+
+<div
+  class="widget"
+  class:large
+  style:--tint={tint || 'transparent'}
+  data-no-press
+  bind:clientWidth={width}
+  bind:clientHeight={height}
+>
   <span class="glow" aria-hidden="true"></span>
-  {#if !music?.ready}
+  {#if editing}
+    <div class="options">
+      <span class="label">{name}</span>
+      {@render toggle(
+        'Notification au changement de morceau (Photon caché)',
+        settings.notify,
+        (notify) => save({ ...settings, notify })
+      )}
+      {@render toggle(
+        "Accent de l'app pris sur la pochette pendant la lecture",
+        settings.accent,
+        (accent) => save({ ...settings, accent })
+      )}
+    </div>
+  {:else if !music?.ready}
     <p class="message">Chargement de {name}…</p>
   {:else if !track}
     <!-- Sans compte, YT Music et SoundCloud jouent quand même : la connexion n'est proposée que si
@@ -84,113 +163,206 @@
       </button>
     </div>
   {:else}
-    <div class="art">
-      {#if track.artwork}
-        <img src={track.artwork} alt="" />
-      {:else}
-        <MusicNotesIcon size={28} aria-hidden="true" />
-      {/if}
-      <!-- Petite case : seul contrôle, posé sur la pochette. -->
-      <button
-        type="button"
-        class="play overlay"
-        aria-label={track.playing ? 'Pause' : 'Lecture'}
-        onclick={() => control('toggle')}
-      >
-        {#if track.playing}<PauseIcon size={22} weight="fill" />{:else}<PlayIcon
-            size={22}
-            weight="fill"
-          />{/if}
-      </button>
-    </div>
-    <div class="details">
-      <div class="head">
-        <div class="names">
-          <p class="title" title={track.title}>{track.title}</p>
-          <p class="artist" title={track.artist}>{track.artist}</p>
-        </div>
+    <div class="main">
+      <div class="art">
+        {#if track.artwork}
+          <img src={track.artwork} alt="" />
+        {:else}
+          <MusicNotesIcon size={28} aria-hidden="true" />
+        {/if}
+        <!-- Petite case : seul contrôle, posé sur la pochette. -->
         <button
           type="button"
-          class="icon"
-          aria-label="Ouvrir {name}"
-          title="Ouvrir {name}"
-          onclick={() => window.photon.musicOpen(service)}
-        >
-          <ArrowSquareOutIcon size={18} />
-        </button>
-      </div>
-      <div class="progress">
-        <span>{clock(dragTime ?? track.time)}</span>
-        <input
-          type="range"
-          aria-label="Position dans le morceau"
-          min="0"
-          max={track.duration || 1}
-          step="1"
-          disabled={!track.canSeek}
-          value={dragTime ?? track.time}
-          style:--fill="{((dragTime ?? track.time) / (track.duration || 1)) * 100}%"
-          oninput={(event) => (dragTime = event.currentTarget.valueAsNumber)}
-          onchange={async (event) => {
-            await window.photon.musicSeek(service, event.currentTarget.valueAsNumber)
-            await read()
-            dragTime = null
-          }}
-        />
-        <span>{clock(track.duration)}</span>
-      </div>
-      <div class="controls">
-        <button
-          type="button"
-          class="icon"
-          aria-label="Morceau précédent"
-          onclick={() => control('previous')}
-        >
-          <SkipBackIcon size={20} weight="fill" />
-        </button>
-        <button
-          type="button"
-          class="play"
+          class="play overlay"
           aria-label={track.playing ? 'Pause' : 'Lecture'}
           onclick={() => control('toggle')}
         >
-          {#if track.playing}<PauseIcon size={20} weight="fill" />{:else}<PlayIcon
-              size={20}
+          {#if track.playing}<PauseIcon size={22} weight="fill" />{:else}<PlayIcon
+              size={22}
               weight="fill"
             />{/if}
         </button>
-        <button
-          type="button"
-          class="icon"
-          aria-label="Morceau suivant"
-          onclick={() => control('next')}
-        >
-          <SkipForwardIcon size={20} weight="fill" />
-        </button>
-        <!-- Volume inconnu (Spotify ne joue sur aucune sortie) : pas de curseur. -->
-        {#if track.volume >= 0}
-          <label class="volume">
-            <SpeakerHighIcon size={16} aria-hidden="true" />
-            <input
-              type="range"
-              aria-label="Volume"
-              min="0"
-              max="100"
-              value={dragVolume ?? track.volume}
-              style:--fill="{dragVolume ?? track.volume}%"
-              oninput={(event) => {
-                dragVolume = event.currentTarget.valueAsNumber
-                void window.photon.musicVolume(service, dragVolume)
-              }}
-              onchange={async () => {
-                await read()
-                dragVolume = null
-              }}
-            />
-          </label>
-        {/if}
+      </div>
+      <div class="details">
+        <div class="head">
+          <div class="names">
+            <p class="title" title={track.title}>{track.title}</p>
+            <p class="artist" title={track.artist}>{track.artist}</p>
+          </div>
+          {#if track.like !== null}
+            <!-- « Je n'aime pas » : YT Music seulement. -->
+            {#if large && service === 'ytmusic'}
+              <button
+                type="button"
+                class="icon"
+                class:on={track.like === 'dislike'}
+                aria-label="Je n'aime pas"
+                aria-pressed={track.like === 'dislike'}
+                title="Je n'aime pas"
+                onclick={() => control('dislike')}
+              >
+                <ThumbsDownIcon size={18} weight={track.like === 'dislike' ? 'fill' : 'regular'} />
+              </button>
+            {/if}
+            <button
+              type="button"
+              class="icon"
+              class:on={track.like === 'like'}
+              aria-label="J'aime"
+              aria-pressed={track.like === 'like'}
+              title="J'aime"
+              onclick={() => control('like')}
+            >
+              <ThumbsUpIcon size={18} weight={track.like === 'like' ? 'fill' : 'regular'} />
+            </button>
+          {/if}
+          <button
+            type="button"
+            class="icon"
+            aria-label="Ouvrir {name}"
+            title="Ouvrir {name}"
+            onclick={() => window.photon.musicOpen(service)}
+          >
+            <ArrowSquareOutIcon size={18} />
+          </button>
+        </div>
+        <div class="progress">
+          <span>{clock(dragTime ?? track.time)}</span>
+          <input
+            type="range"
+            aria-label="Position dans le morceau"
+            min="0"
+            max={track.duration || 1}
+            step="1"
+            disabled={!track.canSeek}
+            value={dragTime ?? track.time}
+            style:--fill="{((dragTime ?? track.time) / (track.duration || 1)) * 100}%"
+            oninput={(event) => (dragTime = event.currentTarget.valueAsNumber)}
+            onchange={async (event) => {
+              await window.photon.musicSeek(service, event.currentTarget.valueAsNumber)
+              await read()
+              dragTime = null
+            }}
+          />
+          <span>{clock(track.duration)}</span>
+        </div>
+        <div class="controls">
+          {#if large && track.shuffle !== null}
+            <button
+              type="button"
+              class="icon"
+              class:on={track.shuffle}
+              aria-label="Lecture aléatoire"
+              aria-pressed={track.shuffle}
+              title="Lecture aléatoire"
+              onclick={() => control('shuffle')}
+            >
+              <ShuffleIcon size={18} />
+            </button>
+          {/if}
+          <button
+            type="button"
+            class="icon"
+            aria-label="Morceau précédent"
+            onclick={() => control('previous')}
+          >
+            <SkipBackIcon size={20} weight="fill" />
+          </button>
+          <button
+            type="button"
+            class="play"
+            aria-label={track.playing ? 'Pause' : 'Lecture'}
+            onclick={() => control('toggle')}
+          >
+            {#if track.playing}<PauseIcon size={20} weight="fill" />{:else}<PlayIcon
+                size={20}
+                weight="fill"
+              />{/if}
+          </button>
+          <button
+            type="button"
+            class="icon"
+            aria-label="Morceau suivant"
+            onclick={() => control('next')}
+          >
+            <SkipForwardIcon size={20} weight="fill" />
+          </button>
+          {#if large && track.repeat !== null}
+            <button
+              type="button"
+              class="icon"
+              class:on={track.repeat !== 'none'}
+              aria-label={track.repeat === 'one'
+                ? 'Répéter : ce morceau'
+                : track.repeat === 'all'
+                  ? 'Répéter : toute la file'
+                  : 'Répéter : désactivé'}
+              title={track.repeat === 'one'
+                ? 'Répète ce morceau'
+                : track.repeat === 'all'
+                  ? 'Répète toute la file'
+                  : 'Répéter'}
+              onclick={() => control('repeat')}
+            >
+              {#if track.repeat === 'one'}<RepeatOnceIcon size={18} />{:else}<RepeatIcon
+                  size={18}
+                />{/if}
+            </button>
+          {/if}
+          <!-- Volume inconnu (Spotify ne joue sur aucune sortie) : pas de curseur. -->
+          {#if track.volume >= 0}
+            <label class="volume">
+              <SpeakerHighIcon size={16} aria-hidden="true" />
+              <input
+                type="range"
+                aria-label="Volume"
+                min="0"
+                max="100"
+                value={dragVolume ?? track.volume}
+                style:--fill="{dragVolume ?? track.volume}%"
+                oninput={(event) => {
+                  dragVolume = event.currentTarget.valueAsNumber
+                  void window.photon.musicVolume(service, dragVolume)
+                }}
+                onchange={async () => {
+                  await read()
+                  dragVolume = null
+                }}
+              />
+            </label>
+          {/if}
+        </div>
       </div>
     </div>
+    {#if large && queue.length > 1}
+      <span class="label queue-label">À suivre</span>
+      <ul class="queue">
+        {#each queue as item (item.id)}
+          <li>
+            <button
+              type="button"
+              class="item"
+              class:current={item.current}
+              title={item.current ? 'En cours' : `Jouer ${item.title}`}
+              disabled={item.current}
+              onclick={() => play(item.id)}
+            >
+              <span class="thumb">
+                {#if item.artwork}<img src={item.artwork} alt="" />{:else}<MusicNotesIcon
+                    size={14}
+                    aria-hidden="true"
+                  />{/if}
+              </span>
+              <span class="item-names">
+                <span class="item-title">{item.title}</span>
+                <span class="item-artist">{item.artist}</span>
+              </span>
+              <span class="item-time">{item.duration}</span>
+            </button>
+          </li>
+        {/each}
+      </ul>
+    {/if}
   {/if}
 </div>
 
@@ -218,6 +390,145 @@
     pointer-events: none;
   }
 
+  .large {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .main {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    gap: clamp(12px, 5cqmin, 20px);
+  }
+
+  .large .main {
+    flex: none;
+    height: clamp(120px, 38%, 200px);
+  }
+
+  .options {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .label {
+    font-size: var(--text-12);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--text-13);
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+
+  .option input {
+    accent-color: var(--accent);
+  }
+
+  .queue-label {
+    position: relative;
+  }
+
+  .queue {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-y: auto;
+  }
+
+  .item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 6px;
+    border-radius: var(--radius-row);
+    text-align: left;
+    transition: background var(--dur-fast) var(--ease-out);
+  }
+
+  .item:not(:disabled):hover {
+    background: var(--surface-hover);
+  }
+
+  .item:not(:disabled):active {
+    transform: none;
+  }
+
+  .item:disabled {
+    cursor: default;
+  }
+
+  .thumb {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-bar);
+    overflow: hidden;
+    background: var(--white-6);
+    color: var(--text-faint);
+  }
+
+  .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .item-names {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .item-title,
+  .item-artist {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .item-title {
+    font-size: var(--text-13);
+  }
+
+  .current .item-title {
+    color: var(--accent);
+    font-weight: var(--weight-medium);
+  }
+
+  .item-artist {
+    font-size: var(--text-12);
+    color: var(--text-faint);
+  }
+
+  .item-time {
+    font-size: var(--text-11);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-faint);
+  }
+
+  .icon.on {
+    color: var(--accent);
+  }
+
   .message {
     position: relative;
     margin: auto;
@@ -238,6 +549,7 @@
     position: relative;
     flex: none;
     height: 100%;
+    max-height: 100%;
     aspect-ratio: 1;
     max-width: 45%;
     display: grid;
@@ -340,15 +652,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Service qui refuse qu'on change la position : barre affichée seule. */
-  .progress input:disabled {
-    cursor: default;
-  }
-
-  .progress input:disabled::-webkit-slider-thumb {
-    opacity: 0;
-  }
-
   .controls {
     display: flex;
     align-items: center;
@@ -365,6 +668,15 @@
 
   .volume input {
     width: 72px;
+  }
+
+  /* Service qui refuse qu'on change la position : barre affichée seule. */
+  .progress input:disabled {
+    cursor: default;
+  }
+
+  .progress input:disabled::-webkit-slider-thumb {
+    opacity: 0;
   }
 
   button:focus-visible,

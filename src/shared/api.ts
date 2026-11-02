@@ -125,7 +125,8 @@ export const MUSIC_SERVICES = {
   spotify: 'Spotify'
 } as const
 export type MusicService = keyof typeof MUSIC_SERVICES
-export type MusicCommand = 'toggle' | 'next' | 'previous'
+export type MusicCommand =
+  'toggle' | 'next' | 'previous' | 'like' | 'dislike' | 'shuffle' | 'repeat' // désactivée → toute la file → un titre → désactivée
 
 export interface MusicTrack {
   title: string
@@ -136,6 +137,20 @@ export interface MusicTrack {
   duration: number // secondes
   canSeek: boolean // le service accepte qu'on change la position
   volume: number // 0 à 100 ; -1 : inconnu (curseur caché)
+  // null : le service ne l'offre pas, ou bouton introuvable dans la page (bouton caché)
+  like: 'like' | 'dislike' | 'none' | null // dislike : YT Music seulement
+  shuffle: boolean | null
+  repeat: 'none' | 'all' | 'one' | null
+}
+
+// File d'attente (YT Music seulement), à partir du morceau en cours.
+export interface MusicQueueItem {
+  id: string // identifiant de la vidéo YouTube
+  title: string
+  artist: string
+  duration: string // « 3:18 »
+  current: boolean
+  artwork: string // data URL ; '' tant que la miniature n'est pas téléchargée
 }
 
 export interface MusicState {
@@ -225,6 +240,30 @@ export interface MarketFeed {
   updatedAt: number | null // dernière lecture réussie ; null = jamais
 }
 
+// Processus regroupés par nom (src/main/processes.ts).
+export interface ProcessGroup {
+  name: string // nom du processus (« chrome »), sert aussi d'identifiant
+  label: string // nom lisible de l'exécutable (« Google Chrome »), sinon le nom
+  count: number // processus de ce nom
+  cpu: number // % de tout le processeur
+  memory: number // octets
+  closable: boolean // false : Windows ou Photon
+}
+
+// Dépôt du widget Projets Git (src/main/git.ts).
+export interface GitRepo {
+  path: string
+  name: string // nom du dossier
+  branch: string
+  upstream: boolean // branche suivie sur un dépôt distant
+  ahead: number // commits pas encore poussés
+  behind: number // commits du distant pas encore récupérés (au dernier fetch)
+  changed: number // fichiers modifiés, renommés ou en conflit
+  untracked: number // nouveaux fichiers
+  commit: { subject: string; at: number } | null // dernier commit ; null : dépôt vide
+  error: string | null // « Pas un dépôt Git », « Dossier introuvable »…
+}
+
 export interface RecentFile {
   path: string
   name: string
@@ -285,6 +324,9 @@ export interface PhotonApi {
   musicSeek(service: MusicService, seconds: number): Promise<void>
   musicVolume(service: MusicService, volume: number): Promise<void> // 0 à 100
   musicOpen(service: MusicService): void // interface complète (navigation, connexion) ou app
+  // File de YT Music : 20 morceaux au plus, le morceau en cours d'abord ; jouer l'un d'eux
+  musicQueue(): Promise<MusicQueueItem[]>
+  musicPlay(id: string): Promise<void>
   // Barre de commande
   search(query: string): Promise<SearchResult[]>
   openResult(id: string, inFolder: boolean): Promise<boolean> // true : ouvert, Photon se cache
@@ -310,6 +352,11 @@ export interface PhotonApi {
   clipboardClear(): void
   batteries(): Promise<Battery[] | null> // null : outil natif indisponible
   markets(symbols: string): Promise<MarketFeed> // cache seulement, aucun appel réseau
+  processes(sort: 'cpu' | 'ram'): Promise<ProcessGroup[] | null> // 10 premiers ; null : outil absent
+  processIcon(name: string): Promise<string | null>
+  processClose(name: string): Promise<boolean> // fenêtres fermées comme la croix, sinon arrêt
+  gitStatus(paths: string[]): Promise<GitRepo[]> // aucun appel réseau
+  gitOpen(path: string): Promise<boolean> // ouvre dans VS Code puis cache Photon
   // Thème
   pickFile(kind: 'image' | 'font'): Promise<string | null> // boîte de dialogue ; null si annulée
   // Copie chez Photon ; nom pour photon://images/<nom> ou photon://fonts/<nom>, null si refusé

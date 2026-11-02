@@ -18,10 +18,21 @@ import {
   validFiles
 } from './claude'
 import { clipboardClear, clipboardHistory, syncClipboard } from './clipboard'
+import { gitOpen, gitStatus } from './git'
 import { createProfile, data, deleteProfile, saveProfile, saveTheme, switchProfile } from './data'
 import { markets, onMarketsProfile } from './markets'
-import { musicControl, musicSeek, musicState, musicVolume, openMusic, syncMusic } from './music'
+import {
+  musicControl,
+  musicPlay,
+  musicQueue,
+  musicSeek,
+  musicState,
+  musicVolume,
+  openMusic,
+  syncMusic
+} from './music'
 import { pomodoro, pomodoroControl } from './pomodoro'
+import { processClose, processes, processIcon } from './processes'
 import { recentFiles } from './search/files'
 import { openResult, resultIcon, search } from './search/search'
 import { sharedLoad, sharedSave } from './shared'
@@ -138,6 +149,8 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:musicControl', musicControl) // services, commandes, nombres : validés dans music.ts
   handle('photon:musicSeek', musicSeek)
   handle('photon:musicVolume', musicVolume)
+  handle('photon:musicQueue', musicQueue)
+  handle('photon:musicPlay', musicPlay) // identifiant YouTube validé dans music.ts
   on('photon:musicOpen', (service) => {
     hideWindow('lecteur de musique ouvert')
     openMusic(service) // service validé dans music.ts
@@ -173,4 +186,13 @@ export function registerIpc(actions: IpcActions): void {
   on('photon:clipboardClear', clipboardClear)
   handle('photon:batteries', batteries)
   handle('photon:markets', markets) // symboles validés dans markets.ts
+  handle('photon:processes', processes) // nom validé contre la dernière lecture, jamais un pid
+  handle('photon:processIcon', processIcon)
+  handle('photon:processClose', processClose)
+  handle('photon:gitStatus', gitStatus) // chemins absolus locaux seulement
+  handle('photon:gitOpen', async (path) => {
+    const opened = await gitOpen(path)
+    if (opened) hideWindow('VS Code ouvert')
+    return opened
+  })
 }
