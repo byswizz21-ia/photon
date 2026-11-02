@@ -116,7 +116,15 @@ export interface ClaudeState {
   history: { id: string; title: string; updatedAt: number }[] // plus récentes d'abord
 }
 
-// YT Music : lecteur caché piloté par Photon (src/main/music.ts).
+// Lecteurs de musique (src/main/music.ts) : YT Music, Deezer et SoundCloud dans une page cachée,
+// Spotify par son app Windows. Le type du widget est le nom du service.
+export const MUSIC_SERVICES = {
+  ytmusic: 'YT Music',
+  deezer: 'Deezer',
+  soundcloud: 'SoundCloud',
+  spotify: 'Spotify'
+} as const
+export type MusicService = keyof typeof MUSIC_SERVICES
 export type MusicCommand =
   'toggle' | 'next' | 'previous' | 'like' | 'dislike' | 'shuffle' | 'repeat' // désactivée → toute la file → un titre → désactivée
 
@@ -127,13 +135,15 @@ export interface MusicTrack {
   playing: boolean
   time: number // secondes
   duration: number // secondes
-  volume: number // 0 à 100
-  like: 'like' | 'dislike' | 'none' | null // null : bouton introuvable dans la page
-  shuffle: boolean | null // null : état illisible
+  canSeek: boolean // le service accepte qu'on change la position
+  volume: number // 0 à 100 ; -1 : inconnu (curseur caché)
+  // null : le service ne l'offre pas, ou bouton introuvable dans la page (bouton caché)
+  like: 'like' | 'dislike' | 'none' | null // dislike : YT Music seulement
+  shuffle: boolean | null
   repeat: 'none' | 'all' | 'one' | null
 }
 
-// File d'attente de YT Music, à partir du morceau en cours.
+// File d'attente (YT Music seulement), à partir du morceau en cours.
 export interface MusicQueueItem {
   id: string // identifiant de la vidéo YouTube
   title: string
@@ -144,8 +154,8 @@ export interface MusicQueueItem {
 }
 
 export interface MusicState {
-  ready: boolean // page YT Music chargée (false aussi sans widget YT Music)
-  signedIn: boolean
+  ready: boolean // page du service chargée (false aussi sans widget de ce service)
+  signedIn: boolean // Spotify : app ouverte
   track: MusicTrack | null // null : rien en cours
 }
 
@@ -322,14 +332,15 @@ export interface PhotonApi {
   claudeImage(png: Uint8Array): Promise<string | null> // capture collée → fichier temporaire
   clipboardText(): Promise<string>
   copyText(text: string): void
-  // YT Music : état lu dans la page cachée, sans appel réseau
-  music(): Promise<MusicState>
-  musicControl(command: MusicCommand): Promise<void>
-  musicSeek(seconds: number): Promise<void>
-  musicVolume(volume: number): Promise<void> // 0 à 100
-  musicOpen(): void // interface complète de YT Music (navigation, connexion Google)
-  musicQueue(): Promise<MusicQueueItem[]> // 20 morceaux au plus, le morceau en cours d'abord
-  musicPlay(id: string): Promise<void> // un morceau de la file
+  // Musique : état lu dans la page cachée ou auprès de Windows, sans appel réseau
+  music(service: MusicService): Promise<MusicState>
+  musicControl(service: MusicService, command: MusicCommand): Promise<void>
+  musicSeek(service: MusicService, seconds: number): Promise<void>
+  musicVolume(service: MusicService, volume: number): Promise<void> // 0 à 100
+  musicOpen(service: MusicService): void // interface complète (navigation, connexion) ou app
+  // File de YT Music : 20 morceaux au plus, le morceau en cours d'abord ; jouer l'un d'eux
+  musicQueue(): Promise<MusicQueueItem[]>
+  musicPlay(id: string): Promise<void>
   // Barre de commande
   search(query: string): Promise<SearchResult[]>
   openResult(id: string, inFolder: boolean): Promise<boolean> // true : ouvert, Photon se cache

@@ -2,7 +2,8 @@ import { EventEmitter } from 'node:events'
 import { PassThrough } from 'node:stream'
 import { expect, test, vi } from 'vitest'
 
-// Faux outil natif : répond à chaque ligne comme audio.cs, ou se tait si `silent`.
+// Faux outil natif : lit le code C# jusqu'à la ligne de fin (native.ts), puis répond à chaque
+// commande comme audio.cs, ou se tait si `silent`.
 const sent: string[] = []
 let spawned = 0
 let silent = false
@@ -16,8 +17,13 @@ vi.mock('node:child_process', () => ({
     const stdout = new PassThrough()
     const proc = Object.assign(new EventEmitter(), { stdin, stdout, kill: () => proc.emit('exit') })
     kills.push(proc.kill)
+    let compiled = false
     stdin.on('data', (chunk: Buffer) => {
       for (const line of chunk.toString().split('\n').filter(Boolean)) {
+        if (!compiled) {
+          compiled = line === '#photon-end-of-source'
+          continue
+        }
         sent.push(line)
         if (silent) continue
         if (line.startsWith('device ')) current = line.slice(7)

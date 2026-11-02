@@ -2,7 +2,8 @@
 // Les commandes lourdes (redémarrer, éteindre…) demandent une 2e validation dans la barre.
 import { spawn } from 'node:child_process'
 import { audioOutputs, audioDevice, toggleMute } from '../audio'
-import { musicAvailable, musicControl, openMusic } from '../music'
+import { MUSIC_SERVICES, type MusicCommand, type MusicService } from '../../shared/api'
+import { currentMusic, musicAvailable, musicControl, openMusic } from '../music'
 import { pomodoroCommand } from '../pomodoro'
 
 export interface Command {
@@ -45,10 +46,27 @@ const ui = (id: string, title: string, keywords: string): Command => ({
   run: () => {}
 })
 
-const music = (id: string, title: string, keywords: string, run: () => void): Command => ({
-  ...system(id, title, keywords, false, run),
-  available: musicAvailable
+// Lecture, suivant, précédent : le service qui joue, sinon le premier présent (music.ts).
+const music = (id: string, title: string, keywords: string, command: MusicCommand): Command => ({
+  ...system(id, title, keywords, false, () => {
+    void currentMusic().then((service) => service && musicControl(service, command))
+  }),
+  available: () => (Object.keys(MUSIC_SERVICES) as MusicService[]).some(musicAvailable)
 })
+
+// « Ouvrir YT Music » garde son id d'origine.
+const openCommands = (Object.entries(MUSIC_SERVICES) as [MusicService, string][]).map(
+  ([service, name]): Command => ({
+    ...system(
+      service === 'ytmusic' ? 'music-open' : `music-open-${service}`,
+      `Ouvrir ${name}`,
+      `musique ${name.toLowerCase()}${service === 'ytmusic' ? ' youtube' : ''}`,
+      false,
+      () => openMusic(service)
+    ),
+    available: () => musicAvailable(service)
+  })
+)
 
 export const COMMANDS: readonly Command[] = [
   system(
@@ -96,25 +114,10 @@ export const COMMANDS: readonly Command[] = [
     true,
     powershell('Clear-RecycleBin -Force -ErrorAction SilentlyContinue')
   ),
-  music(
-    'music-toggle',
-    'Lecture / pause de la musique',
-    'musique play pause yt',
-    () => void musicControl('toggle')
-  ),
-  music(
-    'music-next',
-    'Morceau suivant',
-    'musique suivant next skip',
-    () => void musicControl('next')
-  ),
-  music(
-    'music-previous',
-    'Morceau précédent',
-    'musique precedent previous',
-    () => void musicControl('previous')
-  ),
-  music('music-open', 'Ouvrir YT Music', 'musique youtube music', openMusic),
+  music('music-toggle', 'Lecture / pause de la musique', 'musique play pause', 'toggle'),
+  music('music-next', 'Morceau suivant', 'musique suivant next skip', 'next'),
+  music('music-previous', 'Morceau précédent', 'musique precedent previous', 'previous'),
+  ...openCommands,
   system(
     'pomodoro-start',
     'Lancer un pomodoro',

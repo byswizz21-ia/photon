@@ -12,7 +12,7 @@ let extracted = $state(DEFAULT_ACCENT) // accent calculé depuis le fond
 export const resolvedAccent = (): string =>
   app.theme.accent === 'auto' ? extracted : app.theme.accent
 
-// Accent prêté par un widget (YT Music : couleur de la pochette pendant la lecture), affiché à la
+// Accent prêté par un widget (musique : couleur de la pochette pendant la lecture), affiché à la
 // place de celui du thème ; null le rend. Les réglages montrent toujours celui du thème.
 let borrowed = $state<string | null>(null)
 export const borrowAccent = (color: string | null): void => {
