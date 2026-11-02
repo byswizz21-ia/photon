@@ -1,9 +1,15 @@
 # Mises à jour
 
-## Prochaine version
+## À venir
 
 ### Nouveau
 
+- **Notifications** : toutes passent par un même système, réglable dans Réglages ›
+  Notifications (tout couper, ou source par source, et notification d'essai). L'avertissement
+  avant un arrêt du PC part toujours.
+- **Rappels** : Agenda (5 à 60 min avant chaque événement, réglé dans le widget), Compte à
+  rebours (la veille et le jour J), Micro-entreprise (déclaration URSSAF 7 jours avant puis le
+  dernier jour), Suivi du temps (chrono qui tourne depuis plus de 4 h).
 - **Animation d'ouverture** : à la toute première ouverture, un point de lumière éclate, le nom
   « Photon » apparaît puis rejoint l'en-tête, l'interface et les widgets arrivent en cascade et
   le raccourci est montré. Deux variantes : plein écran (14 s) et fenêtre (10 s). Clic ou

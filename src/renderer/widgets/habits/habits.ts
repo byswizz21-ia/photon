@@ -1,5 +1,5 @@
 // Habitudes : jours cochés et séries (data/habits.json, partagé entre profils sauf réglage own).
-import { dayKey } from '../../lib/day'
+import { dayKey } from '../../../shared/day'
 
 export interface Habit {
   id: string

@@ -20,7 +20,7 @@ import type {
 import { notify } from './notify'
 import { describeAction } from './permission'
 import { readJson, writeJson } from './store'
-import { isVisible, send, showWindow } from './window'
+import { isVisible, send } from './window'
 
 const EXE = join(homedir(), '.local', 'bin', 'claude.exe') // installateur officiel Windows
 const READ_TOOLS = 'Read,Glob,Grep' // jamais demandés : sans effet sur le PC
@@ -294,7 +294,7 @@ export function ask(text: string, files: string[]): boolean {
 // Photon caché pendant une demande d'accord : notification Windows qui le rouvre.
 function notifyApproval(): void {
   if (isVisible()) return
-  notify({ title: 'Claude attend ton accord', body: approvals[0]?.title ?? '' }, showWindow)
+  notify('claude', { title: 'Claude attend ton accord', body: approvals[0]?.title ?? '' })
 }
 
 export function stopAnswer(): void {

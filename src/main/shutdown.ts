@@ -5,7 +5,6 @@ import { execFile } from 'node:child_process'
 import type { ShutdownAction, ShutdownState } from '../shared/api'
 import { data } from './data'
 import { notify } from './notify'
-import { showWindow } from './window'
 
 const MINUTE = 60_000
 const WINDOWS_DELAY_S = 60 // compte à rebours laissé à Windows pour arrêt et redémarrage
@@ -71,10 +70,10 @@ export function shutdownStart(action: unknown, minutes: unknown): ShutdownState 
     timers.push(
       setTimeout(
         () =>
-          notify(
-            { title: `${LABELS[action]} dans 2 minutes`, body: 'Ouvre Photon pour annuler.' },
-            showWindow
-          ),
+          notify('always', {
+            title: `${LABELS[action]} dans 2 minutes`,
+            body: 'Ouvre Photon pour annuler.'
+          }),
         ms - WARN_MS
       )
     )

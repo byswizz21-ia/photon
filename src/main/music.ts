@@ -24,7 +24,7 @@ import {
   spotifyState,
   spotifyVolume
 } from './spotify'
-import { isVisible, showWindow } from './window'
+import { isVisible } from './window'
 
 type WebService = Exclude<MusicService, 'spotify'>
 type Extras = Pick<MusicTrack, 'like' | 'shuffle' | 'repeat'>
@@ -360,15 +360,12 @@ async function onTrack(service: MusicService): Promise<void> {
   const art = await (service === 'spotify'
     ? spotifyArtwork()
     : (players.get(service as WebService)?.artwork.ready ?? ''))
-  notify(
-    {
-      title: track.title,
-      body: track.artist,
-      silent: true,
-      ...(art ? { icon: nativeImage.createFromDataURL(art) } : {})
-    },
-    () => void showWindow()
-  )
+  notify('music', {
+    title: track.title,
+    body: track.artist,
+    silent: true,
+    ...(art ? { icon: nativeImage.createFromDataURL(art) } : {})
+  })
 }
 
 async function download(raw: string, hosts: RegExp): Promise<string> {

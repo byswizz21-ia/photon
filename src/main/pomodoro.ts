@@ -2,7 +2,6 @@
 // Fin du travail : notification et pause lancée d'office ; fin de la pause : notification.
 import type { PomodoroCommand, PomodoroState } from '../shared/api'
 import { notify } from './notify'
-import { showWindow } from './window'
 
 const MINUTE = 60_000
 const DEFAULT = { focus: 25, pause: 5 }
@@ -31,7 +30,7 @@ const minutes = (v: unknown, fallback: number): number =>
   typeof v === 'number' && Number.isFinite(v) ? Math.min(Math.max(Math.round(v), 1), 180) : fallback
 
 function ring(title: string, body: string): void {
-  notify(reminders ? { title, toastXml: reminderXml(title, body) } : { title, body }, showWindow)
+  notify('pomodoro', reminders ? { title, toastXml: reminderXml(title, body) } : { title, body })
 }
 
 function run(phase: 'focus' | 'pause', total: number, left = total): void {

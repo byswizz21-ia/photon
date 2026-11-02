@@ -29,6 +29,7 @@ import { startScreens } from './screens'
 import { startBackdrop } from './backdrop'
 import { leaveFocus } from './focus'
 import { startAuto } from './auto'
+import { startReminders } from './reminders'
 
 // Argument passé par le lancement au démarrage de Windows : rester caché dans la zone de notif.
 const HIDDEN_ARG = '--hidden'
@@ -118,5 +119,6 @@ if (!app.requestSingleInstanceLock()) {
     loadMusic()
     startScreens()
     startAuto()
+    startReminders()
   })
 }

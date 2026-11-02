@@ -3,7 +3,7 @@
   // cotisations estimées, saisie d'un encaissement, derniers encaissements.
   // Mode édition : activité, rythme de déclaration, taux de cotisations.
   import XIcon from 'phosphor-svelte/lib/XIcon'
-  import { dayKey } from '../../lib/day'
+  import { dayKey } from '../../../shared/day'
   import { pollWhileVisible } from '../../lib/poll.svelte'
   import { shared } from '../../lib/shared.svelte'
   import type { WidgetProps } from '../types'
@@ -17,7 +17,7 @@
     total,
     type Activity,
     type Period
-  } from './micro'
+  } from '../../../shared/micro'
 
   let { settings, editing, save }: WidgetProps<MicroSettings> = $props()
 

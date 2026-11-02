@@ -163,6 +163,12 @@ rien d'autre à modifier.
    }, 2000)
    ```
 
+5. Pour prévenir par une notification Windows : un rappel daté (à partir des réglages du widget)
+   s'ajoute dans `dueReminders` (`src/main/reminders.ts`, vérifié chaque minute, testé) ; un
+   événement tenu par Photon (fin de minuteur…) appelle `notify(source, { title, body })` de
+   `src/main/notify.ts`. Dans les deux cas, déclare la source dans `NOTIFY_SOURCES`
+   (`src/shared/model.ts`) : elle apparaît dans Réglages › Notifications pour être coupée.
+
 Règles : la carte de verre, le survol et la gestion des pannes sont fournis par Photon (un widget qui
 plante affiche une erreur dans sa case seulement). Anime uniquement `transform` et `opacity`. Pour un
 chiffre qui change, utilise `lib/RollingNumber.svelte`. Dimensionne le contenu sur la carte avec

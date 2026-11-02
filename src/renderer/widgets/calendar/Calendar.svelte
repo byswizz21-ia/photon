@@ -80,6 +80,17 @@
       />
       <small>Google Agenda › Paramètres de l'agenda › Adresse secrète au format iCal</small>
     </label>
+    <label class="field" data-no-drag>
+      <span>Notification</span>
+      <select
+        value={settings.remind}
+        onchange={(event) => save({ ...settings, remind: Number(event.currentTarget.value) })}
+      >
+        {#each [0, 5, 10, 15, 30, 60] as minutes (minutes)}
+          <option value={minutes}>{minutes ? `${minutes} min avant` : 'Aucune'}</option>
+        {/each}
+      </select>
+    </label>
   {:else if message}
     <p class="message">{message}</p>
   {:else}
@@ -209,7 +220,8 @@
     font-size: var(--text-13);
   }
 
-  .field input {
+  .field input,
+  .field select {
     min-height: 34px;
     padding: 0 10px;
     border: 1px solid var(--glass-edge);
@@ -220,7 +232,12 @@
     user-select: text;
   }
 
-  .field input:focus-visible {
+  .field select option {
+    background: var(--surface-option);
+  }
+
+  .field input:focus-visible,
+  .field select:focus-visible {
     outline: var(--focus-ring);
     outline-offset: 0;
   }

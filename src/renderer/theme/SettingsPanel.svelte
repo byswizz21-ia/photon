@@ -3,10 +3,12 @@
   import XIcon from 'phosphor-svelte/lib/XIcon'
   import {
     BAR_SHORTCUTS,
+    NOTIFY_SOURCES,
     SHORTCUTS,
     shortcutLabel,
     type Background,
     type FontSettings,
+    type NotifySettings,
     type Settings,
     type SoundSettings,
     type Theme
@@ -176,6 +178,13 @@
     } catch (error) {
       console.error('[photon] réglage non enregistré', error)
     }
+  }
+
+  const notifications = $derived(app.settings.notifications)
+  const notifySources = Object.entries(NOTIFY_SOURCES)
+
+  function patchNotify(patch: Partial<NotifySettings>): void {
+    void setting({ notifications: { ...app.settings.notifications, ...patch } })
   }
 
   // Sons : appliqués tout de suite (le clic sur la case sonne déjà selon le nouveau choix),
@@ -489,6 +498,38 @@
         </label>
       {/each}
     {/if}
+  </section>
+
+  <section>
+    <h3>Notifications</h3>
+    <label class="check">
+      <input
+        type="checkbox"
+        checked={notifications.enabled}
+        onchange={(event) => patchNotify({ enabled: event.currentTarget.checked })}
+      />
+      <span>Notifications de Photon</span>
+      <small>L'avertissement avant un arrêt du PC part toujours</small>
+    </label>
+    {#if notifications.enabled}
+      {#each notifySources as [source, [label, hint]] (source)}
+        <label class="check">
+          <input
+            type="checkbox"
+            checked={notifications.sources[source] !== false}
+            onchange={(event) =>
+              patchNotify({
+                sources: { ...notifications.sources, [source]: event.currentTarget.checked }
+              })}
+          />
+          <span>{label}</span>
+          <small>{hint}</small>
+        </label>
+      {/each}
+    {/if}
+    <button type="button" class="action" onclick={() => window.photon.notifyTest()}>
+      Envoyer une notification d'essai
+    </button>
   </section>
 </div>
 

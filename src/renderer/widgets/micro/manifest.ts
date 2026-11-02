@@ -4,7 +4,7 @@
 import BriefcaseIcon from 'phosphor-svelte/lib/BriefcaseIcon'
 import type { WidgetManifest } from '../types'
 import Micro from './Micro.svelte'
-import type { Activity, Period } from './micro'
+import type { Activity, Period } from '../../../shared/micro'
 
 export type MicroSettings = {
   activity: Activity

@@ -5,7 +5,7 @@
   import FlameIcon from 'phosphor-svelte/lib/FlameIcon'
   import XIcon from 'phosphor-svelte/lib/XIcon'
   import OwnToggle from '../../lib/OwnToggle.svelte'
-  import { dayKey } from '../../lib/day'
+  import { dayKey } from '../../../shared/day'
   import { pollWhileVisible } from '../../lib/poll.svelte'
   import { profileKey, shared } from '../../lib/shared.svelte'
   import type { WidgetProps } from '../types'
