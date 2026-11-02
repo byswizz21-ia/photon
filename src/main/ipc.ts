@@ -6,6 +6,7 @@ import { audio, audioDevice, audioMute, audioVolume } from './audio'
 import { awake, awakeStart, awakeStop, syncAwake } from './awake'
 import { eyes, eyesSet, syncEyes } from './eyes'
 import { importFile, pickFile } from './background'
+import { importUrl } from './download'
 import { batteries } from './batteries'
 import { calendar, onProfileSaved } from './calendar'
 import {
@@ -173,6 +174,7 @@ export function registerIpc(actions: IpcActions): void {
   })
   handle('photon:pickFile', pickFile)
   handle('photon:importFile', importFile) // type, extension et taille vérifiés dans background.ts
+  handle('photon:importUrl', importUrl) // https seulement, type et taille vérifiés (download.ts)
   handle('photon:sharedLoad', sharedLoad) // clé = nom de fichier validé, taille bornée
   handle('photon:sharedSave', sharedSave)
   handle('photon:pomodoro', pomodoro)

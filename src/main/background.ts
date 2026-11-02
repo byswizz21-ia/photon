@@ -1,24 +1,29 @@
 // Images servies à l'interface par le protocole photon:// :
 //   photon://wallpaper → fond d'écran Windows actuel ; photon://image → image choisie dans le thème ;
-//   photon://images/<nom>, photon://fonts/<nom> → copies faites par importFile (ci-dessous).
+//   photon://images|videos|fonts/<nom> → copies faites par importFile (ci-dessous) et importUrl.
 // Rien d'autre n'est servi : l'interface ne peut pas lire un fichier quelconque du disque.
 import { app, dialog, net, protocol } from 'electron'
 import { randomUUID } from 'node:crypto'
-import { copyFile, mkdir, stat } from 'node:fs/promises'
+import { copyFile, mkdir, stat, writeFile } from 'node:fs/promises'
 import { basename, extname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { IMAGE_EXTENSIONS, VIDEO_EXTENSIONS, type FileKind } from '../shared/api'
 import { data } from './data'
 import { withModal } from './window'
 
-const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif', 'bmp']
-
 // À appeler avant app.whenReady() : schéma « sécurisé » et CORS pour lire l'image dans un canvas
-// (extraction de la couleur d'accent).
+// (extraction de la couleur d'accent) ; stream pour les vidéos (sinon refusées par <video>).
 export function registerBackgroundScheme(): void {
   protocol.registerSchemesAsPrivileged([
     {
       scheme: 'photon',
-      privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true }
+      privileges: {
+        standard: true,
+        secure: true,
+        supportFetchAPI: true,
+        corsEnabled: true,
+        stream: true
+      }
     }
   ])
 }
@@ -34,14 +39,15 @@ function themeImagePath(): string | null {
   return IMAGE_EXTENSIONS.includes(extension) ? background.path : null
 }
 
-// Fichiers copiés chez Photon (%APPDATA%/Photon/<dossier>) : images des widgets Image, polices
-// importées. Servis par photon://images/<nom> et photon://fonts/<nom>.
-export type FileKind = 'image' | 'font'
-const KINDS: Record<FileKind, { dir: string; extensions: string[]; maxBytes: number }> = {
-  image: { dir: 'images', extensions: IMAGE_EXTENSIONS, maxBytes: 30 * 1024 * 1024 },
-  font: { dir: 'fonts', extensions: ['ttf', 'otf', 'woff', 'woff2'], maxBytes: 20 * 1024 * 1024 }
+// Fichiers copiés chez Photon (%APPDATA%/Photon/<dossier>) : images et vidéos des widgets Image,
+// GIF et Vidéo, polices importées. Servis par photon://<dossier>/<nom>.
+const MB = 1024 * 1024
+export const KINDS: Record<FileKind, { dir: string; extensions: string[]; maxBytes: number }> = {
+  image: { dir: 'images', extensions: IMAGE_EXTENSIONS, maxBytes: 30 * MB },
+  video: { dir: 'videos', extensions: VIDEO_EXTENSIONS, maxBytes: 500 * MB },
+  font: { dir: 'fonts', extensions: ['ttf', 'otf', 'woff', 'woff2'], maxBytes: 20 * MB }
 }
-const isKind = (v: unknown): v is FileKind => v === 'image' || v === 'font'
+const isKind = (v: unknown): v is FileKind => typeof v === 'string' && Object.hasOwn(KINDS, v)
 const kindDir = (kind: FileKind): string => join(app.getPath('userData'), KINDS[kind].dir)
 
 // Nom d'une copie : jamais un chemin (pas de / ni de ..), extension du bon type.
@@ -59,10 +65,7 @@ export async function importFile(kind: unknown, path: unknown): Promise<string |
   if (!KINDS[kind].extensions.includes(extension)) return null
   try {
     if ((await stat(path)).size > KINDS[kind].maxBytes) return null
-    const base = basename(path, extname(path))
-      .replace(/[^\w-]+/g, '-')
-      .slice(0, 40)
-    const name = `${base}-${randomUUID().slice(0, 8)}.${extension}`
+    const name = copyName(basename(path, extname(path)), extension)
     await mkdir(kindDir(kind), { recursive: true })
     await copyFile(path, join(kindDir(kind), name))
     return name
@@ -71,12 +74,41 @@ export async function importFile(kind: unknown, path: unknown): Promise<string |
   }
 }
 
+const copyName = (base: string, extension: string): string =>
+  `${base.replace(/[^\w-]+/g, '-').slice(0, 40) || 'fichier'}-${randomUUID().slice(0, 8)}.${extension}`
+
+// Enregistre un fichier téléchargé (download.ts), type et taille déjà vérifiés ; nom de la copie.
+export async function saveCopy(
+  kind: FileKind,
+  base: string,
+  extension: string,
+  bytes: Uint8Array
+): Promise<string> {
+  const name = copyName(base, extension)
+  await mkdir(kindDir(kind), { recursive: true })
+  await writeFile(join(kindDir(kind), name), bytes)
+  return name
+}
+
 function fileFor(url: URL): string | null {
   if (url.host === 'wallpaper') return wallpaperPath()
   if (url.host === 'image') return themeImagePath()
   const name = url.pathname.slice(1)
-  const kind = url.host === 'images' ? 'image' : url.host === 'fonts' ? 'font' : null
+  const kind = (Object.keys(KINDS) as FileKind[]).find((k) => KINDS[k].dir === url.host)
   return kind && isCopyName(kind, name) ? join(kindDir(kind), name) : null
+}
+
+// En-tête Range d'une vidéo (« bytes=0- », « bytes=100-199 ») : octets demandés, bornés au fichier.
+// null : pas de Range (fichier entier) ; 'invalid' : hors du fichier (réponse 416).
+export function byteRange(
+  header: string | null,
+  size: number
+): { start: number; end: number } | 'invalid' | null {
+  const match = /^bytes=(\d+)-(\d*)$/.exec(header ?? '')
+  if (!match) return null
+  const start = Number(match[1])
+  const end = match[2] ? Math.min(Number(match[2]), size - 1) : size - 1
+  return start <= end ? { start, end } : 'invalid'
 }
 
 export function serveBackgrounds(): void {
@@ -84,29 +116,43 @@ export function serveBackgrounds(): void {
     const file = fileFor(new URL(request.url))
     if (!file) return new Response(null, { status: 404 })
     try {
-      const response = await net.fetch(pathToFileURL(file).toString())
+      // Vidéos : lues par morceaux (Range). net.fetch coupe bien le fichier mais répond 200 sans
+      // Content-Range : on remet le statut 206 et les en-têtes qu'attend le lecteur.
+      const { size } = await stat(file)
+      const range = byteRange(request.headers.get('Range'), size)
+      if (range === 'invalid') return new Response(null, { status: 416 })
+      const response = await net.fetch(pathToFileURL(file).toString(), {
+        headers: range ? { Range: `bytes=${range.start}-${range.end}` } : {}
+      })
       const headers = new Headers(response.headers)
       headers.set('Access-Control-Allow-Origin', '*')
-      return new Response(response.body, { status: response.status, headers })
+      headers.set('Accept-Ranges', 'bytes')
+      if (!range) return new Response(response.body, { status: response.status, headers })
+      headers.set('Content-Range', `bytes ${range.start}-${range.end}/${size}`)
+      headers.set('Content-Length', String(range.end - range.start + 1))
+      return new Response(response.body, { status: 206, headers })
     } catch {
       return new Response(null, { status: 404 }) // fichier déplacé ou supprimé
     }
   })
 }
 
-// Boîte « choisir une image » (fond du thème, widget Image) ou « une police ».
+const PICKERS = {
+  image: { title: 'Choisir une image', folder: 'pictures', filter: 'Images' },
+  video: { title: 'Choisir une vidéo', folder: 'videos', filter: 'Vidéos' },
+  font: { title: 'Choisir une police', folder: 'downloads', filter: 'Polices' }
+} as const
+
+// Boîte « choisir une image » (fond du thème, widgets Image et GIF), « une vidéo » ou « une police ».
 export async function pickFile(kind: unknown): Promise<string | null> {
-  const font = kind === 'font'
+  const type = isKind(kind) ? kind : 'image'
+  const { title, folder, filter } = PICKERS[type]
   const result = await withModal((parent) =>
     dialog.showOpenDialog(parent, {
-      title: font ? 'Choisir une police' : 'Choisir une image',
-      defaultPath: app.getPath(font ? 'downloads' : 'pictures'),
+      title,
+      defaultPath: app.getPath(folder),
       properties: ['openFile'],
-      filters: [
-        font
-          ? { name: 'Polices', extensions: KINDS.font.extensions }
-          : { name: 'Images', extensions: IMAGE_EXTENSIONS }
-      ]
+      filters: [{ name: filter, extensions: KINDS[type].extensions }]
     })
   )
   return result.canceled ? null : (result.filePaths[0] ?? null)

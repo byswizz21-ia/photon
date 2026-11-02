@@ -14,3 +14,15 @@ test('photon://images et fonts : seulement un nom de copie du bon type, jamais u
   expect(isCopyName('font', 'Inter-3f2b9c1a.woff2')).toBe(true)
   expect(isCopyName('font', 'photo.png')).toBe(false)
 })
+
+test('vidéos : Range borné au fichier, 416 hors du fichier', async () => {
+  const { byteRange } = await import('./background')
+  expect(byteRange(null, 1000)).toBeNull()
+  expect(byteRange('bytes=0-', 1000)).toEqual({ start: 0, end: 999 })
+  expect(byteRange('bytes=100-199', 1000)).toEqual({ start: 100, end: 199 })
+  expect(byteRange('bytes=900-5000', 1000)).toEqual({ start: 900, end: 999 })
+  expect(byteRange('bytes=1000-', 1000)).toBe('invalid')
+  expect(byteRange('bytes=-500', 1000)).toBeNull() // suffixe : fichier entier
+  expect(isCopyName('video', 'clip-3f2b9c1a.mp4')).toBe(true)
+  expect(isCopyName('video', 'clip.png')).toBe(false)
+})

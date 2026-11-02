@@ -87,7 +87,8 @@ const photon: PhotonApi = {
   eyes: () => ipcRenderer.invoke('photon:eyes'),
   eyesSet: (on, minutes) => ipcRenderer.invoke('photon:eyesSet', on, minutes),
   pickFile: (kind) => ipcRenderer.invoke('photon:pickFile', kind),
-  importFile: (kind, path) => ipcRenderer.invoke('photon:importFile', kind, path)
+  importFile: (kind, path) => ipcRenderer.invoke('photon:importFile', kind, path),
+  importUrl: (url) => ipcRenderer.invoke('photon:importUrl', url)
 }
 
 contextBridge.exposeInMainWorld('photon', photon)
