@@ -5,6 +5,9 @@ import type { Settings } from '../shared/model'
 import { audio, audioDevice, audioMute, audioVolume } from './audio'
 import { awake, awakeStart, awakeStop, syncAwake } from './awake'
 import { eyes, eyesSet, syncEyes } from './eyes'
+import { pickColor } from './colorpicker'
+import { portClose, ports } from './ports'
+import { shutdownCancel, shutdownStart, shutdownState, syncShutdown } from './shutdown'
 import { importFile, pickFile } from './background'
 import { importUrl } from './download'
 import { batteries } from './batteries'
@@ -105,6 +108,7 @@ export function registerIpc(actions: IpcActions): void {
     syncMusic()
     syncEyes()
     syncAwake()
+    syncShutdown()
   })
   // Profil changé : agendas et lecteurs de musique suivent les widgets du nouveau profil.
   const switched = (ok: boolean): AppState | null => {
@@ -117,6 +121,7 @@ export function registerIpc(actions: IpcActions): void {
     syncMusic()
     syncEyes()
     syncAwake()
+    syncShutdown()
     return { ...data }
   }
   handle('photon:switchProfile', async (id) => switched(await switchProfile(id)))
@@ -208,4 +213,10 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:awakeStop', awakeStop)
   handle('photon:eyes', eyes)
   handle('photon:eyesSet', eyesSet) // validé dans eyes.ts
+  handle('photon:ports', ports)
+  handle('photon:portClose', portClose) // pid validé contre la dernière lecture
+  handle('photon:shutdownState', shutdownState)
+  handle('photon:shutdownStart', shutdownStart) // action et durée validées dans shutdown.ts
+  handle('photon:shutdownCancel', shutdownCancel)
+  handle('photon:pickColor', pickColor)
 }

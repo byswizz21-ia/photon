@@ -278,6 +278,23 @@ export interface EyesState {
   next: number | null // ms depuis 1970 du prochain rappel ; null : coupé
 }
 
+// Port TCP en écoute (src/main/ports.ts).
+export interface PortInfo {
+  port: number
+  pid: number
+  name: string // nom du processus (« node ») ; « pid 1234 » si illisible
+  local: boolean // seulement 127.0.0.1 / ::1 : invisible depuis le réseau
+  closable: boolean // false : Windows, Photon, processus protégé
+}
+
+// Minuteur d'arrêt (src/main/shutdown.ts) : un seul, partagé par tous les profils.
+export type ShutdownAction = 'shutdown' | 'restart' | 'sleep'
+
+export interface ShutdownState {
+  action: ShutdownAction | null // null : aucun minuteur
+  at: number | null // ms depuis 1970
+}
+
 export interface RecentFile {
   path: string
   name: string
@@ -387,6 +404,12 @@ export interface PhotonApi {
   awakeStart(minutes: number | null, screen: boolean): Promise<AwakeState> // null : sans fin
   awakeStop(): Promise<AwakeState>
   eyes(): Promise<EyesState>
+  ports(): Promise<PortInfo[] | null> // null : netstat indisponible
+  portClose(pid: number): Promise<boolean> // processus de la dernière lecture, jamais protégé
+  shutdownState(): Promise<ShutdownState>
+  shutdownStart(action: ShutdownAction, minutes: number): Promise<ShutdownState> // 1 à 1440 min
+  shutdownCancel(): Promise<ShutdownState>
+  pickColor(): Promise<string | null> // « #rrggbb » cliqué à l'écran ; null : annulé
   eyesSet(on: boolean, minutes: number): Promise<EyesState> // 5 à 120 min
   // Thème
   pickFile(kind: FileKind): Promise<string | null> // boîte de dialogue ; null si annulée

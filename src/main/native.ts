@@ -44,13 +44,14 @@ while ($null -ne ($line = [Console]::In.ReadLine())) { [Console]::Out.WriteLine(
     return proc
   }
 
-  // Réponse brute, ou null si l'outil est indisponible ou plus lent que `wait` ms.
+  // Réponse brute, ou null si l'outil est indisponible ou plus lent que `wait` ms. Une commande
+  // qui attend l'utilisateur (pipette) passe un `wait` plus long : l'outil n'est pas tué avant.
   // Une réponse en retard est quand même consommée : l'ordre des lignes reste juste.
   function send(command: string, wait = STUCK_MS): Promise<string | null> {
     return new Promise((resolve) => {
       const proc = helper()
       const late = setTimeout(() => resolve(null), wait)
-      const stuck = setTimeout(() => proc.kill(), STUCK_MS)
+      const stuck = setTimeout(() => proc.kill(), Math.max(wait, STUCK_MS)) // pipette : 35 s
       waiting.push((line) => {
         clearTimeout(late)
         clearTimeout(stuck)

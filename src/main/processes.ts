@@ -173,8 +173,18 @@ export async function processIcon(name: unknown): Promise<string | null> {
 export async function processClose(name: unknown): Promise<boolean> {
   if (typeof name !== 'string' || !closable(name) || !last) return false
   const pids = [...last.procs].filter(([, proc]) => proc.name === name).map(([pid]) => pid)
-  if (!pids.length) return false
+  return pids.length > 0 && closePids(pids, name)
+}
+
+// Fenêtres fermées comme la croix, sinon arrêt. Les appelants ont vérifié closable().
+export async function closePids(pids: number[], name: string): Promise<boolean> {
   const reply = await tool.send(`close ${pids.join(',')}`)
   if (reply !== 'closed' && reply !== 'killed') console.warn(`[photon] fermeture refusée : ${name}`)
   return reply === 'closed' || reply === 'killed'
+}
+
+// Nom de chaque processus (pid → nom) ; null si l'outil natif ne répond pas (widget Ports).
+export async function processNames(): Promise<Map<number, string> | null> {
+  const snap = await snapshot()
+  return snap && new Map([...snap.procs].map(([pid, proc]) => [pid, proc.name]))
 }
