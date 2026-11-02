@@ -25,7 +25,10 @@ créé au démarrage puis seulement affiché ou caché : l'ouverture est instant
   avec bascule automatique au lancement d'une app ou selon l'heure. Un profil Focus active « Ne pas
   déranger » et le pomodoro.
 - **Thèmes** : fond d'écran, image, dégradé ou scène lumineuse ; accent extrait du fond ; flou,
-  opacité, arrondi, densité et police réglables, par profil ou pour tous.
+  opacité, arrondi (tous les coins le suivent), densité et police réglables, par profil ou pour
+  tous.
+- **Sons** : sound design discret, généré à la volée, réglable ou coupé.
+- **Menu « Ajouter »** : widgets par rubrique, recherche, et catalogue avec aperçu en direct.
 - **Plein écran ou fenêtre**, au choix de l'écran, avec flou en direct en mode fenêtre.
 
 ## Widgets
@@ -39,6 +42,8 @@ créé au démarrage puis seulement affiché ou caché : l'ouverture est instant
 | Raccourcis    | Lanceur, Dossiers, Presse-papiers, Projets Git, Outils dev, Pipette                        |
 | Infos         | Météo, Cours (bourse et crypto), Claude, Usage Claude, Micro-entreprise, Moyenne           |
 | Décor         | Image, GIF, Vidéo                                                                          |
+
+Nouveautés de chaque version : [CHANGELOG.md](CHANGELOG.md).
 
 ## Installer
 
