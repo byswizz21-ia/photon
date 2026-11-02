@@ -90,7 +90,7 @@ export function registerIpc(actions: IpcActions): void {
     syncClipboard()
     syncMusic()
   })
-  // Profil changé : agendas et lecteur YT Music suivent les widgets du nouveau profil.
+  // Profil changé : agendas et lecteurs de musique suivent les widgets du nouveau profil.
   const switched = (ok: boolean): AppState | null => {
     if (!ok) return null
     void syncFocus(data.profile.focus)
@@ -135,12 +135,12 @@ export function registerIpc(actions: IpcActions): void {
     if (typeof text === 'string') void clipboard.writeText(text.slice(0, MAX_TEXT))
   })
   handle('photon:music', musicState)
-  handle('photon:musicControl', musicControl) // commandes, nombres : validés dans music.ts
+  handle('photon:musicControl', musicControl) // services, commandes, nombres : validés dans music.ts
   handle('photon:musicSeek', musicSeek)
   handle('photon:musicVolume', musicVolume)
-  on('photon:musicOpen', () => {
-    hideWindow('YT Music ouvert')
-    openMusic()
+  on('photon:musicOpen', (service) => {
+    hideWindow('lecteur de musique ouvert')
+    openMusic(service) // service validé dans music.ts
   })
   handle('photon:search', search) // texte borné, résultats gardés côté Windows
   handle('photon:openResult', async (id, inFolder) => {
