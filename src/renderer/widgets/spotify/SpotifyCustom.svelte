@@ -1,6 +1,6 @@
 <script lang="ts">
   // Spotify, design « Adapté » : pochette, paroles synchronisées (LRCLIB, ligne en cours au centre),
-  // barre verte lumineuse, aléatoire et répéter marqués d'un point. Pas de « J'aime » : l'app
+  // barre verte lumineuse, aléatoire et répéter marqués d'un point, volume. Pas de « J'aime » : l'app
   // Spotify de Windows ne le publie pas. Paroles cachées si introuvables ou case trop basse.
   import ArrowSquareOutIcon from 'phosphor-svelte/lib/ArrowSquareOutIcon'
   import MusicNotesIcon from 'phosphor-svelte/lib/MusicNotesIcon'
@@ -14,6 +14,7 @@
   import SpotifyLogoIcon from 'phosphor-svelte/lib/SpotifyLogoIcon'
   import type { LyricLine, MusicTrack } from '../../../shared/api'
   import { clock, ratioAt, type MusicSource } from '../../lib/music/source.svelte'
+  import Volume from '../../lib/music/Volume.svelte'
 
   let { source, track }: { source: MusicSource; track: MusicTrack } = $props()
 
@@ -99,64 +100,70 @@
   </div>
 
   <div class="controls">
-    {#if track.shuffle !== null}
+    <span></span>
+    <div class="buttons">
+      {#if track.shuffle !== null}
+        <button
+          type="button"
+          class="icon"
+          class:on={track.shuffle}
+          aria-label="Lecture aléatoire"
+          aria-pressed={track.shuffle}
+          title="Lecture aléatoire"
+          onclick={() => source.control('shuffle')}
+        >
+          <ShuffleIcon size={18} weight="bold" />
+        </button>
+      {/if}
       <button
         type="button"
         class="icon"
-        class:on={track.shuffle}
-        aria-label="Lecture aléatoire"
-        aria-pressed={track.shuffle}
-        title="Lecture aléatoire"
-        onclick={() => source.control('shuffle')}
+        aria-label="Morceau précédent"
+        onclick={() => source.control('previous')}
       >
-        <ShuffleIcon size={18} weight="bold" />
+        <SkipBackIcon size={20} weight="fill" />
       </button>
-    {/if}
-    <button
-      type="button"
-      class="icon"
-      aria-label="Morceau précédent"
-      onclick={() => source.control('previous')}
-    >
-      <SkipBackIcon size={20} weight="fill" />
-    </button>
-    <button
-      type="button"
-      class="play"
-      aria-label={track.playing ? 'Pause' : 'Lecture'}
-      onclick={() => source.control('toggle')}
-    >
-      {#if track.playing}<PauseIcon size={22} weight="fill" />{:else}<PlayIcon
-          size={22}
-          weight="fill"
-        />{/if}
-    </button>
-    <button
-      type="button"
-      class="icon"
-      aria-label="Morceau suivant"
-      onclick={() => source.control('next')}
-    >
-      <SkipForwardIcon size={20} weight="fill" />
-    </button>
-    {#if track.repeat !== null}
       <button
         type="button"
-        class="icon"
-        class:on={track.repeat !== 'none'}
-        aria-label={track.repeat === 'one'
-          ? 'Répéter : ce morceau'
-          : track.repeat === 'all'
-            ? 'Répéter : toute la file'
-            : 'Répéter : désactivé'}
-        title="Répéter"
-        onclick={() => source.control('repeat')}
+        class="play"
+        aria-label={track.playing ? 'Pause' : 'Lecture'}
+        onclick={() => source.control('toggle')}
       >
-        {#if track.repeat === 'one'}<RepeatOnceIcon size={18} weight="bold" />{:else}<RepeatIcon
-            size={18}
-            weight="bold"
+        {#if track.playing}<PauseIcon size={22} weight="fill" />{:else}<PlayIcon
+            size={22}
+            weight="fill"
           />{/if}
       </button>
+      <button
+        type="button"
+        class="icon"
+        aria-label="Morceau suivant"
+        onclick={() => source.control('next')}
+      >
+        <SkipForwardIcon size={20} weight="fill" />
+      </button>
+      {#if track.repeat !== null}
+        <button
+          type="button"
+          class="icon"
+          class:on={track.repeat !== 'none'}
+          aria-label={track.repeat === 'one'
+            ? 'Répéter : ce morceau'
+            : track.repeat === 'all'
+              ? 'Répéter : toute la file'
+              : 'Répéter : désactivé'}
+          title="Répéter"
+          onclick={() => source.control('repeat')}
+        >
+          {#if track.repeat === 'one'}<RepeatOnceIcon size={18} weight="bold" />{:else}<RepeatIcon
+              size={18}
+              weight="bold"
+            />{/if}
+        </button>
+      {/if}
+    </div>
+    {#if track.volume >= 0}
+      <Volume {source} volume={track.volume} width={62} tint="var(--brand-spotify)" />
     {/if}
   </div>
 </div>
@@ -457,11 +464,21 @@
     opacity: 1;
   }
 
+  /* Commandes au centre, volume à droite. */
   .controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .buttons {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 14px;
+    gap: 12px;
+  }
+
+  .controls > :global(.volume) {
+    justify-self: end;
   }
 
   button {
@@ -541,6 +558,13 @@
     .art {
       width: 96px;
       height: 96px;
+    }
+  }
+
+  /* Case étroite : bouton du son sans curseur. */
+  @container (max-width: 459px) {
+    .controls :global(input) {
+      display: none;
     }
   }
 

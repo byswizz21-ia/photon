@@ -1,6 +1,6 @@
 <script lang="ts">
   // SoundCloud, design « Adapté » : grande forme d'onde orange (partie lue, survol jusqu'au
-  // curseur, clic = aller à ce moment), reflet sous l'onde, pochette et auteur, « J'aime ».
+  // curseur, clic = aller à ce moment), reflet sous l'onde, pochette et auteur, volume, « J'aime ».
   // SoundCloud ne donne pas la vraie forme d'onde à Photon : elle est dessinée d'après le titre
   // (toujours la même pour un morceau). Pas de commentaires ni de compteurs (non lus).
   import ArrowSquareOutIcon from 'phosphor-svelte/lib/ArrowSquareOutIcon'
@@ -13,6 +13,7 @@
   import SoundcloudLogoIcon from 'phosphor-svelte/lib/SoundcloudLogoIcon'
   import type { MusicTrack } from '../../../shared/api'
   import { clock, ratioAt, type MusicSource } from '../../lib/music/source.svelte'
+  import Volume from '../../lib/music/Volume.svelte'
 
   let { source, track }: { source: MusicSource; track: MusicTrack } = $props()
 
@@ -140,6 +141,9 @@
     >
       <SkipForwardIcon size={20} weight="fill" />
     </button>
+    {#if track.volume >= 0}
+      <Volume {source} volume={track.volume} tint="var(--brand-soundcloud-light)" />
+    {/if}
     {#if track.like !== null}
       <button
         type="button"
@@ -372,6 +376,13 @@
     display: flex;
     align-items: center;
     gap: 8px;
+  }
+
+  /* Case étroite : bouton du son sans curseur. */
+  @container (max-width: 439px) {
+    .footer :global(input) {
+      display: none;
+    }
   }
 
   button {

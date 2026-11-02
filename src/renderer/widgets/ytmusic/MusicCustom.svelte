@@ -1,22 +1,26 @@
 <script lang="ts">
-  // YT Music, design « Adapté » : disque qui tourne (anneau rouge = progression) ou grande
-  // pochette, au choix ; j'aime / je n'aime pas, barre rouge, et les deux prochains titres de la
-  // file (clic = les jouer). Case basse : pas de file.
+  // YT Music, design « Adapté » : « Titre » (disque qui tourne, anneau rouge = progression) ou
+  // « Clip » (pochette en grand qui zoome), au choix ; j'aime / je n'aime pas, playlist (ouvre YT
+  // Music), volume, barre rouge, et les deux prochains titres de la file (clic = les jouer).
+  // Case basse : pas de file.
   import MusicNotesIcon from 'phosphor-svelte/lib/MusicNotesIcon'
   import ArrowSquareOutIcon from 'phosphor-svelte/lib/ArrowSquareOutIcon'
   import PauseIcon from 'phosphor-svelte/lib/PauseIcon'
   import PlayIcon from 'phosphor-svelte/lib/PlayIcon'
+  import PlaylistIcon from 'phosphor-svelte/lib/PlaylistIcon'
   import SkipBackIcon from 'phosphor-svelte/lib/SkipBackIcon'
   import SkipForwardIcon from 'phosphor-svelte/lib/SkipForwardIcon'
   import ThumbsDownIcon from 'phosphor-svelte/lib/ThumbsDownIcon'
   import ThumbsUpIcon from 'phosphor-svelte/lib/ThumbsUpIcon'
+  import VideoCameraIcon from 'phosphor-svelte/lib/VideoCameraIcon'
   import YoutubeLogoIcon from 'phosphor-svelte/lib/YoutubeLogoIcon'
   import type { MusicTrack } from '../../../shared/api'
   import { clock, ratioAt, type MusicSource } from '../../lib/music/source.svelte'
+  import Volume from '../../lib/music/Volume.svelte'
 
   let { source, track }: { source: MusicSource; track: MusicTrack } = $props()
 
-  let mode = $state<'disc' | 'cover'>('disc')
+  let mode = $state<'disc' | 'cover'>('disc') // Titre ou Clip
 
   $effect(() => {
     source.wantQueue = true
@@ -55,11 +59,11 @@
       <legend class="sr">Affichage</legend>
       <label>
         <input type="radio" bind:group={mode} value="disc" />
-        <span>Disque</span>
+        <span>Titre</span>
       </label>
       <label>
         <input type="radio" bind:group={mode} value="cover" />
-        <span>Pochette</span>
+        <span>Clip</span>
       </label>
     </fieldset>
     <button
@@ -85,6 +89,8 @@
       </div>
       <div class="cover" class:shown={mode === 'cover'} aria-hidden={mode !== 'cover'}>
         <span class="zoom">{@render art(32)}</span>
+        <span class="badge"><VideoCameraIcon size={12} weight="fill" aria-hidden="true" />Clip</span
+        >
         <span class="mini"
           ><span class="mini-fill" style:transform="scaleX({progress})"></span></span
         >
@@ -98,8 +104,8 @@
           <span class="artist" title={track.artist}>{track.artist}</span>
         </div>
       {/key}
-      {#if track.like !== null}
-        <div class="rate">
+      <div class="rate">
+        {#if track.like !== null}
           <button
             type="button"
             class="icon"
@@ -122,8 +128,17 @@
           >
             <ThumbsDownIcon size={18} weight={track.like === 'dislike' ? 'fill' : 'duotone'} />
           </button>
-        </div>
-      {/if}
+        {/if}
+        <button
+          type="button"
+          class="icon"
+          aria-label="Enregistrer dans une playlist (ouvre YT Music)"
+          title="Enregistrer dans une playlist (ouvre YT Music)"
+          onclick={() => source.open()}
+        >
+          <PlaylistIcon size={18} weight="duotone" />
+        </button>
+      </div>
       <div class="controls">
         <button
           type="button"
@@ -152,6 +167,9 @@
         >
           <SkipForwardIcon size={20} weight="fill" />
         </button>
+        {#if track.volume >= 0}
+          <Volume {source} volume={track.volume} />
+        {/if}
       </div>
     </div>
   </div>
@@ -250,7 +268,7 @@
     color: var(--text-faint);
   }
 
-  /* Disque / Pochette : deux pastilles. */
+  /* Titre / Clip : deux pastilles. */
   .seg {
     margin: 0 0 0 auto;
     padding: 2px;
@@ -282,8 +300,8 @@
   }
 
   .seg input:checked + span {
-    background: var(--white-12);
-    color: var(--text);
+    background: color-mix(in srgb, var(--brand-ytmusic) 22%, transparent);
+    color: var(--brand-ytmusic);
   }
 
   .seg input:focus-visible + span {
@@ -438,6 +456,20 @@
     }
   }
 
+  .badge {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    background: var(--veil-art);
+    font-size: var(--text-11);
+    color: var(--white);
+  }
+
   .mini {
     position: absolute;
     left: 0;
@@ -508,6 +540,17 @@
     gap: 8px;
   }
 
+  .controls > :global(.volume) {
+    margin-left: auto;
+  }
+
+  /* Case étroite : bouton du son sans curseur. */
+  @container (max-width: 439px) {
+    .controls :global(input) {
+      display: none;
+    }
+  }
+
   button {
     display: grid;
     place-items: center;
@@ -539,7 +582,8 @@
   }
 
   .icon.on {
-    color: var(--brand-ytmusic);
+    color: var(--text);
+    background: var(--white-8);
   }
 
   .play {

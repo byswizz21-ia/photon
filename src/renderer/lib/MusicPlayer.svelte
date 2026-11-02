@@ -19,11 +19,11 @@
   import ShuffleIcon from 'phosphor-svelte/lib/ShuffleIcon'
   import SkipBackIcon from 'phosphor-svelte/lib/SkipBackIcon'
   import SkipForwardIcon from 'phosphor-svelte/lib/SkipForwardIcon'
-  import SpeakerHighIcon from 'phosphor-svelte/lib/SpeakerHighIcon'
   import ThumbsDownIcon from 'phosphor-svelte/lib/ThumbsDownIcon'
   import ThumbsUpIcon from 'phosphor-svelte/lib/ThumbsUpIcon'
   import { MUSIC_SERVICES, type MusicTrack } from '../../shared/api'
   import { clock, type MusicSource } from './music/source.svelte'
+  import Volume from './music/Volume.svelte'
 
   let { source, track }: { source: MusicSource; track: MusicTrack } = $props()
 
@@ -34,7 +34,6 @@
 
   // Curseur tenu par la souris : on n'écrase pas sa position avec la lecture suivante.
   let dragTime = $state<number | null>(null)
-  let dragVolume = $state<number | null>(null)
 
   let width = $state(0)
   let height = $state(0)
@@ -201,25 +200,7 @@
         {/if}
         <!-- Volume inconnu (Spotify ne joue sur aucune sortie) : pas de curseur. -->
         {#if track.volume >= 0}
-          <label class="volume">
-            <SpeakerHighIcon size={16} aria-hidden="true" />
-            <input
-              type="range"
-              aria-label="Volume"
-              min="0"
-              max="100"
-              value={dragVolume ?? track.volume}
-              style:--fill="{dragVolume ?? track.volume}%"
-              oninput={(event) => {
-                dragVolume = event.currentTarget.valueAsNumber
-                void window.photon.musicVolume(service, dragVolume)
-              }}
-              onchange={async () => {
-                await source.read()
-                dragVolume = null
-              }}
-            />
-          </label>
+          <Volume {source} volume={track.volume} />
         {/if}
       </div>
     </div>
@@ -510,16 +491,8 @@
     gap: 6px;
   }
 
-  .volume {
+  .controls > :global(.volume) {
     margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--text-muted);
-  }
-
-  .volume input {
-    width: 72px;
   }
 
   /* Service qui refuse qu'on change la position : barre affichée seule. */
@@ -561,9 +534,9 @@
     }
   }
 
-  /* Moyenne mais étroite : pas de volume. */
+  /* Moyenne mais étroite : bouton du son sans curseur. */
   @container (max-width: 420px) {
-    .volume {
+    .controls :global(.volume input) {
       display: none;
     }
   }

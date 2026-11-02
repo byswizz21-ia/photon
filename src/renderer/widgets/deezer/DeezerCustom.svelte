@@ -1,7 +1,7 @@
 <script lang="ts">
   // Deezer, design « Adapté » : grand disque façon Flow (taches de couleur qui tournent, ondes et
   // battement pendant la lecture, pochette au centre ; clic = lecture/pause), titre, coup de cœur,
-  // barre violette. Les humeurs du Flow ne sont pas pilotables depuis Photon : pas de pastilles.
+  // barre violette, volume en haut. Les humeurs du Flow ne sont pas pilotables depuis Photon : pas de pastilles.
   import ArrowSquareOutIcon from 'phosphor-svelte/lib/ArrowSquareOutIcon'
   import HeartIcon from 'phosphor-svelte/lib/HeartIcon'
   import MusicNotesIcon from 'phosphor-svelte/lib/MusicNotesIcon'
@@ -12,6 +12,7 @@
   import WaveformIcon from 'phosphor-svelte/lib/WaveformIcon'
   import type { MusicTrack } from '../../../shared/api'
   import { clock, ratioAt, type MusicSource } from '../../lib/music/source.svelte'
+  import Volume from '../../lib/music/Volume.svelte'
 
   let { source, track }: { source: MusicSource; track: MusicTrack } = $props()
 
@@ -32,6 +33,9 @@
   <header>
     <WaveformIcon class="logo" size={22} weight="fill" aria-hidden="true" />
     <span class="label">Deezer</span>
+    {#if track.volume >= 0}
+      <Volume {source} volume={track.volume} width={84} tint="var(--brand-deezer-light)" />
+    {/if}
     <button
       type="button"
       class="icon open"
@@ -177,15 +181,13 @@
     color: var(--brand-deezer-light);
   }
 
+  /* Volume et « ouvrir » poussés à droite. */
   .label {
+    margin-right: auto;
     font-size: var(--text-12);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--text-faint);
-  }
-
-  .open {
-    margin-left: auto;
   }
 
   .now {

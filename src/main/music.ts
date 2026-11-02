@@ -389,7 +389,11 @@ async function download(raw: string, hosts: RegExp): Promise<string> {
 // File d'attente de YT Music lue dans son lecteur (ytmusic-app.queue), pas dans le panneau
 // « À suivre » : celui-ci n'est rempli que quand YT Music l'affiche. Un morceau qui a deux
 // versions (titre et clip) est enveloppé (playlistPanelVideoWrapperRenderer) : version principale.
+// Un titre lancé seul n'a que lui dans la file : la suite est la lecture automatique
+// (automixItems, tant qu'elle est activée), qu'on ne peut pas choisir avec selectQueueItem.
 const QUEUE = `const q = document.querySelector('ytmusic-app')?.queue
+  const state = q?.store?.getState?.()?.queue
+  const automix = state?.autoplay ? state.automixItems ?? [] : []
   const video = (it) => it.playlistPanelVideoRenderer
     ?? it.playlistPanelVideoWrapperRenderer?.primaryRenderer?.playlistPanelVideoRenderer ?? {}`
 
@@ -398,7 +402,7 @@ const READ_QUEUE = `(() => {
   if (!q?.getItems) return []
   const text = (t) => (t?.runs ?? []).map((run) => run.text).join('')
   const at = q.getCurrentItemIndex()
-  return q.getItems().slice(Math.max(0, at), Math.max(0, at) + 20).map((it, i) => {
+  return [...q.getItems().slice(Math.max(0, at)), ...automix].slice(0, 20).map((it, i) => {
     const v = video(it)
     return {
       id: v.videoId ?? '',
@@ -419,9 +423,13 @@ export async function musicQueue(): Promise<MusicQueueItem[]> {
     .executeJavaScript(READ_QUEUE)
     .catch(() => [])) as unknown
   if (!Array.isArray(raw)) return []
-  return (raw as Omit<MusicQueueItem, 'artwork'>[])
-    .filter((item) => VIDEO_ID.test(item.id) && typeof item.title === 'string')
-    .map((item) => ({ ...item, artwork: thumbnail(item.id) }))
+  return (
+    (raw as Omit<MusicQueueItem, 'artwork'>[])
+      .filter((item) => VIDEO_ID.test(item.id) && typeof item.title === 'string')
+      // Un titre à la fois dans la file et la lecture automatique : une seule fois (clé d'affichage).
+      .filter((item, i, all) => all.findIndex((other) => other.id === item.id) === i)
+      .map((item) => ({ ...item, artwork: thumbnail(item.id) }))
+  )
 }
 
 // Miniatures de la file : téléchargées une fois en fond, gardées pour les 80 dernières.
@@ -448,7 +456,10 @@ export async function musicPlay(id: unknown): Promise<void> {
     'ytmusic',
     () => `{ ${QUEUE}
     const item = q?.getItems?.().find((it) => video(it).videoId === '${id}')
-    if (item) q.selectQueueItem(item) }`
+    const next = automix.find((it) => video(it).videoId === '${id}')
+    if (item) q.selectQueueItem(item)
+    else if (next) document.querySelector('ytmusic-app').dispatchEvent(new CustomEvent('yt-navigate',
+      { detail: { endpoint: video(next).navigationEndpoint }, bubbles: true, composed: true })) }`
   )
 }
 
