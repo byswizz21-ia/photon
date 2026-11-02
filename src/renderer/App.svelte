@@ -6,6 +6,8 @@
   import AddMenu from './grid/AddMenu.svelte'
   import Catalog from './grid/Catalog.svelte'
   import Grid from './grid/Grid.svelte'
+  import Intro from './intro/Intro.svelte'
+  import { endIntro, intro, startIntro } from './intro/timeline.svelte'
   import Logo from './lib/Logo.svelte'
   import { flushShared } from './lib/shared.svelte'
   import Profiles from './profiles/Profiles.svelte'
@@ -37,12 +39,15 @@
       app.visible = true
       app.mini = mini
       play('open')
-      if (!reducedMotion()) reveal(root, origin)
+      // Toute première ouverture : l'intro remplace la révélation habituelle.
+      const first = !mini && !app.settings.introSeen && startIntro()
+      if (!first && !reducedMotion()) reveal(root, origin)
       // Mesure : deux images après l'affichage ≈ fenêtre réellement à l'écran.
       requestAnimationFrame(() => requestAnimationFrame(() => window.photon.shown()))
     })
     const offHide = window.photon.onHide(() => {
       play('close')
+      endIntro()
       app.visible = false
       app.editing = false
       settingsOpen = false
@@ -91,6 +96,13 @@
   $effect(() => {
     document.documentElement.toggleAttribute('data-reduce-motion', reducedMotion())
   })
+
+  // Réglages → « Revoir l'animation d'ouverture ».
+  function replayIntro(): void {
+    settingsOpen = false
+    app.editing = false
+    startIntro()
+  }
 
   function closeSettings(): void {
     settingsOpen = false
@@ -175,7 +187,9 @@
       <div class="veil"></div>
     </div>
     <div class="light" aria-hidden="true"></div>
-    <main class="panel" data-void>
+    {#if intro.playing && fullscreen}<Intro layer="back" />{/if}
+    <main class="panel" class:intro={intro.playing} data-void>
+      {#if intro.playing && !fullscreen}<Intro layer="back" />{/if}
       <header class="bar" data-reveal class:drag={!fullscreen}>
         <Logo size={28} mode={claudeBusy ? 'thinking' : 'idle'} />
         <span class="name">Photon</span>
@@ -218,9 +232,11 @@
       </header>
       <!-- Nouvelle grille à chaque profil : gridstack repart de zéro, rien de l'ancien ne reste. -->
       {#key app.settings.activeProfile}<Grid />{/key}
+      {#if intro.playing}<Intro layer="glass" />{/if}
     </main>
-    {#if settingsOpen}<SettingsPanel onclose={closeSettings} />{/if}
+    {#if settingsOpen}<SettingsPanel onclose={closeSettings} onintro={replayIntro} />{/if}
     {#if catalogOpen}<Catalog onclose={() => (catalogOpen = false)} />{/if}
+    {#if intro.playing}<Intro layer="front" />{/if}
   {/if}
 </div>
 
@@ -304,6 +320,11 @@
     border-radius: var(--radius-window); /* bordure en dégradé qui suit les coins de Windows */
     background: var(--grain), var(--panel-light), var(--panel-sheen), var(--panel-tint);
     box-shadow: var(--panel-rim);
+  }
+
+  /* Intro en mode fenêtre : ses lueurs passent entre le fond du panneau et son contenu. */
+  .panel.intro {
+    isolation: isolate;
   }
 
   /* Flou réglable (mode fenêtre) : le panneau floute la capture de l'écran posée derrière lui. */

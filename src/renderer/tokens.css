@@ -167,6 +167,7 @@
   --radius-kbd: calc(var(--radius) * 0.25);
   --radius-check: calc(var(--radius) * 0.25);
   --radius-bar: 4px; /* barres fines et petites étiquettes : fixe */
+  --radius-intro-key: 9px; /* touches du raccourci montrées par l'intro */
   --radius-window: 8px; /* coins que Windows 11 dessine autour de la fenêtre */
   --radius-pill: 999px;
 
@@ -210,6 +211,9 @@
   --text-display-m: calc(40px * var(--font-scale));
   --text-display-l: calc(44px * var(--font-scale));
   --text-display-xl: calc(96px * var(--font-scale));
+  --text-intro: 120px; /* animation d'ouverture : nom « Photon » en plein écran */
+  --text-intro-window: 84px; /* la même en mode fenêtre */
+  --text-intro-sub: 22px; /* « Bienvenue » en plein écran */
   --tracking-display: -0.04em;
   --tracking-title: -0.01em;
   --tracking-label: 0.1em;
@@ -229,6 +233,12 @@
 
   /* Mouvement : transform et opacity seulement */
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-glide: cubic-bezier(
+    0.65,
+    0,
+    0.35,
+    1
+  ); /* intro : glissements lents, départ et arrivée doux */
   /* Ressort amorti (dépassement 12 %), calculé depuis un oscillateur réel. */
   --ease-spring: linear(
     0,

@@ -98,6 +98,12 @@ test('réglages multi-écran : valeurs invalides → défaut', () => {
   expect(parseSettings({ screen: '2779098405' }).screen).toBe('2779098405')
 })
 
+test('intro : pas encore vue par défaut, seul true compte', () => {
+  expect(parseSettings({}).introSeen).toBe(false)
+  expect(parseSettings({ introSeen: 'oui' }).introSeen).toBe(false)
+  expect(parseSettings({ introSeen: true }).introSeen).toBe(true)
+})
+
 test('sons : activés par défaut, volume borné, champ invalide → défaut', () => {
   expect(parseSettings({}).sound).toEqual({
     enabled: true,

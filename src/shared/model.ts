@@ -25,6 +25,7 @@ export interface Settings {
   autoProfiles: boolean // bascule automatique selon les règles des profils
   liveBlur: boolean // mode fenêtre : flou fait par Photon (capture de l'écran), réglable
   sound: SoundSettings
+  introSeen: boolean // animation de première ouverture déjà vue (ou passée)
 }
 
 // Sons de l'interface (src/renderer/sound.svelte.ts), par famille.
@@ -122,7 +123,8 @@ export const defaultSettings = (): Settings => ({
   reduceMotion: false,
   autoProfiles: false,
   liveBlur: false,
-  sound: defaultSound()
+  sound: defaultSound(),
+  introSeen: false
 })
 
 export const defaultSound = (): SoundSettings => ({
@@ -233,7 +235,8 @@ export function parseSettings(raw: unknown): Settings {
     reduceMotion: typeof v.reduceMotion === 'boolean' ? v.reduceMotion : d.reduceMotion,
     autoProfiles: v.autoProfiles === true,
     liveBlur: v.liveBlur === true,
-    sound: parseSound(v.sound)
+    sound: parseSound(v.sound),
+    introSeen: v.introSeen === true
   }
 }
 

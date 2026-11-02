@@ -13,10 +13,10 @@
   } from '../../shared/model'
   import type { DisplayInfo } from '../../shared/api'
   import { play } from '../sound.svelte'
-  import { app, saveTheme } from '../state.svelte'
+  import { app, reducedMotion, saveTheme } from '../state.svelte'
   import { importedFamily, importedFontName, resolvedAccent } from './apply.svelte'
 
-  let { onclose }: { onclose: () => void } = $props()
+  let { onclose, onintro }: { onclose: () => void; onintro: () => void } = $props()
 
   const TABS = [
     ['glow', 'Lumineux'],
@@ -448,6 +448,9 @@
       />
       <span>Réduire les animations</span>
     </label>
+    <button type="button" class="action" disabled={reducedMotion()} onclick={onintro}>
+      Revoir l'animation d'ouverture
+    </button>
     <label class="check">
       <input
         type="checkbox"
