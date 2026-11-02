@@ -1,7 +1,7 @@
 import { expect, test, vi } from 'vitest'
 
 vi.mock('electron', () => ({ shell: {} }))
-const { parseStatus } = await import('./git')
+const { filterOverrides, parseStatus } = await import('./git')
 
 test('git status : branche, avance/retard, fichiers modifiés et nouveaux', () => {
   const out = [
@@ -33,4 +33,20 @@ test('git status : sans branche suivie, HEAD détachée, dépôt propre', () => 
     ahead: 0,
     changed: 0
   })
+})
+
+test('filtres du dépôt coupés, sauf Git LFS', () => {
+  const out = [
+    'filter.lfs.clean git-lfs clean -- %f',
+    'filter.lfs.process git-lfs filter-process',
+    'filter.evil.clean C:/temp/evil.exe %f',
+    'filter.evil.required true',
+    ''
+  ].join('\n')
+  expect(filterOverrides(out)).toEqual([
+    '-c',
+    'filter.evil.clean=',
+    '-c',
+    'filter.evil.required=false'
+  ])
 })

@@ -1,6 +1,8 @@
 // Mode Agent : ce que Claude veut faire, écrit pour être relu avant d'accepter. Le détail montre
 // tout ce qui compte (commande entière, fichier visé, texte écrit) : on n'accepte pas à l'aveugle.
-const MAX_DETAIL = 4_000
+// Une commande n'est jamais coupée (la partie dangereuse peut être à la fin) ; un long texte écrit
+// dans un fichier l'est au-delà de MAX_DETAIL (le détail défile, au-delà il serait illisible).
+const MAX_DETAIL = 20_000
 
 const text = (v: unknown): string => (typeof v === 'string' ? v : '')
 
@@ -18,7 +20,7 @@ export function describeAction(
     case 'PowerShell':
       return {
         title: text(input['description']) || 'Exécuter une commande',
-        detail: cut(text(input['command']))
+        detail: text(input['command'])
       }
     case 'Write':
       return {

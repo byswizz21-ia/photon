@@ -17,6 +17,16 @@ files:
 asarUnpack:
   - out/main/chunks/*.ico
 
+# Verrous gravés dans Photon.exe : personne ne peut s'en servir comme Node (ELECTRON_RUN_AS_NODE,
+# NODE_OPTIONS, --inspect) ni lui faire charger un autre code que son app.asar vérifié.
+# file:// garde ses droits : l'interface est chargée par loadFile.
+electronFuses:
+  runAsNode: false
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  enableEmbeddedAsarIntegrityValidation: true
+  onlyLoadAppFromAsar: true
+
 win:
   target:
     - target: nsis

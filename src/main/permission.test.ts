@@ -7,8 +7,13 @@ describe('describeAction', () => {
     expect(action).toEqual({ title: 'Exécuter une commande', detail: 'Remove-Item C:\\x -Recurse' })
   })
 
-  it('montre le fichier et le texte écrit, coupé au-delà de 4 000 caractères', () => {
-    const action = describeAction('Write', { file_path: 'C:\\a.txt', content: 'x'.repeat(5_000) })
+  it('ne coupe jamais une commande, même très longue', () => {
+    const command = `Write-Output ${'a'.repeat(30_000)}; Remove-Item C:\\x -Recurse`
+    expect(describeAction('Bash', { command }).detail).toBe(command)
+  })
+
+  it('montre le fichier et le texte écrit, coupé au-delà de 20 000 caractères', () => {
+    const action = describeAction('Write', { file_path: 'C:\\a.txt', content: 'x'.repeat(25_000) })
     expect(action.detail.startsWith('C:\\a.txt\n\nxxx')).toBe(true)
     expect(action.detail).toContain('caractères de plus')
   })
