@@ -2,10 +2,11 @@
 // fermé, touches multimédia gérées par Chromium). Créée seulement si un widget YT Music existe
 // (≈ 300 Mo de RAM). Le widget la pilote par l'API du lecteur YouTube (#movie_player) de la page.
 // Cookies Google dans une session à part, jamais lus par Photon.
-import { app, BrowserWindow, net, session, shell } from 'electron'
+import { app, BrowserWindow, nativeImage, net, Notification, session, shell } from 'electron'
 import icon from '../../assets/icon.ico?asset'
-import type { MusicCommand, MusicState, MusicTrack } from '../shared/api'
+import type { MusicCommand, MusicQueueItem, MusicState, MusicTrack } from '../shared/api'
 import { data } from './data'
+import { isVisible, showWindow } from './window'
 
 const HOME = 'https://music.youtube.com/'
 const PARTITION = 'persist:ytmusic'
@@ -14,7 +15,8 @@ const ARTWORK_HOSTS = /\.(googleusercontent|ytimg|ggpht)\.com$/
 
 let player: BrowserWindow | null = null
 let quitting = false
-let artwork = { url: '', data: '' } // dernière pochette, en data URL (CSP de Photon : pas d'image distante)
+// Dernière pochette, en data URL (CSP de Photon : pas d'image distante) ; ready : son téléchargement.
+let artwork = { url: '', data: '', ready: Promise.resolve('') }
 
 // Google refuse la connexion dans Electron, même déguisé en Chrome (il vérifie des signaux propres
 // à Chrome) : on se présente comme Firefox. Connexion testée et validée le 1er novembre 2026.
@@ -60,7 +62,7 @@ export function syncMusic(): void {
     if (reason !== 'clean-exit' && !win.isDestroyed()) win.webContents.reload()
   })
   // Changement de morceau (titre de la page) : pochette préparée en fond, pas à l'ouverture.
-  win.on('page-title-updated', () => void musicState())
+  win.on('page-title-updated', () => void onTitle())
   void win.loadURL(HOME)
 }
 
@@ -88,6 +90,9 @@ const READ_STATE = `(() => {
   const same = m && m.title === video.title && m.artwork.length
   const v = p.querySelector('video')
   const ad = p.classList.contains('ad-showing')
+  const like = document.querySelector('like-button-view-model button')
+  const dislike = document.querySelector('dislike-button-view-model button')
+  const queue = document.querySelector('ytmusic-app')?.queue?.store?.getState?.()?.queue
   return {
     signedIn: !document.querySelector('ytmusic-nav-bar .sign-in-link'),
     track: video.video_id ? {
@@ -98,7 +103,11 @@ const READ_STATE = `(() => {
       playing: !!v && !v.paused,
       time: p.getCurrentTime(),
       duration: p.getDuration(),
-      volume: p.getVolume()
+      volume: p.getVolume(),
+      like: !like ? null : like.getAttribute('aria-pressed') === 'true' ? 'like'
+        : dislike?.getAttribute('aria-pressed') === 'true' ? 'dislike' : 'none',
+      shuffle: queue ? !!queue.shuffleEnabled : null,
+      repeat: queue ? ({ NONE: 'none', ALL: 'all', ONE: 'one' })[queue.repeatMode] ?? null : null
     } : null
   }
 })()`
@@ -125,11 +134,38 @@ export async function musicState(): Promise<MusicState> {
 // Pochette en cache ; une nouvelle est téléchargée en fond et arrive à la lecture suivante.
 function cover(url: string): string {
   if (url === artwork.url) return artwork.data
-  artwork = { url, data: '' }
-  void download(url).then((dataUrl) => {
-    if (artwork.url === url) artwork.data = dataUrl
-  })
+  const entry = { url, data: '', ready: download(url) }
+  artwork = entry
+  void entry.ready.then((dataUrl) => (entry.data = dataUrl))
   return ''
+}
+
+// Notification au changement de morceau : option d'un widget YT Music du profil, Photon caché,
+// jamais pour une pub ni pour le premier morceau vu (chargement de la page).
+let lastTrack = ''
+
+const notifyWanted = (): boolean =>
+  data.profile.widgets.some((w) => w.type === 'ytmusic' && w.settings['notify'] === true)
+
+async function onTitle(): Promise<void> {
+  const { track } = await musicState()
+  if (!track || track.artist === 'Publicité') return
+  const key = `${track.title}\0${track.artist}`
+  if (key === lastTrack) return
+  const first = lastTrack === ''
+  lastTrack = key
+  if (first || !track.playing || isVisible() || !notifyWanted() || !Notification.isSupported()) {
+    return
+  }
+  const art = await artwork.ready
+  const notification = new Notification({
+    title: track.title,
+    body: track.artist,
+    silent: true,
+    ...(art ? { icon: nativeImage.createFromDataURL(art) } : {})
+  })
+  notification.on('click', () => void showWindow())
+  notification.show()
 }
 
 async function download(raw: string): Promise<string> {
@@ -147,11 +183,77 @@ async function download(raw: string): Promise<string> {
   }
 }
 
-// API du lecteur YouTube : stable, contrairement aux boutons de YT Music (classes générées).
+// API du lecteur YouTube quand elle existe ; sinon boutons de la page, repérés par les composants
+// partagés de YouTube (like) ou les classes des contrôles (aléatoire, répéter), pas par leur texte.
 const COMMANDS: Record<MusicCommand, string> = {
   toggle: "p.querySelector('video')?.paused === false ? p.pauseVideo() : p.playVideo()",
   next: 'p.nextVideo()',
-  previous: 'p.previousVideo()'
+  previous: 'p.previousVideo()',
+  like: "document.querySelector('like-button-view-model button')?.click()",
+  dislike: "document.querySelector('dislike-button-view-model button')?.click()",
+  shuffle: "document.querySelector('.ytmusicPlayerControlsShuffleButton button')?.click()",
+  repeat: "document.querySelector('.ytmusicPlayerControlsRepeatButton button')?.click()"
+}
+
+// File d'attente lue dans le lecteur de YT Music (ytmusic-app.queue), pas dans le panneau
+// « À suivre » : celui-ci n'est rempli que quand YT Music l'affiche. Un morceau qui a deux
+// versions (titre et clip) est enveloppé (playlistPanelVideoWrapperRenderer) : version principale.
+const QUEUE = `const q = document.querySelector('ytmusic-app')?.queue
+  const video = (it) => it.playlistPanelVideoRenderer
+    ?? it.playlistPanelVideoWrapperRenderer?.primaryRenderer?.playlistPanelVideoRenderer ?? {}`
+
+const READ_QUEUE = `(() => {
+  ${QUEUE}
+  if (!q?.getItems) return []
+  const text = (t) => (t?.runs ?? []).map((run) => run.text).join('')
+  const at = q.getCurrentItemIndex()
+  return q.getItems().slice(Math.max(0, at), Math.max(0, at) + 20).map((it, i) => {
+    const v = video(it)
+    return {
+      id: v.videoId ?? '',
+      title: text(v.title),
+      artist: text(v.shortBylineText),
+      duration: text(v.lengthText),
+      current: i === 0 && at >= 0
+    }
+  })
+})()`
+
+const VIDEO_ID = /^[\w-]{11}$/
+
+export async function musicQueue(): Promise<MusicQueueItem[]> {
+  if (!player || player.webContents.isLoading()) return []
+  const raw = (await player.webContents.executeJavaScript(READ_QUEUE).catch(() => [])) as unknown
+  if (!Array.isArray(raw)) return []
+  return (raw as Omit<MusicQueueItem, 'artwork'>[])
+    .filter((item) => VIDEO_ID.test(item.id) && typeof item.title === 'string')
+    .map((item) => ({ ...item, artwork: thumbnail(item.id) }))
+}
+
+// Miniatures de la file : téléchargées une fois en fond, gardées pour les 80 dernières.
+const MAX_THUMBNAILS = 80
+const thumbnails = new Map<string, string>()
+
+function thumbnail(id: string): string {
+  const known = thumbnails.get(id)
+  if (known !== undefined) return known
+  const oldest = thumbnails.keys().next()
+  if (thumbnails.size >= MAX_THUMBNAILS && !oldest.done) thumbnails.delete(oldest.value)
+  thumbnails.set(id, '')
+  void download(`https://i.ytimg.com/vi/${id}/mqdefault.jpg`).then((dataUrl) => {
+    if (thumbnails.has(id)) thumbnails.set(id, dataUrl)
+  })
+  return ''
+}
+
+// Identifiant validé : seul ce texte connu est injecté dans la page.
+export async function musicPlay(id: unknown): Promise<void> {
+  if (typeof id !== 'string' || !VIDEO_ID.test(id)) return
+  await run(
+    `{ ${QUEUE}
+    const item = q?.getItems?.().find((it) => video(it).videoId === '${id}')
+    if (item) q.selectQueueItem(item) }`
+  )
 }
 
 export async function musicControl(command: unknown): Promise<void> {
