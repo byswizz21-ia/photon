@@ -1,9 +1,11 @@
 <script lang="ts">
-  // YT Music : lecteur de musique partagé (lib/MusicPlayer.svelte).
-  import MusicPlayer, { type MusicSettings } from '../../lib/MusicPlayer.svelte'
+  // YT Music : design « Sobre » commun (lib/MusicPlayer.svelte) ou « Adapté » (MusicCustom.svelte).
+  import MusicWidget from '../../lib/music/MusicWidget.svelte'
+  import type { MusicSettings } from '../../lib/MusicPlayer.svelte'
   import type { WidgetProps } from '../types'
+  import Custom from './MusicCustom.svelte'
 
   let props: WidgetProps<MusicSettings> = $props()
 </script>
 
-<MusicPlayer {...props} service="ytmusic" />
+<MusicWidget {...props} service="ytmusic" custom={Custom} />

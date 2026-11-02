@@ -37,6 +37,7 @@ import {
   openMusic,
   syncMusic
 } from './music'
+import { lyrics } from './lyrics'
 import { pomodoro, pomodoroControl } from './pomodoro'
 import { processClose, processes, processIcon } from './processes'
 import { recentFiles } from './search/files'
@@ -163,6 +164,7 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:musicVolume', musicVolume)
   handle('photon:musicQueue', musicQueue)
   handle('photon:musicPlay', musicPlay) // identifiant YouTube validé dans music.ts
+  handle('photon:musicLyrics', lyrics) // textes bornés dans lyrics.ts
   on('photon:musicOpen', (service) => {
     hideWindow('lecteur de musique ouvert')
     openMusic(service) // service validé dans music.ts

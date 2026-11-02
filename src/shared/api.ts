@@ -153,6 +153,12 @@ export interface MusicQueueItem {
   artwork: string // data URL ; '' tant que la miniature n'est pas téléchargée
 }
 
+// Ligne de paroles synchronisées (design « Adapté » de Spotify, src/main/lyrics.ts).
+export interface LyricLine {
+  time: number // secondes depuis le début du morceau
+  text: string
+}
+
 export interface MusicState {
   ready: boolean // page du service chargée (false aussi sans widget de ce service)
   signedIn: boolean // Spotify : app ouverte
@@ -370,6 +376,8 @@ export interface PhotonApi {
   // File de YT Music : 20 morceaux au plus, le morceau en cours d'abord ; jouer l'un d'eux
   musicQueue(): Promise<MusicQueueItem[]>
   musicPlay(id: string): Promise<void>
+  // Paroles synchronisées (LRCLIB) ; null : introuvables ou réseau en panne
+  musicLyrics(title: string, artist: string, duration: number): Promise<LyricLine[] | null>
   // Barre de commande
   search(query: string): Promise<SearchResult[]>
   openResult(id: string, inFolder: boolean): Promise<boolean> // true : ouvert, Photon se cache

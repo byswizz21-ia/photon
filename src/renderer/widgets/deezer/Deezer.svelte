@@ -1,9 +1,11 @@
 <script lang="ts">
-  // Deezer : lecteur de musique partagé (lib/MusicPlayer.svelte).
-  import MusicPlayer, { type MusicSettings } from '../../lib/MusicPlayer.svelte'
+  // Deezer : design « Sobre » commun (lib/MusicPlayer.svelte) ou « Adapté » (DeezerCustom.svelte).
+  import MusicWidget from '../../lib/music/MusicWidget.svelte'
+  import type { MusicSettings } from '../../lib/MusicPlayer.svelte'
   import type { WidgetProps } from '../types'
+  import Custom from './DeezerCustom.svelte'
 
   let props: WidgetProps<MusicSettings> = $props()
 </script>
 
-<MusicPlayer {...props} service="deezer" />
+<MusicWidget {...props} service="deezer" custom={Custom} />

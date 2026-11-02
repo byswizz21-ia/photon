@@ -51,6 +51,8 @@ const photon: PhotonApi = {
   musicControl: (service, command) => ipcRenderer.invoke('photon:musicControl', service, command),
   musicSeek: (service, seconds) => ipcRenderer.invoke('photon:musicSeek', service, seconds),
   musicVolume: (service, volume) => ipcRenderer.invoke('photon:musicVolume', service, volume),
+  musicLyrics: (title, artist, duration) =>
+    ipcRenderer.invoke('photon:musicLyrics', title, artist, duration),
   musicOpen: (service) => ipcRenderer.send('photon:musicOpen', service),
   musicQueue: () => ipcRenderer.invoke('photon:musicQueue'),
   musicPlay: (id) => ipcRenderer.invoke('photon:musicPlay', id),

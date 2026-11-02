@@ -42,6 +42,19 @@
   --rise: #7ee2a8; /* cours en hausse */
   --veil-dark: rgb(7 8 11 / 0.4); /* fond net assombri sous le panneau (plein écran) */
   --veil-art: rgb(0 0 0 / 0.45); /* bouton posé sur une pochette */
+  --veil-deep: rgb(7 8 11 / 0.8); /* étiquette posée sur une forme d'onde */
+  --ink: #07080b; /* texte sombre sur une couleur de marque vive */
+
+  /* Couleurs de marque des lecteurs de musique (design « Adapté ») */
+  --brand-spotify: #1ed760;
+  --brand-deezer: #a238ff;
+  --brand-deezer-light: #c58cff;
+  --brand-deezer-deep: #7b3cff;
+  --brand-deezer-pink: #ff7ad9;
+  --brand-soundcloud: #ff5500;
+  --brand-soundcloud-light: #ff9a2e;
+  --brand-soundcloud-blue: #4a6fa5;
+  --brand-ytmusic: #ff0033;
 
   /* Surfaces sombres opaques */
   --surface-chip: #1b1d24; /* pastille « retirer » des cartes et tuiles */
@@ -252,6 +265,16 @@
   --dur-logo-turn: 1.25s; /* logo : un tour quand Claude réfléchit */
   --dur-logo-breathe: 5s;
   --dur-logo-flare: 1100ms; /* logo : éclat au clic (même durée que le minuteur de Logo.svelte) */
+  --dur-swap: 420ms; /* lecteurs : titre qui change, cœur qui saute */
+  --dur-burst: 560ms; /* lecteurs : éclats autour du cœur */
+  --dur-lyrics: 600ms; /* Spotify : défilement des paroles */
+  --dur-eq: 700ms; /* barres d'égaliseur */
+  --dur-ripple: 2.6s; /* Deezer : ondes autour du Flow */
+  --dur-beat: 860ms; /* Deezer : battement du Flow */
+  --dur-shine: 3.4s; /* SoundCloud : reflet sur la forme d'onde */
+  --dur-orbit: 8s; /* Deezer : taches de couleur du Flow */
+  --dur-disc: 9s; /* YT Music : un tour du disque, zoom lent du clip */
+  --dur-drift: 12s; /* halo qui dérive au fond d'une carte */
   --press-scale: 0.97;
   --hover-lift: -2px;
 }

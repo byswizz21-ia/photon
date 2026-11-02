@@ -1,7 +1,8 @@
 // Spotify : l'app Spotify de Windows pilotée depuis Photon (Spotify web ne lit rien dans Electron).
-// Options : notification au changement de morceau, accent de l'app pris sur la pochette.
+// Options : design « Sobre » ou « Adapté », notification au changement de morceau, accent de
+// l'app pris sur la pochette.
 import SpotifyLogoIcon from 'phosphor-svelte/lib/SpotifyLogoIcon'
-import type { MusicSettings } from '../../lib/MusicPlayer.svelte'
+import { MUSIC_DEFAULTS, type MusicSettings } from '../../lib/MusicPlayer.svelte'
 import type { WidgetManifest } from '../types'
 import Spotify from './Spotify.svelte'
 
@@ -9,7 +10,7 @@ const manifest: WidgetManifest<MusicSettings> = {
   name: 'Spotify',
   icon: SpotifyLogoIcon,
   size: { w: 4, h: 2, minW: 2, minH: 2 },
-  defaults: { notify: false, accent: false },
+  defaults: MUSIC_DEFAULTS,
   component: Spotify
 }
 
