@@ -8,9 +8,11 @@
     type Background,
     type FontSettings,
     type Settings,
+    type SoundSettings,
     type Theme
   } from '../../shared/model'
   import type { DisplayInfo } from '../../shared/api'
+  import { play } from '../sound.svelte'
   import { app, saveTheme } from '../state.svelte'
   import { importedFamily, importedFontName, resolvedAccent } from './apply.svelte'
 
@@ -27,6 +29,12 @@
     ['Violet', '#B69CFF'],
     ['Orange', '#FFB86B'],
     ['Menthe', '#6EF2C2']
+  ] as const
+
+  const SOUND_GROUPS = [
+    ['window', 'Ouverture et fermeture', 'Quand Photon apparaît ou se cache'],
+    ['clicks', 'Clics', 'Boutons, cases, réglages, changement de profil'],
+    ['grid', 'Mode édition', 'Ajouter, supprimer, déplacer un widget']
   ] as const
 
   const px = (value: number): string => `${value} px`
@@ -168,6 +176,22 @@
     } catch (error) {
       console.error('[photon] réglage non enregistré', error)
     }
+  }
+
+  // Sons : appliqués tout de suite (le clic sur la case sonne déjà selon le nouveau choix),
+  // enregistrés ensuite. Curseur du volume : enregistré, avec un son d'aperçu, une fois lâché.
+  let soundTimer: ReturnType<typeof setTimeout> | undefined
+  const sound = $derived(app.settings.sound)
+
+  function patchSound(patch: Partial<SoundSettings>, later = false): void {
+    const next = { ...app.settings.sound, ...patch }
+    app.settings.sound = next
+    clearTimeout(soundTimer)
+    if (!later) return void setting({ sound: next })
+    soundTimer = setTimeout(() => {
+      void setting({ sound: next })
+      play('toggleOn', true)
+    }, 250)
   }
 </script>
 
@@ -433,6 +457,35 @@
       <span>Bascule automatique des profils</span>
       <small>Règles de chaque profil : bouton « Auto » en mode édition</small>
     </label>
+  </section>
+
+  <section>
+    <h3>Sons</h3>
+    <label class="check">
+      <input
+        type="checkbox"
+        checked={sound.enabled}
+        onchange={(event) => patchSound({ enabled: event.currentTarget.checked })}
+      />
+      <span>Sons de Photon</span>
+      <small>Le volume de Windows n'est jamais modifié</small>
+    </label>
+    {#if sound.enabled}
+      {@render range('Volume', sound.volume, 0, 1, 0.05, percent, (volume) =>
+        patchSound({ volume }, true)
+      )}
+      {#each SOUND_GROUPS as [group, label, hint] (group)}
+        <label class="check">
+          <input
+            type="checkbox"
+            checked={sound[group]}
+            onchange={(event) => patchSound({ [group]: event.currentTarget.checked })}
+          />
+          <span>{label}</span>
+          <small>{hint}</small>
+        </label>
+      {/each}
+    {/if}
   </section>
 </div>
 

@@ -24,6 +24,16 @@ export interface Settings {
   reduceMotion: boolean
   autoProfiles: boolean // bascule automatique selon les règles des profils
   liveBlur: boolean // mode fenêtre : flou fait par Photon (capture de l'écran), réglable
+  sound: SoundSettings
+}
+
+// Sons de l'interface (src/renderer/sound.svelte.ts), par famille.
+export interface SoundSettings {
+  enabled: boolean
+  volume: number // 0..1, volume propre à Photon (celui de Windows n'est jamais touché)
+  window: boolean // ouverture et fermeture de Photon
+  clicks: boolean // boutons, cases, réglages, profils
+  grid: boolean // mode édition : ajouter, supprimer, poser un widget
 }
 
 export type Background =
@@ -111,7 +121,16 @@ export const defaultSettings = (): Settings => ({
   theme: 'default',
   reduceMotion: false,
   autoProfiles: false,
-  liveBlur: false
+  liveBlur: false,
+  sound: defaultSound()
+})
+
+export const defaultSound = (): SoundSettings => ({
+  enabled: true,
+  volume: 0.5,
+  window: true,
+  clicks: true,
+  grid: true
 })
 
 export const defaultTheme = (): Theme => ({
@@ -181,6 +200,20 @@ function parseBoundsMap(v: unknown): Record<string, Bounds> {
   return Object.fromEntries(entries.slice(-MAX_SCREEN_SETUPS))
 }
 
+function parseSound(v: unknown): SoundSettings {
+  const d = defaultSound()
+  if (!isObject(v)) return d
+  const flag = (value: unknown, fallback: boolean): boolean =>
+    typeof value === 'boolean' ? value : fallback
+  return {
+    enabled: flag(v.enabled, d.enabled),
+    volume: num(v.volume, 0, 1, d.volume),
+    window: flag(v.window, d.window),
+    clicks: flag(v.clicks, d.clicks),
+    grid: flag(v.grid, d.grid)
+  }
+}
+
 export function parseSettings(raw: unknown): Settings {
   const v = root(raw)
   const d = defaultSettings()
@@ -199,7 +232,8 @@ export function parseSettings(raw: unknown): Settings {
     theme: isName(v.theme) ? v.theme : d.theme,
     reduceMotion: typeof v.reduceMotion === 'boolean' ? v.reduceMotion : d.reduceMotion,
     autoProfiles: v.autoProfiles === true,
-    liveBlur: v.liveBlur === true
+    liveBlur: v.liveBlur === true,
+    sound: parseSound(v.sound)
   }
 }
 
