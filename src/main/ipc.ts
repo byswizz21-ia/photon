@@ -4,6 +4,7 @@ import type { AppState } from '../shared/api'
 import type { Settings } from '../shared/model'
 import { audio, audioDevice, audioMute, audioVolume } from './audio'
 import { awake, awakeStart, awakeStop } from './awake'
+import { eyes, eyesSet } from './eyes'
 import { importFile, pickFile } from './background'
 import { batteries } from './batteries'
 import { calendar, onProfileSaved } from './calendar'
@@ -199,4 +200,6 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:awake', awake)
   handle('photon:awakeStart', awakeStart) // durée et choix de l'écran validés dans awake.ts
   handle('photon:awakeStop', awakeStop)
+  handle('photon:eyes', eyes)
+  handle('photon:eyesSet', eyesSet) // validé dans eyes.ts
 }

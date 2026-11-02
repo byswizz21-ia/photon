@@ -261,6 +261,13 @@ export interface AwakeState {
   until: number | null // ms depuis 1970 ; null : jusqu'à l'arrêt
 }
 
+// Pause des yeux (src/main/eyes.ts) : rappel régulier, réglé par le widget.
+export interface EyesState {
+  on: boolean
+  minutes: number // entre deux rappels
+  next: number | null // ms depuis 1970 du prochain rappel ; null : coupé
+}
+
 export interface RecentFile {
   path: string
   name: string
@@ -356,6 +363,8 @@ export interface PhotonApi {
   awake(): Promise<AwakeState>
   awakeStart(minutes: number | null, screen: boolean): Promise<AwakeState> // null : sans fin
   awakeStop(): Promise<AwakeState>
+  eyes(): Promise<EyesState>
+  eyesSet(on: boolean, minutes: number): Promise<EyesState> // 5 à 120 min
   // Thème
   pickFile(kind: 'image' | 'font'): Promise<string | null> // boîte de dialogue ; null si annulée
   // Copie chez Photon ; nom pour photon://images/<nom> ou photon://fonts/<nom>, null si refusé

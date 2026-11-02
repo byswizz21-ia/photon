@@ -84,6 +84,8 @@ const photon: PhotonApi = {
   awake: () => ipcRenderer.invoke('photon:awake'),
   awakeStart: (minutes, screen) => ipcRenderer.invoke('photon:awakeStart', minutes, screen),
   awakeStop: () => ipcRenderer.invoke('photon:awakeStop'),
+  eyes: () => ipcRenderer.invoke('photon:eyes'),
+  eyesSet: (on, minutes) => ipcRenderer.invoke('photon:eyesSet', on, minutes),
   pickFile: (kind) => ipcRenderer.invoke('photon:pickFile', kind),
   importFile: (kind, path) => ipcRenderer.invoke('photon:importFile', kind, path)
 }
