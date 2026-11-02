@@ -13,9 +13,16 @@ export function applyLayout(widgets: WidgetInstance[], nodes: GridStackWidget[])
     if (!widget) continue
     widget.x = node.x ?? widget.x
     widget.y = node.y ?? widget.y
-    widget.w = node.w ?? widget.w
-    widget.h = node.h ?? widget.h
+    // gridstack n'écrit pas w / h quand ils valent 1 ou le minimum de la carte.
+    widget.w = node.w ?? node.minW ?? 1
+    widget.h = node.h ?? node.minH ?? 1
   }
+}
+
+// Cases qu'il faut pour qu'un contenu de `px` tienne : chaque carte perd la marge de chaque côté
+// et sa bordure (1 px de chaque côté).
+export function cellsFor(px: number, cell: number, margin: number): number {
+  return Math.ceil((px + 2 * margin + 2) / cell)
 }
 
 // Nouvelle instance : id lisible et unique (clock, clock-2…), taille par défaut du widget.

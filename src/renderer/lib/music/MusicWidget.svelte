@@ -7,7 +7,7 @@
   import { untrack, type Component } from 'svelte'
   import { MUSIC_SERVICES, type MusicService, type MusicTrack } from '../../../shared/api'
   import type { WidgetProps } from '../../widgets/types'
-  import MusicPlayer, { type MusicSettings } from '../MusicPlayer.svelte'
+  import MusicPlayer, { CUSTOM_MIN, type MusicSettings } from '../MusicPlayer.svelte'
   import { MusicSource } from './source.svelte'
 
   let {
@@ -38,7 +38,7 @@
   const isCustom = $derived(settings.design === 'custom')
   let width = $state(0)
   let height = $state(0)
-  const roomy = $derived(width >= 340 && height >= 300)
+  const roomy = $derived(width >= CUSTOM_MIN.width && height >= CUSTOM_MIN.height)
   const DESIGNS = [
     ['sober', 'Sobre'],
     ['custom', 'Adapté']

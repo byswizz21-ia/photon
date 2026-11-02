@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import type { WidgetInstance } from '../../shared/model'
 import type { WidgetManifest } from '../widgets/types'
-import { applyLayout, createInstance, mergeSettings } from './layout'
+import { applyLayout, cellsFor, createInstance, mergeSettings } from './layout'
 
 const widget = (id: string, type = 'clock'): WidgetInstance => ({
   id,
@@ -19,11 +19,12 @@ describe('applyLayout', () => {
     const [a] = widgets
     applyLayout(widgets, [
       { id: 'a', x: 4, y: 1, w: 6, h: 3 },
-      { id: 'b', x: 0, y: 2 }
+      { id: 'b', x: 0, y: 2, minW: 4, minH: 4 }
     ])
     expect(widgets[0]).toBe(a)
     expect(widgets[0]).toMatchObject({ x: 4, y: 1, w: 6, h: 3 })
-    expect(widgets[1]).toMatchObject({ x: 0, y: 2, w: 4, h: 2 })
+    // gridstack n'écrit pas une taille égale au minimum (ou à 1) : c'est elle.
+    expect(widgets[1]).toMatchObject({ x: 0, y: 2, w: 4, h: 4 })
   })
 
   test('ignore les ids inconnus ; un widget absent de la grille garde sa place', () => {
@@ -66,4 +67,11 @@ describe('mergeSettings', () => {
       defaults
     )
   })
+})
+
+test('cases pour une place minimale en px', () => {
+  // Case de 100 px, marge 10 : 4 cases = 400 - 20 - 2 = 378 px de contenu.
+  expect(cellsFor(300, 100, 10)).toBe(4) // 3 cases n'en donnent que 278
+  expect(cellsFor(278, 100, 10)).toBe(3)
+  expect(cellsFor(340, 150, 10)).toBe(3)
 })

@@ -25,8 +25,10 @@
   import { GridStack, type GridItemHTMLElement, type GridStackWidget } from 'gridstack'
   import 'gridstack/dist/gridstack.min.css'
   import { untrack } from 'svelte'
+  import type { WidgetInstance } from '../../shared/model'
   import { saveProfile } from '../state.svelte'
-  import { COLUMNS, applyLayout } from './layout'
+  import type { WidgetManifest } from '../widgets/types'
+  import { COLUMNS, applyLayout, cellsFor, mergeSettings } from './layout'
   import WidgetFrame from './WidgetFrame.svelte'
 
   // Hauteur d'une case et marge par côté (l'écart entre deux cartes vaut le double), en px.
@@ -52,6 +54,37 @@
     saveProfile()
   }
 
+  // Taille minimale d'une carte en cases : celle du manifest, ou plus si ses réglages demandent de
+  // la place en px (manifest.minSize), convertie avec la taille actuelle des cases.
+  function minCells(
+    widget: WidgetInstance,
+    manifest: WidgetManifest
+  ): { minW: number; minH: number } {
+    const { minW, minH } = manifest.size
+    const px = manifest.minSize?.(mergeSettings(manifest.defaults, widget.settings))
+    if (!grid || !px) return { minW, minH }
+    const density = app.theme.density
+    return {
+      minW: Math.min(
+        grid.getColumn(),
+        Math.max(minW, cellsFor(px.width, grid.cellWidth(), MARGIN[density]))
+      ),
+      minH: Math.max(minH, cellsFor(px.height, CELL[density], MARGIN[density]))
+    }
+  }
+
+  // Nouveau minimum : la carte grandit tout de suite si besoin et ne descend plus en dessous.
+  function fitMin(id: string, { minW, minH }: { minW: number; minH: number }): void {
+    const el = grid?.el.querySelector<GridItemHTMLElement>(`[data-id="${CSS.escape(id)}"]`)
+    const node = el?.gridstackNode
+    if (!grid || !el || !node || (node.minW === minW && node.minH === minH)) return
+    const w = Math.max(node.w ?? minW, minW)
+    const h = Math.max(node.h ?? minH, minH)
+    const grows = w !== node.w || h !== node.h
+    grid.update(el, { minW, minH, w, h })
+    if (grows) persist()
+  }
+
   // Objet neuf pour gridstack (il le modifie) : jamais l'état Svelte directement.
   function makeItem(el: HTMLElement): void {
     const widget = app.profile.widgets.find((w) => w.id === el.dataset.id)
@@ -59,7 +92,7 @@
       widget && Object.hasOwn(widgets, widget.type) ? widgets[widget.type] : undefined
     if (!grid || !widget || !manifest || (el as GridItemHTMLElement).gridstackNode) return
     const { id, x, y, w, h } = widget
-    const { minW, minH } = manifest.size
+    const { minW, minH } = minCells(widget, manifest)
     grid.makeWidget(el, { id, x, y, w, h, minW, minH, autoPosition: placing.delete(id) })
   }
 
@@ -127,6 +160,17 @@
       grid?.cellHeight(CELL[density])
       grid?.margin(MARGIN[density])
     })
+  })
+
+  // Réglage qui change la place demandée (design « Adapté » des lecteurs de musique) ou densité :
+  // minimum recalculé. Largeur de fenêtre changée ensuite : pas suivie, le widget s'adapte seul.
+  $effect(() => {
+    for (const widget of items) {
+      const manifest = widgets[widget.type]
+      if (!manifest?.minSize) continue
+      const min = minCells(widget, manifest)
+      untrack(() => fitMin(widget.id, min))
+    }
   })
 </script>
 

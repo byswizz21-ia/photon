@@ -2,6 +2,10 @@
   // Réglages communs aux widgets de musique : notification, accent pris sur la pochette, design.
   export type MusicSettings = { notify: boolean; accent: boolean; design: string }
   export const MUSIC_DEFAULTS: MusicSettings = { notify: false, accent: false, design: 'sober' }
+  // Place qu'il faut au design « Adapté » ; la grille y agrandit la carte quand on le choisit.
+  export const CUSTOM_MIN = { width: 340, height: 300 }
+  export const musicMinSize = (settings: MusicSettings): typeof CUSTOM_MIN | null =>
+    settings.design === 'custom' ? CUSTOM_MIN : null
 </script>
 
 <script lang="ts">

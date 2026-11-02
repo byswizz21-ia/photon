@@ -57,6 +57,10 @@ rien d'autre à modifier.
    export default manifest
    ```
 
+   Optionnel : `minSize(settings)` renvoie la place minimale du contenu en px selon les réglages
+   (ou `null`). La grille la convertit en cases, agrandit la carte quand le réglage change et
+   empêche de la réduire en dessous. Exemple : le design « Adapté » des lecteurs de musique.
+
 3. Dans le composant, reçois tes réglages :
 
    ```svelte

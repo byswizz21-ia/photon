@@ -15,5 +15,8 @@ export interface WidgetManifest<S extends WidgetSettings = WidgetSettings> {
   icon: Component // icône Phosphor : import XIcon from 'phosphor-svelte/lib/XIcon'
   size: { w: number; h: number; minW: number; minH: number } // en cases, grille de 12 colonnes
   defaults: S // réglages par défaut d'une nouvelle instance
+  // Optionnel : place minimale du contenu en px selon les réglages (un design qui en demande plus),
+  // null : celle de `size`. La grille la convertit en cases et agrandit la carte si besoin.
+  minSize?(settings: S): { width: number; height: number } | null
   component: Component<WidgetProps<S>>
 }
