@@ -123,8 +123,9 @@ test('sons : activés par défaut, volume borné, champ invalide → défaut', (
   })
 })
 
-test('ambiance sonore : connue gardée, inconnue → Verre', () => {
-  expect(parseSettings({ sound: { preset: 'piano' } }).sound.preset).toBe('piano')
+test('ambiance sonore : connue gardée, inconnue ou retirée → Verre', () => {
+  expect(parseSettings({ sound: { preset: 'tactile' } }).sound.preset).toBe('tactile')
+  expect(parseSettings({ sound: { preset: 'piano' } }).sound.preset).toBe('glass') // ambiance retirée
   expect(parseSettings({ sound: { preset: 'toString' } }).sound.preset).toBe('glass')
   expect(parseSettings({ sound: { preset: 4 } }).sound.preset).toBe('glass')
 })

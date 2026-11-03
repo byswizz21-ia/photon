@@ -1,6 +1,6 @@
 // Ambiances à fichiers : un .ogg (Opus) par son, rangés par ambiance. Chargés à la demande
 // (un petit module par fichier, inclus dans l'app : aucun accès réseau), décodés une fois.
-// Sources : kits SND de Dentsu (snd.dev : Onde, Piano, Industriel) et Kenney (CC0, Tactile).
+// Sources : kit SND de Dentsu (snd.dev : Onde) et Kenney (CC0, Tactile).
 // Découpés, normalisés et encodés depuis les kits d'origine.
 import type { SoundPreset } from '../../shared/model'
 import type { SoundName } from './synth'

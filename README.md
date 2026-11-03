@@ -29,7 +29,7 @@ créé au démarrage puis seulement affiché ou caché : l'ouverture est instant
   tous.
 - **Notifications** : cartes de verre aux couleurs du thème (ou celles de Windows), rappels de
   l'Agenda, des anniversaires, des abonnements, de l'URSSAF…, source par source.
-- **Sons** : sound design discret, sept ambiances au choix (Réglages › Sons), réglable ou coupé.
+- **Sons** : sound design discret, cinq ambiances au choix (Réglages › Sons), réglable ou coupé.
 - **Menu « Ajouter »** : widgets par rubrique, recherche, et catalogue avec aperçu en direct.
 - **Plein écran ou fenêtre**, au choix de l'écran, avec flou en direct en mode fenêtre.
 - **Animation d'ouverture** à la toute première ouverture (passable d'un clic ou d'une touche,
@@ -185,9 +185,9 @@ les unités `cqw` / `cqh`. Couleurs, rayons, ombres, tailles et durées : tokens
 - Police [Satoshi](https://www.fontshare.com/fonts/satoshi) (Indian Type Foundry), licence ITF Free
   Font License : intégrée telle quelle, à ne pas modifier ni redistribuer seule.
 - Icônes [Phosphor](https://phosphoricons.com) (MIT).
-- Sons des ambiances Onde, Piano et Industriel : kits [SND](https://snd.dev) de Dentsu (Yasuhiro
-  Tsuchiya, Ayako Taniguchi…), gratuits pour un usage commercial ou non. Ils ne doivent être ni
-  redistribués seuls ni utilisés comme logo sonore. Ici, ils sont découpés et normalisés.
+- Sons de l'ambiance Onde : kit [SND](https://snd.dev) de Dentsu (Yasuhiro Tsuchiya), gratuit
+  pour un usage commercial ou non. Ses sons ne doivent être ni redistribués seuls ni utilisés
+  comme logo sonore. Ici, ils sont découpés et normalisés.
 - Sons de l'ambiance Tactile : [Kenney](https://kenney.nl/assets/interface-sounds) (CC0).
 - [chess.js](https://github.com/jhlywa/chess.js) (BSD-2) : règles complètes des échecs (roque, prise
   en passant, promotion, mat, nulles), trop longues et piégeuses à recoder. Version figée : le bot

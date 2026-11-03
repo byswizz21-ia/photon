@@ -1,5 +1,12 @@
 # Mises à jour
 
+## À venir
+
+### Retiré
+
+- **Ambiances Piano et Industriel** : il en reste cinq (Verre, Bois, Souffle, Onde, Tactile).
+  Qui avait choisi l'une des deux retrouve Verre.
+
 ## 1.2.0 · 3 novembre 2026
 
 ### Nouveau

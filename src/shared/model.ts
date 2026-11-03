@@ -62,8 +62,6 @@ export const SOUND_PRESETS = {
   wood: ['Bois', 'Marimba feutré, chaleureux'],
   air: ['Souffle', 'De l’air, presque rien'],
   sine: ['Onde', 'Sinusoïdes pures, très courtes'],
-  piano: ['Piano', 'Notes de piano, amples'],
-  industrial: ['Industriel', 'Métal et mécanique, précis'],
   tactile: ['Tactile', 'Clics et touches, comme un vrai bouton']
 } as const
 
