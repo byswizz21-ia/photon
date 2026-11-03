@@ -49,3 +49,25 @@ export function toggleDay(habit: Habit, day: string): void {
 }
 
 export const canAdd = (habits: Habit[]): boolean => habits.length < MAX_HABITS
+
+// Plus longue série de jours d'affilée de l'historique.
+export function best(days: string[]): number {
+  let record = 0
+  let run = 0
+  let previous = ''
+  for (const day of days) {
+    const [y, m, d] = day.split('-').map(Number) as [number, number, number]
+    run = previous && dayKey(new Date(y, m - 1, d), -1) === previous ? run + 1 : 1
+    record = Math.max(record, run)
+    previous = day
+  }
+  return record
+}
+
+// Jours faits parmi les `span` derniers (aujourd'hui compris).
+export function doneIn(days: string[], now: Date, span: number): number {
+  const done = new Set(days)
+  let count = 0
+  for (let offset = 0; offset > -span; offset--) if (done.has(dayKey(now, offset))) count++
+  return count
+}

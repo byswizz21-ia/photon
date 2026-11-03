@@ -144,7 +144,7 @@
     flex-direction: column;
     gap: 14px;
     overflow: hidden;
-    --orb: min(196px, 42cqw, calc(100cqh - 150px));
+    --orb: min(280px, 42cqw, calc(100cqh - 150px));
   }
 
   .wash {
@@ -506,5 +506,38 @@
   button:focus-visible {
     outline: var(--focus-ring);
     outline-offset: var(--focus-offset);
+  }
+
+  /* Carte de 3 cases de large : disque et titre côte à côte, commandes en dessous. */
+  @container (max-width: 320px) {
+    .widget {
+      --orb: min(88px, calc(100cqh - 190px));
+    }
+
+    .now {
+      display: grid;
+      grid-template-columns: var(--orb) minmax(0, 1fr);
+      grid-template-areas: 'orb names' 'controls controls';
+      gap: 12px 16px;
+      align-items: center;
+    }
+
+    .orb-box {
+      grid-area: orb;
+    }
+
+    .side {
+      display: contents;
+    }
+
+    .names {
+      grid-area: names;
+    }
+
+    .controls {
+      grid-area: controls;
+      justify-content: center;
+      margin-left: 0;
+    }
   }
 </style>

@@ -54,6 +54,7 @@ export function summarize(list: UsageEntry[], now: number): Omit<ClaudeUsage, 's
   let messages = 0
   let today = 0
   let week = 0
+  const days = [0, 0, 0, 0, 0, 0, 0]
   for (const e of sorted) {
     if (e.time >= start + WINDOW_MS) {
       start = Math.floor(e.time / HOUR_MS) * HOUR_MS
@@ -64,6 +65,9 @@ export function summarize(list: UsageEntry[], now: number): Omit<ClaudeUsage, 's
     messages++
     week += e.tokens
     if (e.time >= midnight) today += e.tokens
+    // Jours de calendrier (arrondi : un jour de changement d'heure fait 23 ou 25 h).
+    const ago = Math.round((midnight - new Date(e.time).setHours(0, 0, 0, 0)) / 86_400_000)
+    if (ago >= 0 && ago < 7) days[6 - ago]! += e.tokens
   }
   const open = now < start + WINDOW_MS
   return {
@@ -71,7 +75,8 @@ export function summarize(list: UsageEntry[], now: number): Omit<ClaudeUsage, 's
     messages: open ? messages : 0,
     resetsAt: open ? start + WINDOW_MS : null,
     today,
-    week
+    week,
+    days
   }
 }
 

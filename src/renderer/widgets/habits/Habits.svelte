@@ -1,16 +1,20 @@
 <script lang="ts">
   // Une ligne par habitude : nom, série en cours, les 7 derniers jours (aujourd'hui à droite).
-  // Un clic sur un jour le coche ou le décoche (oubli de la veille rattrapable).
+  // Un clic sur un jour le coche ou le décoche (oubli de la veille rattrapable). Mode édition :
+  // design, ajout et suppression (toujours sur la liste classique).
   import CheckIcon from 'phosphor-svelte/lib/CheckIcon'
   import FlameIcon from 'phosphor-svelte/lib/FlameIcon'
   import XIcon from 'phosphor-svelte/lib/XIcon'
+  import DesignPicker from '../../lib/DesignPicker.svelte'
   import OwnToggle from '../../lib/OwnToggle.svelte'
   import { dayKey } from '../../../shared/day'
   import { pollWhileVisible } from '../../lib/poll.svelte'
   import { profileKey, shared } from '../../lib/shared.svelte'
   import type { WidgetProps } from '../types'
   import { canAdd, parseHabits, streak, toggleDay, type Habit } from './habits'
-  import type { HabitsSettings } from './manifest'
+  import HabitsHistory from './HabitsHistory.svelte'
+  import HabitsToday from './HabitsToday.svelte'
+  import { HABITS_DESIGNS, type HabitsSettings } from './manifest'
 
   let { settings, editing, save }: WidgetProps<HabitsSettings> = $props()
 
@@ -52,76 +56,89 @@
   }
 </script>
 
-<div class="widget" class:editing>
-  <div class="head">
-    <span class="label">Habitudes</span>
+{#if !editing && settings.design === 'today'}
+  <HabitsToday habits={data.value.habits} {now} ontoggle={toggle} />
+{:else if !editing && settings.design === 'history'}
+  <HabitsHistory habits={data.value.habits} {now} ontoggle={toggle} />
+{:else}
+  <div class="widget" class:editing>
     {#if editing}
-      <OwnToggle checked={settings.own === true} onchange={(own) => save({ ...settings, own })} />
-    {:else if data.value.habits.length}
-      <span class="count">{doneToday} / {data.value.habits.length} aujourd'hui</span>
+      <DesignPicker
+        designs={HABITS_DESIGNS}
+        value={settings.design}
+        onpick={(design) => save({ ...settings, design })}
+      />
+    {/if}
+    <div class="head">
+      <span class="label">Habitudes</span>
+      {#if editing}
+        <OwnToggle checked={settings.own === true} onchange={(own) => save({ ...settings, own })} />
+      {:else if data.value.habits.length}
+        <span class="count">{doneToday} / {data.value.habits.length} aujourd'hui</span>
+      {/if}
+    </div>
+    {#if data.value.habits.length}
+      <div class="row days" aria-hidden="true">
+        {#if editing}<span></span>{/if}
+        <span></span>
+        <span></span>
+        {#each week as day, i (day.key)}<span class:today={day.key === today} class:old={i < 4}
+            >{day.letter}</span
+          >{/each}
+      </div>
+    {/if}
+    <ul>
+      {#each data.value.habits as habit (habit.id)}
+        {@const series = streak(habit.days, now)}
+        <li class="row">
+          {#if editing}
+            <button
+              type="button"
+              class="remove"
+              aria-label="Supprimer « {habit.name} » et son historique"
+              onclick={() => remove(habit.id)}
+            >
+              <XIcon size={12} aria-hidden="true" />
+            </button>
+          {/if}
+          <span class="name" title={habit.name}>{habit.name}</span>
+          <span class="streak" class:on={series > 0} title="{series} jour(s) d'affilée">
+            <FlameIcon size={13} weight={series > 0 ? 'fill' : 'regular'} aria-hidden="true" />
+            {series}
+          </span>
+          {#each week as day, i (day.key)}
+            {@const done = habit.days.includes(day.key)}
+            <button
+              type="button"
+              class="day"
+              class:done
+              class:today={day.key === today}
+              class:old={i < 4}
+              role="checkbox"
+              aria-checked={done}
+              aria-label="{habit.name}, {day.label}"
+              onclick={() => toggle(habit, day.key)}
+            >
+              {#if done}<CheckIcon size={10} weight="bold" aria-hidden="true" />{/if}
+            </button>
+          {/each}
+        </li>
+      {/each}
+    </ul>
+    {#if canAdd(data.value.habits)}
+      <input
+        bind:value={draft}
+        onkeydown={(event) => {
+          if (event.key === 'Enter') add()
+        }}
+        disabled={!data.ready}
+        maxlength="60"
+        placeholder="Nouvelle habitude (sport, lecture…)"
+        aria-label="Nouvelle habitude"
+      />
     {/if}
   </div>
-  {#if data.value.habits.length}
-    <div class="row days" aria-hidden="true">
-      {#if editing}<span></span>{/if}
-      <span></span>
-      <span></span>
-      {#each week as day, i (day.key)}<span class:today={day.key === today} class:old={i < 4}
-          >{day.letter}</span
-        >{/each}
-    </div>
-  {/if}
-  <ul>
-    {#each data.value.habits as habit (habit.id)}
-      {@const series = streak(habit.days, now)}
-      <li class="row">
-        {#if editing}
-          <button
-            type="button"
-            class="remove"
-            aria-label="Supprimer « {habit.name} » et son historique"
-            onclick={() => remove(habit.id)}
-          >
-            <XIcon size={12} aria-hidden="true" />
-          </button>
-        {/if}
-        <span class="name" title={habit.name}>{habit.name}</span>
-        <span class="streak" class:on={series > 0} title="{series} jour(s) d'affilée">
-          <FlameIcon size={13} weight={series > 0 ? 'fill' : 'regular'} aria-hidden="true" />
-          {series}
-        </span>
-        {#each week as day, i (day.key)}
-          {@const done = habit.days.includes(day.key)}
-          <button
-            type="button"
-            class="day"
-            class:done
-            class:today={day.key === today}
-            class:old={i < 4}
-            role="checkbox"
-            aria-checked={done}
-            aria-label="{habit.name}, {day.label}"
-            onclick={() => toggle(habit, day.key)}
-          >
-            {#if done}<CheckIcon size={10} weight="bold" aria-hidden="true" />{/if}
-          </button>
-        {/each}
-      </li>
-    {/each}
-  </ul>
-  {#if canAdd(data.value.habits)}
-    <input
-      bind:value={draft}
-      onkeydown={(event) => {
-        if (event.key === 'Enter') add()
-      }}
-      disabled={!data.ready}
-      maxlength="60"
-      placeholder="Nouvelle habitude (sport, lecture…)"
-      aria-label="Nouvelle habitude"
-    />
-  {/if}
-</div>
+{/if}
 
 <style>
   .widget {

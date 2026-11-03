@@ -1,9 +1,10 @@
 <script lang="ts" module>
+  import { cardPx } from './DesignPicker.svelte'
   // Réglages communs aux widgets de musique : notification, accent pris sur la pochette, design.
   export type MusicSettings = { notify: boolean; accent: boolean; design: string }
   export const MUSIC_DEFAULTS: MusicSettings = { notify: false, accent: false, design: 'sober' }
-  // Place qu'il faut au design « Adapté » ; la grille y agrandit la carte quand on le choisit.
-  export const CUSTOM_MIN = { width: 340, height: 300 }
+  // Place qu'il faut au design « Adapté » (3×3) ; la grille y agrandit la carte quand on le choisit.
+  export const CUSTOM_MIN = cardPx(3, 3)
   export const musicMinSize = (settings: MusicSettings): typeof CUSTOM_MIN | null =>
     settings.design === 'custom' ? CUSTOM_MIN : null
 </script>

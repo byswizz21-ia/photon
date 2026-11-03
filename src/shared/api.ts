@@ -182,11 +182,36 @@ export interface WeatherDay {
   code: number
   max: number // °C
   min: number // °C
+  sunrise: number | null // ms
+  sunset: number | null // ms
+  uv: number | null // indice UV maximal
+  rain: number | null // % de risque de pluie, maximum du jour
+}
+
+export interface WeatherHour {
+  time: number // ms, début de l'heure
+  temperature: number
+  code: number
+  day: boolean
+  rain: number | null // % de risque de pluie
+}
+
+export interface WeatherNow {
+  temperature: number
+  code: number
+  day: boolean
+  feels: number | null // ressenti, °C
+  humidity: number | null // %
+  wind: number | null // km/h
+  windFrom: number | null // degrés, direction d'où vient le vent
+  gusts: number | null // km/h
+  dewPoint: number | null // °C
 }
 
 export interface WeatherFeed {
   place: string // nom trouvé par le géocodage
-  current: { temperature: number; code: number; day: boolean } | null
+  current: WeatherNow | null
+  hours: WeatherHour[] // 5 jours heure par heure, à filtrer sur l'heure actuelle
   days: WeatherDay[] // aujourd'hui d'abord
   updatedAt: number | null // dernière lecture réussie ; null = jamais
   error: string | null
@@ -209,6 +234,14 @@ export interface AudioState {
   devices: AudioDevice[] // sorties actives
 }
 
+// App qui joue du son (mélangeur de Windows), sur la sortie par défaut.
+export interface AudioApp {
+  id: string // nom du processus en minuscules ; « ~system » : sons système
+  name: string // « Spotify », « Sons système »
+  volume: number // 0 à 100
+  muted: boolean
+}
+
 // Usage de Claude Code, lu dans ses journaux (src/main/usage.ts). Tokens = entrée + sortie +
 // écriture en cache.
 export interface ClaudeUsage {
@@ -217,6 +250,7 @@ export interface ClaudeUsage {
   resetsAt: number | null // fin de la fenêtre en cours (ms) ; null si aucune
   today: number
   week: number // 7 derniers jours
+  days: number[] // 7 jours de calendrier, aujourd'hui en dernier
   sources: number // dossiers de journaux trouvés (0 : Claude Code jamais lancé)
 }
 
@@ -526,6 +560,9 @@ export interface PhotonApi {
   audioVolume(volume: number): Promise<AudioState | null> // 0 à 100
   audioMute(muted: boolean): Promise<AudioState | null>
   audioDevice(id: string): Promise<AudioState | null> // une sortie de la dernière liste lue
+  audioApps(): Promise<AudioApp[] | null> // volume par app ; null : outil indisponible
+  audioAppVolume(id: string, volume: number): Promise<AudioApp[] | null> // app de la dernière liste
+  audioAppIcon(id: string): Promise<string | null> // icône de l'exe (data URL)
   // Widgets ajoutés après la V3
   claudeUsage(): Promise<ClaudeUsage> // 1re lecture lente (journaux), ensuite incrémentale
   clipboardHistory(): Promise<string[]> // textes copiés, le plus récent d'abord (en mémoire)

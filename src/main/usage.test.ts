@@ -44,7 +44,10 @@ test('fenêtre de 5 h arrondie à l’heure, jour et semaine', () => {
     messages: 2,
     resetsAt: at(22),
     today: 100,
-    week: 100
+    week: 100,
+    days: [0, 0, 0, 0, 0, 0, 100]
   })
+  const yesterday = summarize([{ time: at(-2), tokens: 7 }], now) // 31 octobre, 22 h
+  expect(yesterday.days).toEqual([0, 0, 0, 0, 0, 7, 0])
   expect(summarize([{ time: now - 6 * H, tokens: 5 }], now).resetsAt).toBeNull()
 })

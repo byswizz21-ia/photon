@@ -137,6 +137,8 @@ rien d'autre à modifier.
    Optionnel : `minSize(settings)` renvoie la place minimale du contenu en px selon les réglages
    (ou `null`). La grille la convertit en cases, agrandit la carte quand le réglage change et
    empêche de la réduire en dessous. Exemple : le design « Adapté » des lecteurs de musique.
+   Plusieurs designs : un réglage `design`, `lib/DesignPicker.svelte` en mode édition (pastilles)
+   et `cardPx(w, h)` pour un minimum en cases de maquette (exemple : `widgets/clock/`).
 
 3. Dans le composant, reçois tes réglages :
 

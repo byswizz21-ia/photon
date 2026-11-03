@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import { dayKey } from '../../../shared/day'
-import { parseHabits, streak, toggleDay } from './habits'
+import { best, doneIn, parseHabits, streak, toggleDay } from './habits'
 
 const now = new Date(2026, 10, 2, 9) // lundi 2 novembre 2026
 
@@ -38,4 +38,12 @@ test('fichier abîmé : on garde ce qui est lisible', () => {
   expect(parseHabits(raw)).toEqual({
     habits: [{ id: 'a', name: 'Lire', days: ['2026-11-01', '2026-11-02'] }]
   })
+})
+
+test('record et jours faits sur 30 jours', () => {
+  const days = ['2026-09-30', '2026-10-01', '2026-10-02', '2026-10-20', '2026-11-01', '2026-11-02']
+  expect(best(days)).toBe(3) // à cheval sur septembre et octobre
+  expect(best([])).toBe(0)
+  expect(doneIn(days, now, 30)).toBe(3) // depuis le 4 octobre
+  expect(doneIn(days, now, 1)).toBe(1)
 })
