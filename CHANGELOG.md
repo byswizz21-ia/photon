@@ -1,6 +1,6 @@
 # Mises à jour
 
-## À venir
+## 1.3.0 · 3 novembre 2026
 
 ### Nouveau
 

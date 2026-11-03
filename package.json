@@ -1,7 +1,7 @@
 {
   "name": "photon",
   "productName": "Photon",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Fenêtre glass de widgets pour Windows",
   "author": "Hugo",
   "private": true,
