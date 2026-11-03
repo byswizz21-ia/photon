@@ -323,6 +323,104 @@ export const copyUrl = (name: string): string =>
 
 export type FileKind = 'image' | 'video' | 'font'
 
+// Widgets du 2026-11-03 ----------------------------------------------------------------------
+
+// Données réseau lues en fond par Photon (src/main/feeds.ts) : l'interface ne lit que le cache.
+export interface Feed<T> {
+  items: T[]
+  updatedAt: number | null // dernière lecture réussie ; null = jamais (1re lecture en cours)
+  error: string | null // échec de la dernière lecture (les données précédentes restent)
+}
+
+// Corbeille de tous les disques (src/main/trash.ts).
+export interface TrashState {
+  count: number // éléments
+  bytes: number
+}
+
+// Capture d'écran récente (src/main/screenshots.ts).
+export interface Screenshot {
+  path: string
+  name: string
+  at: number // dernière modification, ms depuis 1970
+  thumb: string // data URL ; '' si illisible
+}
+
+// Commande du widget Scripts (src/main/scripts.ts), identifiée par l'id choisi par le widget.
+export interface ScriptRun {
+  id: string
+  running: boolean
+  code: number | null // code de sortie du dernier lancement ; null : en cours ou jamais lancé
+  output: string // fin de la sortie (texte brut, couleurs retirées)
+  startedAt: number | null
+}
+
+// Traduction (src/main/translate.ts) : DeepL avec une clé, sinon MyMemory (gratuit, sans clé).
+export interface Translation {
+  text: string
+  from: string // langue détectée (« en »), '' si inconnue
+  error: string | null
+}
+
+// Jeu offert (src/main/freegames.ts).
+export interface FreeGame {
+  id: string
+  title: string
+  store: string // « Epic Games », « Steam », « GOG »…
+  url: string // https
+  image: string // data URL ; '' si absente
+  until: number | null // fin de l'offre (ms) ; null : inconnue
+  upcoming: boolean // pas encore gratuit (Epic annonce la semaine suivante)
+}
+
+// Prochains passages (src/main/transit.ts) : un arrêt d'une ligne, par direction.
+export interface TransitDeparture {
+  direction: string
+  times: { at: number; realtime: boolean }[] // ms depuis 1970, triés
+}
+export interface TransitLine {
+  id: string
+  code: string // « L3 », « T1 »
+  name: string
+  color: string // « EA619F » ; '' si inconnue
+}
+export interface TransitStop {
+  id: string
+  name: string
+}
+
+// Match (src/main/matches.ts) : foot (ESPN), League of Legends (lolesports), Valorant (vlr.gg).
+export type MatchSport = 'foot' | 'lol' | 'valorant'
+export interface MatchTeam {
+  name: string
+  short: string // « OM », « G2 »
+  logo: string // data URL ; '' si absent
+  score: number | null
+}
+export interface Match {
+  id: string
+  start: number // ms depuis 1970
+  state: 'upcoming' | 'live' | 'done'
+  home: MatchTeam
+  away: MatchTeam
+  event: string // ligue, tournoi
+  url: string // page du match ; '' si aucune
+}
+export interface FootTeam {
+  id: string
+  name: string
+}
+
+// Sortie à venir (src/main/releases.ts) : films et séries (TMDB, clé gratuite), jeux (Steam).
+export type ReleaseKind = 'movie' | 'tv' | 'game'
+export interface Release {
+  id: string
+  title: string
+  date: string // « 2026-11-12 » ou texte libre de Steam (« 2027 », « Bientôt »)
+  image: string // data URL ; '' si absente
+  url: string
+}
+
 export interface PhotonApi {
   // Fenêtre et données
   load(): Promise<AppState>
@@ -429,6 +527,28 @@ export interface PhotonApi {
   // Télécharge un lien (image, vidéo, page Giphy ou Tenor) chez Photon ; nom de la copie
   // (images ou videos, voir copyUrl), null si refusé. Appel réseau : sur action seulement.
   importUrl(url: string): Promise<string | null>
+  // Widgets du 2026-11-03
+  openUrl(url: string): void // https seulement, dans le navigateur ; Photon se cache
+  trash(): Promise<TrashState | null> // null : outil natif indisponible
+  trashEmpty(): Promise<TrashState | null>
+  trashOpen(): void
+  screenshots(folder: string): Promise<Screenshot[]> // '' : dossier Captures d'écran de Windows
+  screenshotDrag(path: string): void // à appeler pendant dragstart : glisser le fichier ailleurs
+  screenshotCopy(path: string): Promise<boolean> // image dans le presse-papiers
+  screenshotDelete(path: string): Promise<boolean> // vers la corbeille
+  scripts(ids: string[]): Promise<ScriptRun[]>
+  scriptStart(id: string, folder: string, command: string): Promise<ScriptRun | null>
+  scriptStop(id: string): Promise<void>
+  // Appels réseau sur action seulement : traduire, choisir une ligne de bus ou une équipe
+  translate(text: string, to: string, deeplKey: string): Promise<Translation>
+  transitLines(): Promise<TransitLine[] | null> // null : réseau injoignable
+  transitStops(line: string): Promise<TransitStop[] | null>
+  footTeams(league: string): Promise<FootTeam[] | null>
+  // Caches lus en fond (src/main/feeds.ts) : le widget passe ses réglages ; null : pas réglé
+  freeGames(): Promise<Feed<FreeGame>>
+  transit(settings: Record<string, unknown>): Promise<Feed<TransitDeparture> | null>
+  matches(settings: Record<string, unknown>): Promise<Feed<Match> | null>
+  releases(settings: Record<string, unknown>): Promise<Feed<Release> | null>
 }
 
 declare global {

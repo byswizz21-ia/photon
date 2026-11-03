@@ -99,7 +99,27 @@ const photon: PhotonApi = {
   pickColor: () => ipcRenderer.invoke('photon:pickColor'),
   pickFile: (kind) => ipcRenderer.invoke('photon:pickFile', kind),
   importFile: (kind, path) => ipcRenderer.invoke('photon:importFile', kind, path),
-  importUrl: (url) => ipcRenderer.invoke('photon:importUrl', url)
+  importUrl: (url) => ipcRenderer.invoke('photon:importUrl', url),
+  // Widgets du 2026-11-03
+  openUrl: (url) => ipcRenderer.send('photon:openUrl', url),
+  trash: () => ipcRenderer.invoke('photon:trash'),
+  trashEmpty: () => ipcRenderer.invoke('photon:trashEmpty'),
+  trashOpen: () => ipcRenderer.send('photon:trashOpen'),
+  screenshots: (folder) => ipcRenderer.invoke('photon:screenshots', folder),
+  screenshotDrag: (path) => ipcRenderer.send('photon:screenshotDrag', path),
+  screenshotCopy: (path) => ipcRenderer.invoke('photon:screenshotCopy', path),
+  screenshotDelete: (path) => ipcRenderer.invoke('photon:screenshotDelete', path),
+  scripts: (ids) => ipcRenderer.invoke('photon:scripts', ids),
+  scriptStart: (id, folder, command) => ipcRenderer.invoke('photon:scriptStart', id, folder, command),
+  scriptStop: (id) => ipcRenderer.invoke('photon:scriptStop', id),
+  translate: (text, to, deeplKey) => ipcRenderer.invoke('photon:translate', text, to, deeplKey),
+  transitLines: () => ipcRenderer.invoke('photon:transitLines'),
+  transitStops: (line) => ipcRenderer.invoke('photon:transitStops', line),
+  footTeams: (league) => ipcRenderer.invoke('photon:footTeams', league),
+  freeGames: () => ipcRenderer.invoke('photon:freeGames'),
+  transit: (settings) => ipcRenderer.invoke('photon:transit', settings),
+  matches: (settings) => ipcRenderer.invoke('photon:matches', settings),
+  releases: (settings) => ipcRenderer.invoke('photon:releases', settings)
 }
 
 contextBridge.exposeInMainWorld('photon', photon)

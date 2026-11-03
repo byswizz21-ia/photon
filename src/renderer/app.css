@@ -88,6 +88,154 @@ button {
   color: var(--on-accent);
 }
 
+/* Briques communes des widgets (préfixe w-) : en-tête, champs, listes, puces. Les widgets plus
+   anciens gardent leur propre copie de ces styles. */
+.w-body {
+  box-sizing: border-box;
+  height: 100%;
+  padding: clamp(12px, 8cqmin, 20px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.w-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.w-label {
+  font-size: var(--text-12);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.w-hint {
+  margin: 0;
+  font-size: var(--text-12);
+  color: var(--text-faint);
+}
+
+.w-message {
+  margin: auto 0;
+  font-size: var(--text-13);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.w-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font-size: var(--text-12);
+  color: var(--text-muted);
+}
+
+.w-input {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: var(--control-h-input);
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-input);
+  background: var(--white-5);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-13);
+  outline: 0;
+  color-scheme: dark;
+}
+
+textarea.w-input {
+  padding: 8px 10px;
+  resize: none;
+}
+
+.w-input:focus {
+  border-color: var(--border-focus);
+}
+
+.w-input option {
+  background: var(--surface-option);
+}
+
+.w-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.w-list {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.w-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.w-chip {
+  height: var(--control-h-chip);
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--white-5);
+  color: var(--text-muted);
+  font-size: var(--text-12);
+  cursor: pointer;
+}
+
+.w-chip:hover {
+  background: var(--surface-hover);
+}
+
+.w-chip.selected {
+  background: var(--surface-accent-soft);
+  color: var(--accent);
+}
+
+/* Petit bouton rond (supprimer une ligne, copier…). */
+.w-icon {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-faint);
+  cursor: pointer;
+}
+
+.w-icon:hover {
+  color: var(--text);
+  background: var(--white-8);
+}
+
+.w-icon:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 /* Menu déroulant sous un bouton d'action (Ajouter, profils). Parent en position: relative. */
 .menu {
   position: absolute;

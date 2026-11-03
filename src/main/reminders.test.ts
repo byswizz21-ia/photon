@@ -67,3 +67,26 @@ test('rappels : rien du jour avant 9 h, agenda coupé à 0, délai réglable', (
   expect(titles([widget('calendar', { url: 'u', remind: 0 })])).toHaveLength(1) // le chrono seul
   expect(titles([widget('calendar', { url: 'u', remind: 30 })])).toHaveLength(3)
 })
+
+test('rappels : anniversaire demain, prélèvement demain, annuel 7 jours avant', () => {
+  const people = [
+    { id: 'a', name: 'Léa', day: '12-01', year: 2006 },
+    { id: 'b', name: 'Tom', day: '12-05', year: null }
+  ]
+  const subs = [
+    { id: 's', name: 'Netflix', amount: 1349, every: 'month' as const, start: '2026-01-01' },
+    { id: 'y', name: 'Domaine', amount: 1200, every: 'year' as const, start: '2025-12-07' },
+    { id: 'n', name: 'Spotify', amount: 1199, every: 'month' as const, start: '2026-01-15' }
+  ]
+  const input = { widgets: [], feed: () => null, time: { projects: [], entries: [], running: null }, people, subs }
+  expect(dueReminders(input, now)).toEqual([]) // pas de widget : pas de rappel
+  const titles = dueReminders(
+    { ...input, widgets: [widget('birthdays'), widget('subscriptions')] },
+    now
+  ).map((r) => r.title)
+  expect(titles).toEqual([
+    'Demain : anniversaire de Léa',
+    'Demain : Netflix',
+    'Domaine se renouvelle dans 7 jours'
+  ])
+})

@@ -30,6 +30,8 @@ import { startBackdrop } from './backdrop'
 import { leaveFocus } from './focus'
 import { startAuto } from './auto'
 import { startReminders } from './reminders'
+import { startFeeds } from './feeds'
+import { stopScripts } from './scripts'
 
 // Argument passé par le lancement au démarrage de Windows : rester caché dans la zone de notif.
 const HIDDEN_ARG = '--hidden'
@@ -52,7 +54,7 @@ function beforeQuit(event: Electron.Event): void {
   const visible = booted && isVisible()
   if (visible) hideWindow('Photon quitte')
   const settled = (visible ? delay(300) : Promise.resolve()).then(() =>
-    Promise.all([allWrites(), leaveFocus()])
+    Promise.all([allWrites(), leaveFocus(), stopScripts()])
   )
   void Promise.race([settled, delay(3000)]).finally(() => app.quit())
 }
@@ -120,5 +122,6 @@ if (!app.requestSingleInstanceLock()) {
     startScreens()
     startAuto()
     startReminders()
+    startFeeds()
   })
 }

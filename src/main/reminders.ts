@@ -2,6 +2,9 @@
 // événement d'agenda imminent, compte à rebours la veille et le jour J, déclaration URSSAF,
 // chrono oublié. Rien de lu sur le disque ni sur le réseau ici : caches déjà en mémoire.
 import type { CalendarFeed } from '../shared/api'
+import { parseBirthdays, upcoming, type Person } from '../shared/birthdays'
+import { euros } from '../shared/micro'
+import { nextCharge, parseSubscriptions, type Subscription } from '../shared/subscriptions'
 import { dayKey } from '../shared/day'
 import { daysUntil } from '../shared/days'
 import { nextDeclaration } from '../shared/micro'
@@ -28,6 +31,8 @@ export interface ReminderInput {
   widgets: WidgetInstance[]
   feed: (url: unknown) => CalendarFeed | null
   time: TimeData
+  people?: Person[] // anniversaires (data/birthdays.json)
+  subs?: Subscription[] // abonnements (data/subscriptions.json)
 }
 
 const longDate = new Intl.DateTimeFormat('fr-FR', {
@@ -104,6 +109,38 @@ function timetrackReminders(time: TimeData, now: Date): Reminder[] {
   ]
 }
 
+function birthdayReminders(people: Person[], now: Date): Reminder[] {
+  return upcoming(people, now)
+    .filter((p) => p.days <= 1)
+    .map((p): Reminder => ({
+      key: `birthday:${p.id}:${p.date}:${p.days}`,
+      source: 'birthdays',
+      title: `${p.days === 0 ? "Aujourd'hui" : 'Demain'} : anniversaire de ${p.name}`,
+      body: p.age !== null ? `${p.age} ans` : longDate.format(new Date(`${p.date}T00:00`))
+    }))
+}
+
+// La veille de chaque prélèvement ; un abonnement annuel prévient aussi 7 jours avant
+// (le temps de résilier).
+function subscriptionReminders(subs: Subscription[], now: Date): Reminder[] {
+  return subs.flatMap((sub): Reminder[] => {
+    const date = nextCharge(sub, dayKey(now))
+    const days = daysUntil(date, now)
+    if (days !== 1 && !(days === 7 && sub.every === 'year')) return []
+    return [
+      {
+        key: `subscription:${sub.id}:${date}:${days}`,
+        source: 'subscriptions',
+        title: days === 1 ? `Demain : ${sub.name}` : `${sub.name} se renouvelle dans 7 jours`,
+        body: `${euros(sub.amount, true)} prélevés le ${longDate.format(new Date(`${date}T00:00`))}`
+      }
+    ]
+  })
+}
+
+// Données partagées : rappels seulement si le profil a le widget.
+const has = (input: ReminderInput, type: string): boolean => input.widgets.some((w) => w.type === type)
+
 // Rappels dus à l'instant `now` (pur, testé) ; le dédoublonnage se fait par clé.
 export function dueReminders(input: ReminderInput, now: Date): Reminder[] {
   const morning = now.getHours() >= MORNING_H
@@ -115,7 +152,9 @@ export function dueReminders(input: ReminderInput, now: Date): Reminder[] {
       return []
     }),
     ...(micro && morning ? microReminders(micro, now) : []),
-    ...timetrackReminders(input.time, now)
+    ...timetrackReminders(input.time, now),
+    ...(morning && has(input, 'birthdays') ? birthdayReminders(input.people ?? [], now) : []),
+    ...(morning && has(input, 'subscriptions') ? subscriptionReminders(input.subs ?? [], now) : [])
   ]
 }
 
@@ -124,8 +163,13 @@ export function dueReminders(input: ReminderInput, now: Date): Reminder[] {
 const sent = new Set<string>()
 
 async function tick(): Promise<void> {
-  const time = parseTime(await sharedLoad('timetrack'))
-  const due = dueReminders({ widgets: data.profile.widgets, feed: calendar, time }, new Date())
+  const [time, people, subs] = await Promise.all([
+    sharedLoad('timetrack').then(parseTime),
+    sharedLoad('birthdays').then((raw) => parseBirthdays(raw).people),
+    sharedLoad('subscriptions').then((raw) => parseSubscriptions(raw).subs)
+  ])
+  const input = { widgets: data.profile.widgets, feed: calendar, time, people, subs }
+  const due = dueReminders(input, new Date())
   for (const reminder of due) {
     if (sent.has(reminder.key)) continue
     sent.add(reminder.key)

@@ -40,7 +40,9 @@ export const NOTIFY_SOURCES = {
   eyes: ['Pause des yeux', 'Regarder au loin, à intervalle réglé dans le widget'],
   claude: ['Claude', "Demande d'accord, Photon caché"],
   music: ['Musique', 'Changement de morceau (option de chaque lecteur)'],
-  profiles: ['Profils automatiques', 'Bascule vers un autre profil']
+  profiles: ['Profils automatiques', 'Bascule vers un autre profil'],
+  birthdays: ['Anniversaires', 'La veille et le jour J, à partir de 9 h'],
+  subscriptions: ['Abonnements', 'La veille d’un prélèvement, 7 jours avant un abonnement annuel']
 } as const
 export type NotifySource = keyof typeof NOTIFY_SOURCES
 

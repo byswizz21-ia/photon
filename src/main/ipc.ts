@@ -1,5 +1,5 @@
 // Côté Windows du pont : un canal par fonction de window.photon, entrées validées ici.
-import { clipboard, ipcMain, type IpcMainEvent, type IpcMainInvokeEvent } from 'electron'
+import { clipboard, ipcMain, shell, type IpcMainEvent, type IpcMainInvokeEvent } from 'electron'
 import type { AppState } from '../shared/api'
 import type { Settings } from '../shared/model'
 import { audio, audioDevice, audioMute, audioVolume } from './audio'
@@ -52,6 +52,16 @@ import { pickAutoApps } from './auto'
 import { claudeUsage } from './usage'
 import { onWeatherProfile, weather } from './weather'
 import { hideWindow, logShown, ownsSender, resizeBar, setIntro } from './window'
+import { syncFeeds } from './feeds'
+import { freeGames } from './freegames'
+import { footTeams, matches } from './matches'
+import { releases } from './releases'
+import { screenshotCopy, screenshotDelete, screenshotDrag, screenshots } from './screenshots'
+import { scriptStart, scripts, scriptStop } from './scripts'
+import { transit, transitLines, transitStops } from './transit'
+import { translate } from './translate'
+import { trash, trashEmpty, trashOpen } from './trash'
+import { httpsHref } from './web'
 
 interface IpcActions {
   ready: () => void
@@ -114,6 +124,7 @@ export function registerIpc(actions: IpcActions): void {
     syncEyes()
     syncAwake()
     syncShutdown()
+    syncFeeds()
   })
   // Profil changé : agendas et lecteurs de musique suivent les widgets du nouveau profil.
   const switched = (ok: boolean): AppState | null => {
@@ -127,6 +138,7 @@ export function registerIpc(actions: IpcActions): void {
     syncEyes()
     syncAwake()
     syncShutdown()
+    syncFeeds()
     return { ...data }
   }
   handle('photon:switchProfile', async (id) => switched(await switchProfile(id)))
@@ -227,4 +239,35 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:shutdownCancel', shutdownCancel)
   handle('photon:pickColor', pickColor)
   on('photon:notifyTest', notifyTest)
+  // Widgets du 2026-11-03
+  on('photon:openUrl', (url) => {
+    const href = httpsHref(url)
+    if (!href) return
+    hideWindow('lien ouvert')
+    void shell.openExternal(href)
+  })
+  handle('photon:trash', trash)
+  handle('photon:trashEmpty', trashEmpty)
+  on('photon:trashOpen', () => {
+    hideWindow('corbeille ouverte')
+    trashOpen()
+  })
+  handle('photon:screenshots', screenshots) // dossier absolu, sinon celui de Windows
+  // Glisser : il faut l'expéditeur (startDrag), d'où ipcMain direct.
+  ipcMain.on('photon:screenshotDrag', (event, path) => {
+    if (ownsSender(event.sender)) screenshotDrag(event.sender, path)
+  })
+  handle('photon:screenshotCopy', screenshotCopy) // seulement les fichiers de la dernière liste
+  handle('photon:screenshotDelete', screenshotDelete)
+  handle('photon:scripts', scripts)
+  handle('photon:scriptStart', scriptStart) // id, dossier existant et commande validés
+  handle('photon:scriptStop', scriptStop)
+  handle('photon:translate', translate) // texte borné, langue validée
+  handle('photon:transitLines', transitLines)
+  handle('photon:transitStops', transitStops) // identifiant de ligne validé
+  handle('photon:footTeams', footTeams) // ligue validée
+  handle('photon:freeGames', freeGames)
+  handle('photon:transit', transit)
+  handle('photon:matches', matches)
+  handle('photon:releases', releases)
 }
