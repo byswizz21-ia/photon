@@ -107,7 +107,7 @@ test('intro : pas encore vue par défaut, seul true compte', () => {
 test('sons : activés par défaut, volume borné, champ invalide → défaut', () => {
   expect(parseSettings({}).sound).toEqual({
     enabled: true,
-    preset: 'glass',
+    preset: 'wood',
     volume: 0.5,
     window: true,
     clicks: true,
@@ -115,7 +115,7 @@ test('sons : activés par défaut, volume borné, champ invalide → défaut', (
   })
   expect(parseSettings({ sound: { enabled: false, volume: 3, clicks: 'non' } }).sound).toEqual({
     enabled: false,
-    preset: 'glass',
+    preset: 'wood',
     volume: 1,
     window: true,
     clicks: true,
@@ -123,11 +123,11 @@ test('sons : activés par défaut, volume borné, champ invalide → défaut', (
   })
 })
 
-test('ambiance sonore : connue gardée, inconnue ou retirée → Verre', () => {
+test('ambiance sonore : connue gardée, inconnue ou retirée → Bois', () => {
   expect(parseSettings({ sound: { preset: 'tactile' } }).sound.preset).toBe('tactile')
-  expect(parseSettings({ sound: { preset: 'piano' } }).sound.preset).toBe('glass') // ambiance retirée
-  expect(parseSettings({ sound: { preset: 'toString' } }).sound.preset).toBe('glass')
-  expect(parseSettings({ sound: { preset: 4 } }).sound.preset).toBe('glass')
+  expect(parseSettings({ sound: { preset: 'piano' } }).sound.preset).toBe('wood') // ambiance retirée
+  expect(parseSettings({ sound: { preset: 'toString' } }).sound.preset).toBe('wood')
+  expect(parseSettings({ sound: { preset: 4 } }).sound.preset).toBe('wood')
 })
 
 test("fond « Lumineux » conservé, type inconnu → fond d'écran", () => {

@@ -2,10 +2,14 @@
 
 ## À venir
 
+### Amélioré
+
+- **Sons** : Bois (marimba feutré) devient l'ambiance par défaut.
+
 ### Retiré
 
 - **Ambiances Piano et Industriel** : il en reste cinq (Verre, Bois, Souffle, Onde, Tactile).
-  Qui avait choisi l'une des deux retrouve Verre.
+  Qui avait choisi l'une des deux retrouve Bois.
 
 ## 1.2.0 · 3 novembre 2026
 

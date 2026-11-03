@@ -169,7 +169,7 @@ export const defaultSettings = (): Settings => ({
 
 export const defaultSound = (): SoundSettings => ({
   enabled: true,
-  preset: 'glass',
+  preset: 'wood',
   volume: 0.5,
   window: true,
   clicks: true,
