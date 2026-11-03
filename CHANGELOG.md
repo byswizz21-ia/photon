@@ -23,6 +23,20 @@
 - **Widget Twitch** : les streamers que tu suis qui sont en live (pseudo, jeu, titre, spectateurs,
   durée ; aperçu du live sur une carte large). Connexion à Twitch dans une fenêtre Photon, ou
   chaînes ajoutées à la main sans compte. Clic : le live dans le navigateur.
+- **Widget Cerveau** (rubrique Apprendre), pour devenir plus intelligent en 3 onglets. Claude
+  Code fait le travail en coulisse, seulement quand tu cliques, sans outils et sans toucher à tes
+  conversations.
+  - **Mémoire** : colle un cours, des notes ou un article, Claude en tire des cartes de révision.
+    Tu les revois en répétition espacée (FSRS, l'algorithme d'Anki) : la carte se retourne, tu
+    notes de Encore à Facile, elle revient juste avant que tu l'oublies. La carte des
+    connaissances montre chaque paquet comme une étoile, verte si solide, rouge si elle s'efface.
+    Un paquet « Apprendre à apprendre » est offert au départ.
+  - **Entraînement** : une séance de 10 minutes par jour en 4 épreuves (un problème corrigé par
+    Claude, 5 questions de calibration où tu paries ta confiance, un piège logique à repérer, une
+    notion à expliquer façon Feynman). XP, niveaux, série de jours et frise d'activité ; le
+    graphique de calibration montre si tu es trop sûr de toi.
+  - **Coach** : un objectif (« apprendre Rust en un mois ») devient un parcours d'étapes. Un
+    pré-test mesure d'où tu pars ; chaque étape se transforme en cartes ou en exercice Feynman.
 
 ### Amélioré
 

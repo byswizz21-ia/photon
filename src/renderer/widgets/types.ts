@@ -11,6 +11,7 @@ export const CATEGORIES = {
   organize: 'Organisation',
   media: 'Musique et médias',
   games: 'Jeux',
+  learn: 'Apprendre',
   tools: 'Raccourcis et outils',
   system: 'Système',
   dev: 'Développement et IA'
