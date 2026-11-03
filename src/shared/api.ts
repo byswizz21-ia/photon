@@ -246,6 +246,35 @@ export interface MarketFeed {
   updatedAt: number | null // dernière lecture réussie ; null = jamais
 }
 
+// Actualités (src/main/news.ts) : flux RSS lus en fond, un par sujet.
+export interface NewsItem {
+  title: string
+  link: string // https
+  source: string // « Le Monde »
+  date: number // ms ; 0 si inconnue
+  topic: string // sujet du widget qui l'a trouvé
+}
+
+// Sujets d'un widget Actualités jamais réglé : partagés par le widget et la lecture en fond.
+export const DEFAULT_NEWS_TOPICS = 'Intelligence artificielle, Tech, Jeux vidéo'
+
+export interface NewsFeed {
+  items: NewsItem[] // plus récents d'abord
+  loading: boolean // un sujet n'a pas encore été lu
+  failed: string[] // sujets jamais lus (hors ligne, adresse fausse)
+  updatedAt: number | null // dernière lecture réussie ; null = jamais
+}
+
+// Problème d'échecs Lichess (src/main/chess.ts). Coups en notation UCI (« e2e4 », « e7e8q »).
+export interface ChessPuzzle {
+  id: string
+  fen: string // position de départ, au joueur de trouver
+  solution: string[] // coups du joueur et réponses adverses, en alternance
+  lastMove: string | null // coup adverse qui a mené à la position
+  rating: number
+  themes: string[] // « fork », « mateIn2 »…
+}
+
 // Processus regroupés par nom (src/main/processes.ts).
 export interface ProcessGroup {
   name: string // nom du processus (« chrome »), sert aussi d'identifiant
@@ -503,6 +532,10 @@ export interface PhotonApi {
   clipboardClear(): void
   batteries(): Promise<Battery[] | null> // null : outil natif indisponible
   markets(symbols: string): Promise<MarketFeed> // cache seulement, aucun appel réseau
+  news(topics: string): Promise<NewsFeed> // cache seulement, aucun appel réseau
+  newsOpen(link: string): Promise<boolean> // lien d'un flux lu seulement ; ouvre puis cache Photon
+  // 'daily' : cache ; 'next' : problème suivant (lu d'avance, sinon téléchargé)
+  chessPuzzle(kind: 'daily' | 'next'): Promise<ChessPuzzle | null>
   processes(sort: 'cpu' | 'ram'): Promise<ProcessGroup[] | null> // 10 premiers ; null : outil absent
   processIcon(name: string): Promise<string | null>
   processClose(name: string): Promise<boolean> // fenêtres fermées comme la croix, sinon arrêt

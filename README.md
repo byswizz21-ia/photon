@@ -27,6 +27,8 @@ créé au démarrage puis seulement affiché ou caché : l'ouverture est instant
 - **Thèmes** : fond d'écran, image, dégradé ou scène lumineuse ; accent extrait du fond ; flou,
   opacité, arrondi (tous les coins le suivent), densité et police réglables, par profil ou pour
   tous.
+- **Notifications** : cartes de verre aux couleurs du thème (ou celles de Windows), rappels de
+  l'Agenda, des anniversaires, des abonnements, de l'URSSAF…, source par source.
 - **Sons** : sound design discret, sept ambiances au choix (Réglages › Sons), réglable ou coupé.
 - **Menu « Ajouter »** : widgets par rubrique, recherche, et catalogue avec aperçu en direct.
 - **Plein écran ou fenêtre**, au choix de l'écran, avec flou en direct en mode fenêtre.
@@ -35,15 +37,16 @@ créé au démarrage puis seulement affiché ou caché : l'ouverture est instant
 
 ## Widgets
 
-| Catégorie     | Widgets                                                                                                                                                     |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Système       | Système, Disques, Réseau, Processus, Batteries, Son, Ports, Anti-veille, Minuteur d'arrêt, Corbeille, Test micro                                            |
-| Organisation  | Horloge, Fuseaux horaires, Agenda, Compte à rebours, Jours fériés, To-do, Notes, Habitudes, Anniversaires, Abonnements, Budget du mois                      |
-| Concentration | Pomodoro, Suivi du temps, Pause des yeux                                                                                                                    |
-| Musique       | Spotify, Deezer, SoundCloud, YT Music : design sobre ou « Adapté » au service, volume                                                                       |
-| Raccourcis    | Lanceur, Dossiers, Presse-papiers, Projets Git, Outils dev, Pipette, Scripts, Captures récentes, Traduction, Tirage au sort                                 |
-| Infos         | Météo, Cours (bourse et crypto), Claude, Usage Claude, Micro-entreprise, Moyenne, Bus et tram (Divia), Matchs (foot, LoL, Valorant), Jeux gratuits, Sorties |
-| Décor         | Image, GIF, Vidéo                                                                                                                                           |
+| Catégorie     | Widgets                                                                                                                                                                            |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Système       | Système, Disques, Réseau, Processus, Batteries, Son, Ports, Anti-veille, Minuteur d'arrêt, Corbeille, Test micro                                                                   |
+| Organisation  | Horloge, Fuseaux horaires, Agenda, Compte à rebours, Jours fériés, To-do, Notes, Habitudes, Anniversaires, Abonnements, Budget du mois                                             |
+| Concentration | Pomodoro, Suivi du temps, Pause des yeux                                                                                                                                           |
+| Musique       | Spotify, Deezer, SoundCloud, YT Music : design sobre ou « Adapté » au service, volume                                                                                              |
+| Raccourcis    | Lanceur, Dossiers, Presse-papiers, Projets Git, Outils dev, Pipette, Scripts, Captures récentes, Traduction, Tirage au sort                                                        |
+| Infos         | Météo, Cours (bourse et crypto), Actualités, Citations, Claude, Usage Claude, Micro-entreprise, Moyenne, Bus et tram (Divia), Matchs (foot, LoL, Valorant), Jeux gratuits, Sorties |
+| Jeux          | Échecs : problème du jour, entraînement, contre l'ordi (3 niveaux), à deux                                                                                                         |
+| Décor         | Image, GIF, Vidéo                                                                                                                                                                  |
 
 Nouveautés de chaque version : [CHANGELOG.md](CHANGELOG.md).
 
@@ -186,5 +189,10 @@ les unités `cqw` / `cqh`. Couleurs, rayons, ombres, tailles et durées : tokens
   Tsuchiya, Ayako Taniguchi…), gratuits pour un usage commercial ou non. Ils ne doivent être ni
   redistribués seuls ni utilisés comme logo sonore. Ici, ils sont découpés et normalisés.
 - Sons de l'ambiance Tactile : [Kenney](https://kenney.nl/assets/interface-sounds) (CC0).
+- [chess.js](https://github.com/jhlywa/chess.js) (BSD-2) : règles complètes des échecs (roque, prise
+  en passant, promotion, mat, nulles), trop longues et piégeuses à recoder. Version figée : le bot
+  (`widgets/chess/engine.ts`) utilise ses fonctions internes, `engine.test.ts` casse si elles changent.
+- Problèmes d'échecs : [Lichess](https://lichess.org) (API publique, base de problèmes CC0).
+- Actualités : flux RSS de Google Actualités (usage personnel) ou de chaque site.
 
 Design doc : https://claude.ai/artifact/PozosXRE6sFL3Cmswz6uB1

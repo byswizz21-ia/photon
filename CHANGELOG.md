@@ -1,10 +1,10 @@
 # Mises à jour
 
-## À venir
+## 1.2.0 · 3 novembre 2026
 
 ### Nouveau
 
-- **13 widgets** :
+- **16 widgets** :
   - **Tirage au sort** : dés (1 à 6, de 4 à 100 faces), pile ou face, un nom dans une liste
     (avec ou sans remise), un nombre entre deux bornes.
   - **Anniversaires** : prochains anniversaires et âge atteint ; rappel la veille et le jour J.
@@ -23,6 +23,14 @@
   - **Matchs** : foot (ligue ou équipe), League of Legends, Valorant : en direct, à venir,
     résultats.
   - **Sorties** : jeux attendus sur Steam ; films et séries avec une clé TMDB gratuite.
+  - **Actualités** : les derniers articles sur tes sujets (mots-clés lus sur Google Actualités, ou
+    l'adresse RSS d'un site), filtre par sujet, clic pour ouvrir l'article. Lus en fond toutes les
+    30 min, jamais à l'ouverture.
+  - **Citations** : une citation par jour parmi les thèmes cochés (motivation, business, code,
+    philosophie, science, sport, art, humour) et tes propres citations ; « Une autre », « Copier ».
+  - **Échecs** : problème du jour Lichess avec série de jours, entraînement (problèmes à la chaîne,
+    indice, solution), partie contre l'ordi (Facile, Moyen, Difficile ; Blancs, Noirs ou au hasard ;
+    annuler) ou à deux sur le même écran. Les parties en cours sont gardées.
 - **Notifications** : toutes passent par un même système, réglable dans Réglages ›
   Notifications (tout couper, ou source par source, et notification d'essai). L'avertissement
   avant un arrêt du PC part toujours.
