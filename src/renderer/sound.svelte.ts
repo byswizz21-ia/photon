@@ -18,7 +18,7 @@ type Tone = {
 // Souffle : bruit filtré dont la hauteur glisse de `from` à `to` (Hz).
 type Swish = { from: number; to: number; at?: number; dur: number; gain: number }
 type Group = keyof Pick<SoundSettings, 'window' | 'clicks' | 'grid'>
-type Sound = { group: Group; tones: Tone[]; swish?: Swish }
+type Sound = { group?: Group; tones: Tone[]; swish?: Swish } // sans famille : notification
 
 const SOUNDS = {
   // Photon apparaît : sol → do qui monte, une octave cristalline, un souffle.
@@ -98,6 +98,15 @@ const SOUNDS = {
     tones: [{ f: 523.25, to: 174.61, dur: 0.15, gain: 0.4 }],
     swish: { from: 1800, to: 400, dur: 0.12, gain: 0.07 }
   },
+  // Notification : deux cloches de verre, do puis sol, qui résonnent.
+  notify: {
+    tones: [
+      { f: 1046.5, dur: 0.5, gain: 0.22 },
+      { f: 1567.98, at: 0.09, dur: 0.65, gain: 0.18 },
+      { f: 3135.96, at: 0.09, dur: 0.25, gain: 0.04 }
+    ],
+    swish: { from: 1500, to: 4200, dur: 0.2, gain: 0.04 }
+  },
   // Carte posée ou redimensionnée : un « toc » mat.
   drop: {
     group: 'grid',
@@ -123,13 +132,20 @@ let lastPlayed = 0 // performance.now() du dernier son joué
 export function play(name: SoundName, force = false): void {
   const sound: Sound = SOUNDS[name]
   const settings = app.settings.sound
-  if (!settings.enabled || settings.volume <= 0 || (!force && !settings[sound.group])) return
+  if (!settings.enabled || (!force && sound.group && !settings[sound.group])) return
+  ring(name, settings.volume)
+}
+
+// Joue un son à ce volume (0 à 1) ; la fenêtre des notifications reçoit le sien de Photon.
+export function ring(name: SoundName, volume: number): void {
+  if (volume <= 0) return
+  const sound: Sound = SOUNDS[name]
   lastPlayed = performance.now()
   audio ??= new AudioContext({ latencyHint: 'interactive' })
   clearTimeout(sleepTimer)
   const context = audio
   const start = (): void => {
-    schedule(context, sound, settings.volume)
+    schedule(context, sound, volume)
     clearTimeout(sleepTimer)
     sleepTimer = setTimeout(() => void context.suspend(), SLEEP)
   }

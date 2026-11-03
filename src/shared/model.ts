@@ -29,7 +29,7 @@ export interface Settings {
   introSeen: boolean // animation de première ouverture déjà vue (ou passée)
 }
 
-// Notifications Windows de Photon, par source : [nom, quand elle arrive]. L'avertissement du
+// Notifications de Photon, par source : [nom, quand elle arrive]. L'avertissement du
 // minuteur d'arrêt n'est pas listé : il part toujours (sinon le PC s'éteindrait sans prévenir).
 export const NOTIFY_SOURCES = {
   calendar: ['Agenda', 'Avant chaque événement (délai réglé dans le widget)'],
@@ -44,8 +44,11 @@ export const NOTIFY_SOURCES = {
 } as const
 export type NotifySource = keyof typeof NOTIFY_SOURCES
 
+export type NotifyStyle = 'photon' | 'windows' // cartes de Photon, ou notifications de Windows
+
 export interface NotifySettings {
   enabled: boolean
+  style: NotifyStyle
   sources: Record<string, boolean> // source absente = activée ; inconnues gardées (retour en arrière)
 }
 
@@ -145,7 +148,7 @@ export const defaultSettings = (): Settings => ({
   autoProfiles: false,
   liveBlur: false,
   sound: defaultSound(),
-  notifications: { enabled: true, sources: {} },
+  notifications: { enabled: true, style: 'photon', sources: {} },
   introSeen: false
 })
 
@@ -239,13 +242,17 @@ function parseSound(v: unknown): SoundSettings {
 }
 
 function parseNotify(v: unknown): NotifySettings {
-  if (!isObject(v)) return { enabled: true, sources: {} }
+  if (!isObject(v)) return { enabled: true, style: 'photon', sources: {} }
   const sources = isObject(v.sources)
     ? Object.fromEntries(
         Object.entries(v.sources).filter(([key, on]) => isName(key) && typeof on === 'boolean')
       )
     : {}
-  return { enabled: v.enabled !== false, sources: sources as Record<string, boolean> }
+  return {
+    enabled: v.enabled !== false,
+    style: v.style === 'windows' ? 'windows' : 'photon',
+    sources: sources as Record<string, boolean>
+  }
 }
 
 export function parseSettings(raw: unknown): Settings {

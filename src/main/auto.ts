@@ -88,16 +88,18 @@ function switchTo(target: ProfileInfo): void {
   send('photon:switchTo', target.id)
   if (!previous) return
   // Annuler : seulement si personne n'a changé de profil entre-temps.
+  const undo = (): void => {
+    if (data.settings.activeProfile === target.id) send('photon:switchTo', previous.id)
+  }
   notify(
     'profiles',
     {
       title: `Profil « ${target.name} » activé`,
       body: `Cliquer pour revenir à « ${previous.name} »`,
-      silent: true
+      silent: true,
+      actions: [{ label: 'Revenir', run: undo }]
     },
-    () => {
-      if (data.settings.activeProfile === target.id) send('photon:switchTo', previous.id)
-    }
+    undo
   )
 }
 

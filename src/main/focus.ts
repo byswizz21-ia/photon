@@ -38,6 +38,15 @@ async function apply(on: boolean): Promise<void> {
   }
 }
 
+// Moment pour une notification : jeu ou présentation en plein écran, Ne pas déranger, ou libre.
+// null : outil indisponible (on fait comme si l'écran était libre).
+export type Quiet = 'fullscreen' | 'dnd' | null
+
+export async function quietState(): Promise<Quiet> {
+  const reply = await tool.send('quiet', 2000)
+  return reply === 'fullscreen' || reply === 'dnd' ? reply : null
+}
+
 // Appelé à chaque changement de profil (ou de son option Focus). Pas au démarrage : Photon
 // lancé avec Windows n'active rien tout seul.
 export function syncFocus(on: boolean): Promise<void> {

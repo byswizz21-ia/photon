@@ -91,6 +91,7 @@ const photon: PhotonApi = {
   eyes: () => ipcRenderer.invoke('photon:eyes'),
   eyesSet: (on, minutes) => ipcRenderer.invoke('photon:eyesSet', on, minutes),
   notifyTest: () => ipcRenderer.send('photon:notifyTest'),
+  toastLook: (look) => ipcRenderer.send('photon:toastLook', look),
   ports: () => ipcRenderer.invoke('photon:ports'),
   portClose: (pid) => ipcRenderer.invoke('photon:portClose', pid),
   shutdownState: () => ipcRenderer.invoke('photon:shutdownState'),

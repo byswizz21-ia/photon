@@ -7,6 +7,12 @@
 - **Notifications** : toutes passent par un même système, réglable dans Réglages ›
   Notifications (tout couper, ou source par source, et notification d'essai). L'avertissement
   avant un arrêt du PC part toujours.
+- **Notifications de Photon** : cartes de verre fumé aux couleurs du thème, en bas à droite de
+  l'écran du curseur. Icône du widget (ou pochette), boutons (« Suivant » pour la musique,
+  « Revenir » pour un profil auto, « Annuler » avant un arrêt du PC), barre de temps qui se
+  met en pause au survol, petit tintement. Les rappels restent jusqu'au clic. En jeu plein
+  écran ou en Ne pas déranger, Windows prend le relais. Réglages › Notifications › Style :
+  Photon ou Windows.
 - **Rappels** : Agenda (5 à 60 min avant chaque événement, réglé dans le widget), Compte à
   rebours (la veille et le jour J), Micro-entreprise (déclaration URSSAF 7 jours avant puis le
   dernier jour), Suivi du temps (chrono qui tourne depuis plus de 4 h).

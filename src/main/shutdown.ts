@@ -72,7 +72,9 @@ export function shutdownStart(action: unknown, minutes: unknown): ShutdownState 
         () =>
           notify('always', {
             title: `${LABELS[action]} dans 2 minutes`,
-            body: 'Ouvre Photon pour annuler.'
+            body: 'Ouvre Photon pour annuler.',
+            sticky: true,
+            actions: [{ label: 'Annuler', run: () => void shutdownCancel() }]
           }),
         ms - WARN_MS
       )

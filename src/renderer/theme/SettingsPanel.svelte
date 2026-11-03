@@ -511,6 +511,24 @@
       <span>Notifications de Photon</span>
       <small>L'avertissement avant un arrêt du PC part toujours</small>
     </label>
+    <div class="field">
+      <span class="line" aria-hidden="true">Style</span>
+      {@render segmented(
+        'Style des notifications',
+        'notifyStyle',
+        [
+          ['photon', 'Photon'],
+          ['windows', 'Windows']
+        ],
+        notifications.style,
+        (id) => patchNotify({ style: id === 'windows' ? 'windows' : 'photon' })
+      )}
+      <small class="hint">
+        {notifications.style === 'photon'
+          ? 'Cartes de Photon en bas à droite. En jeu plein écran ou en Ne pas déranger, Windows prend le relais.'
+          : 'Centre de notifications de Windows.'}
+      </small>
+    </div>
     {#if notifications.enabled}
       {#each notifySources as [source, [label, hint]] (source)}
         <label class="check">

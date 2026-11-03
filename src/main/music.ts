@@ -3,7 +3,7 @@
 // seulement si un widget du service existe (≈ 300 Mo de RAM chacune). Spotify : son app Windows
 // (src/main/spotify.ts). Cookies de chaque service dans une session à part, jamais lus par Photon
 // (sauf la présence du cookie de connexion).
-import { app, BrowserWindow, nativeImage, net, session, shell, type WebContents } from 'electron'
+import { app, BrowserWindow, net, session, shell, type WebContents } from 'electron'
 import { join } from 'node:path'
 import icon from '../../assets/icon.ico?asset'
 import { MUSIC_SERVICES } from '../shared/api'
@@ -364,7 +364,8 @@ async function onTrack(service: MusicService): Promise<void> {
     title: track.title,
     body: track.artist,
     silent: true,
-    ...(art ? { icon: nativeImage.createFromDataURL(art) } : {})
+    ...(art ? { image: art } : {}),
+    actions: [{ label: 'Suivant', run: () => void musicControl(service, 'next') }]
   })
 }
 

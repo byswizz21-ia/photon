@@ -136,10 +136,19 @@ test('police du thème : défaut si absente, nom sans guillemet, bornes', () => 
 })
 
 test('parseSettings : notifications activées par défaut, sources inconnues gardées', () => {
-  expect(parseSettings({}).notifications).toEqual({ enabled: true, sources: {} })
+  expect(parseSettings({}).notifications).toEqual({ enabled: true, style: 'photon', sources: {} })
   expect(
     parseSettings({
       notifications: { enabled: false, sources: { music: false, futur: true, x: 1 } }
     }).notifications
-  ).toEqual({ enabled: false, sources: { music: false, futur: true } })
+  ).toEqual({ enabled: false, style: 'photon', sources: { music: false, futur: true } })
+})
+
+test('parseSettings : style des notifications, Photon sauf « windows » explicite', () => {
+  const style = (v: unknown): unknown =>
+    parseSettings({ notifications: { style: v } }).notifications.style
+  expect(style('windows')).toBe('windows')
+  expect(style('photon')).toBe('photon')
+  expect(style('autre')).toBe('photon')
+  expect(style(undefined)).toBe('photon')
 })
