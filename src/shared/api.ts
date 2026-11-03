@@ -402,6 +402,18 @@ export interface FreeGame {
   upcoming: boolean // pas encore gratuit (Epic annonce la semaine suivante)
 }
 
+// Live Twitch (src/main/twitch.ts).
+export interface TwitchStream {
+  login: string // pseudo, adresse twitch.tv/<login>
+  name: string
+  title: string
+  game: string // '' si aucun
+  viewers: number
+  since: number | null // début du live (ms)
+  avatar: string // data URL ; '' si absente
+  preview: string // aperçu du live, data URL ; '' si absent
+}
+
 // Prochains passages (src/main/transit.ts) : un arrêt d'une ligne, par direction.
 export interface TransitDeparture {
   direction: string
@@ -583,6 +595,11 @@ export interface PhotonApi {
   transit(settings: Record<string, unknown>): Promise<Feed<TransitDeparture> | null>
   matches(settings: Record<string, unknown>): Promise<Feed<Match> | null>
   releases(settings: Record<string, unknown>): Promise<Feed<Release> | null>
+  twitch(
+    settings: Record<string, unknown>
+  ): Promise<{ feed: Feed<TwitchStream>; signedIn: boolean }>
+  twitchLogin(): void // fenêtre de connexion de Twitch
+  twitchLogout(): Promise<void>
 }
 
 // Fenêtre des notifications de Photon (src/main/toast.ts, src/renderer/toast/).

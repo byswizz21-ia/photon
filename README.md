@@ -42,7 +42,7 @@ créé au démarrage puis seulement affiché ou caché : l'ouverture est instant
 | Système       | Système, Disques, Réseau, Processus, Batteries, Son, Ports, Anti-veille, Minuteur d'arrêt, Corbeille, Test micro                                                                   |
 | Organisation  | Horloge, Fuseaux horaires, Agenda, Compte à rebours, Jours fériés, To-do, Notes, Habitudes, Anniversaires, Abonnements, Budget du mois                                             |
 | Concentration | Pomodoro, Suivi du temps, Pause des yeux                                                                                                                                           |
-| Musique       | Spotify, Deezer, SoundCloud, YT Music : design sobre ou « Adapté » au service, volume                                                                                              |
+| Musique       | Spotify, Deezer, SoundCloud, YT Music : design sobre ou « Adapté » au service, volume ; Twitch (lives suivis)                                                                      |
 | Raccourcis    | Lanceur, Dossiers, Presse-papiers, Projets Git, Outils dev, Pipette, Scripts, Captures récentes, Traduction, Tirage au sort                                                        |
 | Infos         | Météo, Cours (bourse et crypto), Actualités, Citations, Claude, Usage Claude, Micro-entreprise, Moyenne, Bus et tram (Divia), Matchs (foot, LoL, Valorant), Jeux gratuits, Sorties |
 | Jeux          | Échecs : problème du jour, entraînement, contre l'ordi (3 niveaux), à deux                                                                                                         |

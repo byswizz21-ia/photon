@@ -31,6 +31,7 @@ const sources: (() => void)[] = []
 
 export function backgroundFeed<T>(source: FeedSource<T>): {
   read(settings: unknown): Feed<T> | null
+  reset(): void
 } {
   const entries = new Map<string, Entry<T>>()
   const asked = new Map<string, number>() // clé → dernière demande de l'interface
@@ -93,6 +94,11 @@ export function backgroundFeed<T>(source: FeedSource<T>): {
       asked.set(key, Date.now())
       if (!known && !entries.has(key)) sync() // nouveau réglage : lu tout de suite
       return entries.get(key)?.feed ?? empty()
+    },
+    // Tout relire tout de suite (connexion ou déconnexion d'un compte).
+    reset() {
+      for (const entry of entries.values()) entry.next = 0
+      sync()
     }
   }
 }

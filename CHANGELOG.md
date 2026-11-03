@@ -2,6 +2,12 @@
 
 ## À venir
 
+### Nouveau
+
+- **Widget Twitch** : les streamers que tu suis qui sont en live (pseudo, jeu, titre, spectateurs,
+  durée ; aperçu du live sur une carte large). Connexion à Twitch dans une fenêtre Photon, ou
+  chaînes ajoutées à la main sans compte. Clic : le live dans le navigateur.
+
 ### Amélioré
 
 - **Sons** : Bois (marimba feutré) devient l'ambiance par défaut.
