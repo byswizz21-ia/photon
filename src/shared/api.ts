@@ -1,5 +1,5 @@
 // Contrat du pont : seules ces fonctions passent entre l'interface et Windows (window.photon).
-import type { Profile, ProfileInfo, Settings, Theme } from './model'
+import type { Profile, ProfileInfo, Settings, SoundPreset, Theme } from './model'
 
 export interface AppState {
   settings: Settings
@@ -442,6 +442,7 @@ export interface Toast {
   actions: string[] // boutons, dans l'ordre
   sticky: boolean // reste jusqu'au clic (rappel, arrêt du PC)
   sound: number // volume du tintement, 0 = muet
+  preset: SoundPreset // ambiance sonore de Photon
   still: boolean // « Réduire les animations »
 }
 

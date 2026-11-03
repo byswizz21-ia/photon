@@ -107,6 +107,7 @@ test('intro : pas encore vue par défaut, seul true compte', () => {
 test('sons : activés par défaut, volume borné, champ invalide → défaut', () => {
   expect(parseSettings({}).sound).toEqual({
     enabled: true,
+    preset: 'glass',
     volume: 0.5,
     window: true,
     clicks: true,
@@ -114,11 +115,18 @@ test('sons : activés par défaut, volume borné, champ invalide → défaut', (
   })
   expect(parseSettings({ sound: { enabled: false, volume: 3, clicks: 'non' } }).sound).toEqual({
     enabled: false,
+    preset: 'glass',
     volume: 1,
     window: true,
     clicks: true,
     grid: true
   })
+})
+
+test('ambiance sonore : connue gardée, inconnue → Verre', () => {
+  expect(parseSettings({ sound: { preset: 'piano' } }).sound.preset).toBe('piano')
+  expect(parseSettings({ sound: { preset: 'toString' } }).sound.preset).toBe('glass')
+  expect(parseSettings({ sound: { preset: 4 } }).sound.preset).toBe('glass')
 })
 
 test("fond « Lumineux » conservé, type inconnu → fond d'écran", () => {

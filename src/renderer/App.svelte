@@ -12,7 +12,7 @@
   import { flushShared } from './lib/shared.svelte'
   import Profiles from './profiles/Profiles.svelte'
   import { reveal } from './reveal'
-  import { clickSound, play, soundOnChange } from './sound.svelte'
+  import { clickSound, play, preloadSounds, soundOnChange } from './sound.svelte'
   import { app, flushProfile, flushTheme, reducedMotion, switchProfile } from './state.svelte'
   import { useTheme } from './theme/apply.svelte'
   import Background from './theme/Background.svelte'
@@ -30,6 +30,7 @@
   const display = $derived(place?.id ?? 0) // ne change qu'en passant d'un écran à l'autre
 
   useTheme()
+  $effect(() => preloadSounds(app.settings.sound.preset))
 
   const fullscreen = $derived(app.settings.mode === 'fullscreen')
   const liveBlur = $derived(!fullscreen && app.settings.liveBlur)

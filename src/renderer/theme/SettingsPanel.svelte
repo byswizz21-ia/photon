@@ -5,16 +5,18 @@
     BAR_SHORTCUTS,
     NOTIFY_SOURCES,
     SHORTCUTS,
+    SOUND_PRESETS,
     shortcutLabel,
     type Background,
     type FontSettings,
     type NotifySettings,
     type Settings,
+    type SoundPreset,
     type SoundSettings,
     type Theme
   } from '../../shared/model'
   import type { DisplayInfo } from '../../shared/api'
-  import { play } from '../sound.svelte'
+  import { play, type SoundName } from '../sound.svelte'
   import { app, reducedMotion, saveTheme } from '../state.svelte'
   import { importedFamily, importedFontName, resolvedAccent } from './apply.svelte'
 
@@ -38,6 +40,23 @@
     ['clicks', 'Clics', 'Boutons, cases, réglages, changement de profil'],
     ['grid', 'Mode édition', 'Ajouter, supprimer, déplacer un widget']
   ] as const
+
+  const soundPresets = Object.entries(SOUND_PRESETS) as [SoundPreset, readonly [string, string]][]
+  // Aperçu d'une ambiance : les sons de Photon dans l'ordre d'une utilisation.
+  const DEMO: SoundName[] = [
+    'open',
+    'tap',
+    'toggleOn',
+    'toggleOff',
+    'panelOpen',
+    'profile',
+    'add',
+    'drop',
+    'remove',
+    'editOff',
+    'notify'
+  ]
+  const DEMO_STEP = 420 // ms entre deux sons
 
   const px = (value: number): string => `${value} px`
   const percent = (value: number): string => `${Math.round(value * 100)} %`
@@ -191,6 +210,20 @@
   // enregistrés ensuite. Curseur du volume : enregistré, avec un son d'aperçu, une fois lâché.
   let soundTimer: ReturnType<typeof setTimeout> | undefined
   const sound = $derived(app.settings.sound)
+
+  let demoTimers: ReturnType<typeof setTimeout>[] = []
+  $effect(() => () => demoTimers.forEach(clearTimeout)) // panneau fermé : l'aperçu s'arrête
+
+  function demo(full: boolean): void {
+    demoTimers.forEach(clearTimeout)
+    const names: SoundName[] = full ? DEMO : ['toggleOn', 'notify']
+    demoTimers = names.map((name, i) => setTimeout(() => play(name, true), i * DEMO_STEP))
+  }
+
+  function pickPreset(preset: SoundPreset): void {
+    patchSound({ preset })
+    demo(false)
+  }
 
   function patchSound(patch: Partial<SoundSettings>, later = false): void {
     const next = { ...app.settings.sound, ...patch }
@@ -483,6 +516,23 @@
       <small>Le volume de Windows n'est jamais modifié</small>
     </label>
     {#if sound.enabled}
+      <fieldset class="presets">
+        <legend>Ambiance</legend>
+        {#each soundPresets as [id, [name, hint]] (id)}
+          <label>
+            <input
+              type="radio"
+              name="sound-preset"
+              value={id}
+              checked={sound.preset === id}
+              onchange={() => pickPreset(id)}
+            />
+            <span>{name}</span>
+            <small>{hint}</small>
+          </label>
+        {/each}
+      </fieldset>
+      <button type="button" class="action" onclick={() => demo(true)}>Écouter l'ambiance</button>
       {@render range('Volume', sound.volume, 0, 1, 0.05, percent, (volume) =>
         patchSound({ volume }, true)
       )}
@@ -791,6 +841,73 @@
     border: 0;
     border-radius: 50%;
     box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25);
+  }
+
+  /* Ambiances : cartes radio sur deux colonnes, la choisie prend l'accent. */
+  .presets {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .presets legend {
+    margin-bottom: 8px;
+    padding: 0;
+    font-size: var(--text-13);
+  }
+
+  .presets label {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-row);
+    background: var(--white-4);
+    cursor: pointer;
+    transition: background var(--dur-hover) var(--ease-out);
+  }
+
+  .presets label:hover {
+    background: var(--white-6);
+  }
+
+  .presets label:has(input:checked) {
+    border-color: var(--border-accent-soft);
+    background: var(--surface-accent-soft);
+  }
+
+  .presets label:has(input:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .presets input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .presets span {
+    font-size: var(--text-13);
+    font-weight: var(--weight-semibold);
+  }
+
+  .presets label:has(input:checked) span {
+    color: var(--accent);
+  }
+
+  .presets small {
+    color: var(--text-faint);
+    font-size: var(--text-12);
+    line-height: 1.35;
   }
 
   .check {

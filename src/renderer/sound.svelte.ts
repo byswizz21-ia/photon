@@ -1,125 +1,16 @@
-// Sons de Photon : synthétisés à la volée (Web Audio), aucun fichier ni dépendance.
-// Notes douces, courtes, accordées entre elles (gamme de do majeur) : du verre qui tinte.
+// Sons de Photon, dans l'ambiance choisie (Réglages › Sons) : synthétisés à la volée
+// (sounds/synth.ts) ou joués depuis de courts fichiers (sounds/samples.ts).
 // Le contexte audio naît au premier son puis se met en veille : un flux audio ouvert en
 // permanence empêcherait la mise en veille de Windows.
 import { untrack } from 'svelte'
-import type { SoundSettings } from '../shared/model'
+import type { SoundPreset } from '../shared/model'
+import { loadKit, type SamplePreset } from './sounds/samples'
+import { GROUPS, SYNTHS, type SoundName, type Swish, type Synth, type Tone } from './sounds/synth'
 import { app } from './state.svelte'
 
-// Note : fréquence (Hz), glissée vers `to`, départ décalé de `at` s, durée, volume relatif.
-type Tone = {
-  f: number
-  to?: number
-  at?: number
-  dur: number
-  gain?: number
-  wave?: OscillatorType
-}
-// Souffle : bruit filtré dont la hauteur glisse de `from` à `to` (Hz).
-type Swish = { from: number; to: number; at?: number; dur: number; gain: number }
-type Group = keyof Pick<SoundSettings, 'window' | 'clicks' | 'grid'>
-type Sound = { group?: Group; tones: Tone[]; swish?: Swish } // sans famille : notification
+export type { SoundName }
 
-const SOUNDS = {
-  // Photon apparaît : sol → do qui monte, une octave cristalline, un souffle.
-  open: {
-    group: 'window',
-    tones: [
-      { f: 392, to: 523.25, dur: 0.22, gain: 0.5 },
-      { f: 1046.5, at: 0.06, dur: 0.4, gain: 0.18 },
-      { f: 1568, at: 0.09, dur: 0.3, gain: 0.07 }
-    ],
-    swish: { from: 600, to: 3200, dur: 0.24, gain: 0.12 }
-  },
-  close: {
-    group: 'window',
-    tones: [{ f: 523.25, to: 349.23, dur: 0.18, gain: 0.35 }],
-    swish: { from: 2600, to: 500, dur: 0.18, gain: 0.08 }
-  },
-  tap: { group: 'clicks', tones: [{ f: 1760, dur: 0.035, gain: 0.16, wave: 'triangle' }] },
-  toggleOn: {
-    group: 'clicks',
-    tones: [
-      { f: 880, dur: 0.06, gain: 0.22 },
-      { f: 1318.5, at: 0.05, dur: 0.1, gain: 0.2 }
-    ]
-  },
-  toggleOff: {
-    group: 'clicks',
-    tones: [
-      { f: 1318.5, dur: 0.06, gain: 0.16 },
-      { f: 880, at: 0.05, dur: 0.09, gain: 0.14 }
-    ]
-  },
-  panelOpen: {
-    group: 'clicks',
-    tones: [{ f: 659.25, to: 783.99, dur: 0.12, gain: 0.18 }],
-    swish: { from: 900, to: 2400, dur: 0.16, gain: 0.07 }
-  },
-  panelClose: {
-    group: 'clicks',
-    tones: [{ f: 783.99, to: 659.25, dur: 0.1, gain: 0.14 }],
-    swish: { from: 2400, to: 900, dur: 0.14, gain: 0.05 }
-  },
-  profile: {
-    group: 'clicks',
-    tones: [
-      { f: 587.33, dur: 0.12, gain: 0.25 },
-      { f: 880, at: 0.07, dur: 0.22, gain: 0.22 }
-    ],
-    swish: { from: 1200, to: 2800, dur: 0.2, gain: 0.06 }
-  },
-  editOn: {
-    group: 'grid',
-    tones: [
-      { f: 440, to: 659.25, dur: 0.12, gain: 0.3 },
-      { f: 1318.5, at: 0.06, dur: 0.16, gain: 0.1 }
-    ]
-  },
-  // « Terminé » : petite cadence mi → sol → do.
-  editOff: {
-    group: 'grid',
-    tones: [
-      { f: 659.25, dur: 0.09, gain: 0.22 },
-      { f: 783.99, at: 0.06, dur: 0.09, gain: 0.22 },
-      { f: 1046.5, at: 0.12, dur: 0.26, gain: 0.22 }
-    ]
-  },
-  // Bulle qui éclot.
-  add: {
-    group: 'grid',
-    tones: [
-      { f: 330, to: 990, dur: 0.09, gain: 0.4 },
-      { f: 1318.5, at: 0.07, dur: 0.22, gain: 0.14 }
-    ]
-  },
-  remove: {
-    group: 'grid',
-    tones: [{ f: 523.25, to: 174.61, dur: 0.15, gain: 0.4 }],
-    swish: { from: 1800, to: 400, dur: 0.12, gain: 0.07 }
-  },
-  // Notification : deux cloches de verre, do puis sol, qui résonnent.
-  notify: {
-    tones: [
-      { f: 1046.5, dur: 0.5, gain: 0.22 },
-      { f: 1567.98, at: 0.09, dur: 0.65, gain: 0.18 },
-      { f: 3135.96, at: 0.09, dur: 0.25, gain: 0.04 }
-    ],
-    swish: { from: 1500, to: 4200, dur: 0.2, gain: 0.04 }
-  },
-  // Carte posée ou redimensionnée : un « toc » mat.
-  drop: {
-    group: 'grid',
-    tones: [
-      { f: 196, dur: 0.07, gain: 0.45, wave: 'triangle' },
-      { f: 392, dur: 0.05, gain: 0.12 }
-    ]
-  }
-} satisfies Record<string, Sound>
-
-export type SoundName = keyof typeof SOUNDS
-
-const MASTER = 0.8 // à 100 % : ouverture vers -8 dB, clic vers -18 dB
+const MASTER = 0.8 // à 100 % : ouverture vers -8 dB, clic vers -18 dB (fichiers calés pareil)
 const ATTACK = 0.006 // s : pas de clic à l'attaque
 const SLEEP = 2000 // ms de silence avant la mise en veille du contexte audio
 
@@ -128,24 +19,31 @@ let noise: AudioBuffer | undefined
 let sleepTimer: ReturnType<typeof setTimeout> | undefined
 let lastPlayed = 0 // performance.now() du dernier son joué
 
-// force : joue même si la famille est coupée (aperçu du volume dans les réglages).
+// force : joue même si la famille est coupée (aperçu dans les réglages).
 export function play(name: SoundName, force = false): void {
-  const sound: Sound = SOUNDS[name]
   const settings = app.settings.sound
-  if (!settings.enabled || (!force && sound.group && !settings[sound.group])) return
-  ring(name, settings.volume)
+  const group = GROUPS[name]
+  if (!settings.enabled || (!force && group && !settings[group])) return
+  ring(name, settings.volume, settings.preset)
+}
+
+const isSynth = (preset: SoundPreset): preset is keyof typeof SYNTHS => preset in SYNTHS
+
+// Prépare les fichiers d'une ambiance (le premier son ne les attend pas).
+export function preloadSounds(preset: SoundPreset): void {
+  if (!isSynth(preset)) void loadKit(preset)
 }
 
 // Joue un son à ce volume (0 à 1) ; la fenêtre des notifications reçoit le sien de Photon.
-export function ring(name: SoundName, volume: number): void {
+export function ring(name: SoundName, volume: number, preset: SoundPreset): void {
   if (volume <= 0) return
-  const sound: Sound = SOUNDS[name]
   lastPlayed = performance.now()
   audio ??= new AudioContext({ latencyHint: 'interactive' })
   clearTimeout(sleepTimer)
   const context = audio
   const start = (): void => {
-    schedule(context, sound, volume)
+    if (isSynth(preset)) schedule(context, SYNTHS[preset][name], volume)
+    else void loadKit(preset as SamplePreset).then((kit) => sample(context, kit[name], volume))
     clearTimeout(sleepTimer)
     sleepTimer = setTimeout(() => void context.suspend(), SLEEP)
   }
@@ -153,15 +51,33 @@ export function ring(name: SoundName, volume: number): void {
   else void context.resume().then(start, () => {})
 }
 
-function schedule(context: AudioContext, sound: Sound, volume: number): void {
+// Sortie d'un son : volume au carré (curseur perçu comme régulier), débranchée à la fin.
+function output(context: AudioContext, volume: number, seconds: number): GainNode {
   const out = context.createGain()
-  out.gain.value = volume * volume * MASTER // carré : curseur perçu comme régulier
+  out.gain.value = volume * volume * MASTER
   out.connect(context.destination)
+  setTimeout(() => out.disconnect(), seconds * 1000 + 200)
+  return out
+}
+
+function sample(context: AudioContext, buffer: AudioBuffer | undefined, volume: number): void {
+  if (!buffer) return
+  const source = context.createBufferSource()
+  source.buffer = buffer
+  source.connect(output(context, volume, buffer.duration))
+  source.start()
+}
+
+function schedule(context: AudioContext, sound: Synth, volume: number): void {
   const t0 = context.currentTime + 0.005
-  let end = t0
-  for (const t of sound.tones) end = Math.max(end, tone(context, out, t, t0))
-  if (sound.swish) end = Math.max(end, swish(context, out, sound.swish, t0))
-  setTimeout(() => out.disconnect(), (end - t0) * 1000 + 200)
+  const length = Math.max(
+    0,
+    ...sound.tones.map((t) => (t.at ?? 0) + t.dur),
+    sound.swish ? (sound.swish.at ?? 0) + sound.swish.dur : 0
+  )
+  const out = output(context, volume, length)
+  for (const t of sound.tones) tone(context, out, t, t0)
+  if (sound.swish) swish(context, out, sound.swish, t0)
 }
 
 // Enveloppe : montée éclair puis décroissance exponentielle (son de cloche, pas de bip).
@@ -179,7 +95,7 @@ function envelope(
   return env
 }
 
-function tone(context: AudioContext, out: AudioNode, t: Tone, t0: number): number {
+function tone(context: AudioContext, out: AudioNode, t: Tone, t0: number): void {
   const at = t0 + (t.at ?? 0)
   const end = at + t.dur
   const osc = context.createOscillator()
@@ -189,10 +105,9 @@ function tone(context: AudioContext, out: AudioNode, t: Tone, t0: number): numbe
   osc.connect(envelope(context, t.gain ?? 1, at, at + ATTACK, end)).connect(out)
   osc.start(at)
   osc.stop(end + 0.02)
-  return end
 }
 
-function swish(context: AudioContext, out: AudioNode, s: Swish, t0: number): number {
+function swish(context: AudioContext, out: AudioNode, s: Swish, t0: number): void {
   const at = t0 + (s.at ?? 0)
   const end = at + s.dur
   if (!noise) {
@@ -204,7 +119,7 @@ function swish(context: AudioContext, out: AudioNode, s: Swish, t0: number): num
   source.buffer = noise
   const band = context.createBiquadFilter()
   band.type = 'bandpass'
-  band.Q.value = 1.2
+  band.Q.value = s.q ?? 1.2
   band.frequency.setValueAtTime(s.from, at)
   band.frequency.exponentialRampToValueAtTime(s.to, end)
   source
@@ -213,7 +128,6 @@ function swish(context: AudioContext, out: AudioNode, s: Swish, t0: number): num
     .connect(out)
   source.start(at)
   source.stop(end + 0.02)
-  return end
 }
 
 const CLICKABLE =

@@ -13,6 +13,10 @@
   met en pause au survol, petit tintement. Les rappels restent jusqu'au clic. En jeu plein
   écran ou en Ne pas déranger, Windows prend le relais. Réglages › Notifications › Style :
   Photon ou Windows.
+- **Ambiances sonores** : sept sound designs au choix dans Réglages › Sons, avec « Écouter
+  l'ambiance ». Synthétisés : Verre (celui d'avant), Bois (marimba feutré), Souffle (de l'air,
+  presque rien). À partir de vrais sons : Onde, Piano et Industriel (kits SND), Tactile
+  (Kenney). Tous calés sur le même volume ressenti.
 - **Rappels** : Agenda (5 à 60 min avant chaque événement, réglé dans le widget), Compte à
   rebours (la veille et le jour J), Micro-entreprise (déclaration URSSAF 7 jours avant puis le
   dernier jour), Suivi du temps (chrono qui tourne depuis plus de 4 h).

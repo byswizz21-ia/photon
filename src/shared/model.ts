@@ -53,8 +53,23 @@ export interface NotifySettings {
 }
 
 // Sons de l'interface (src/renderer/sound.svelte.ts), par famille.
+// Ambiances sonores : [nom, caractère]. Les trois premières sont synthétisées, les autres
+// jouent des fichiers (src/renderer/sounds/).
+export const SOUND_PRESETS = {
+  glass: ['Verre', 'Cloches de verre, claires'],
+  wood: ['Bois', 'Marimba feutré, chaleureux'],
+  air: ['Souffle', 'De l’air, presque rien'],
+  sine: ['Onde', 'Sinusoïdes pures, très courtes'],
+  piano: ['Piano', 'Notes de piano, amples'],
+  industrial: ['Industriel', 'Métal et mécanique, précis'],
+  tactile: ['Tactile', 'Clics et touches, comme un vrai bouton']
+} as const
+
+export type SoundPreset = keyof typeof SOUND_PRESETS
+
 export interface SoundSettings {
   enabled: boolean
+  preset: SoundPreset
   volume: number // 0..1, volume propre à Photon (celui de Windows n'est jamais touché)
   window: boolean // ouverture et fermeture de Photon
   clicks: boolean // boutons, cases, réglages, profils
@@ -154,6 +169,7 @@ export const defaultSettings = (): Settings => ({
 
 export const defaultSound = (): SoundSettings => ({
   enabled: true,
+  preset: 'glass',
   volume: 0.5,
   window: true,
   clicks: true,
@@ -234,6 +250,10 @@ function parseSound(v: unknown): SoundSettings {
     typeof value === 'boolean' ? value : fallback
   return {
     enabled: flag(v.enabled, d.enabled),
+    preset:
+      typeof v.preset === 'string' && Object.hasOwn(SOUND_PRESETS, v.preset)
+        ? (v.preset as SoundPreset)
+        : d.preset,
     volume: num(v.volume, 0, 1, d.volume),
     window: flag(v.window, d.window),
     clicks: flag(v.clicks, d.clicks),

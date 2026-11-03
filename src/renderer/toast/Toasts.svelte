@@ -37,7 +37,7 @@
     toasts.push(toast)
     const shown = toasts.filter((t) => !leaving.includes(t.id))
     if (shown.length > MAX) leave((shown.find((t) => !t.sticky) ?? shown[0]!).id)
-    ring('notify', toast.sound)
+    ring('notify', toast.sound, toast.preset)
   })
 
   // Sortie animée ; Photon sait tout de suite que la carte est fermée.

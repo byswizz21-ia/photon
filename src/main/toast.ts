@@ -97,6 +97,7 @@ export function showToast(source: string, options: NotifyOptions, onClick: () =>
     actions: actions.map((a) => a.label),
     sticky: options.sticky === true,
     sound: options.silent || !sound.enabled ? 0 : sound.volume,
+    preset: sound.preset,
     still: reduceMotion
   }
   if (!win.isVisible()) {
