@@ -34,9 +34,6 @@ async function getJson(url: string): Promise<Record<string, unknown>> {
   return (await response.json()) as Record<string, unknown>
 }
 
-const numbers = (v: unknown): number[] =>
-  Array.isArray(v) ? v.map((n) => (typeof n === 'number' ? n : NaN)) : []
-
 async function locate(
   city: string
 ): Promise<{ name: string; latitude: number; longitude: number } | null> {
@@ -56,6 +53,67 @@ async function locate(
   return place
 }
 
+// Heure locale de la ville (« 2026-11-03T07:32 », timezone=auto) → ms.
+const localTime = (v: unknown, offset: number): number | null => {
+  const ms = typeof v === 'string' ? Date.parse(`${v}Z`) - offset * 1000 : NaN
+  return Number.isFinite(ms) ? ms : null
+}
+
+const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null)
+
+// Réponse Open-Meteo → météo du widget ; valeur absente ou abîmée : null (le widget la cache).
+export function parseForecast(
+  json: Record<string, unknown>,
+  place: string
+): Omit<WeatherFeed, 'updatedAt' | 'error'> {
+  const offset = num(json['utc_offset_seconds']) ?? 0
+  const current = json['current'] as Record<string, unknown> | undefined
+  const daily = (json['daily'] ?? {}) as Record<string, unknown>
+  const hourly = (json['hourly'] ?? {}) as Record<string, unknown>
+  const list = (v: unknown): unknown[] => (Array.isArray(v) ? v : [])
+  const at = (v: unknown, i: number): number | null => num(list(v)[i])
+  const temperature = num(current?.['temperature_2m'])
+  const code = num(current?.['weather_code'])
+  return {
+    place,
+    current:
+      temperature !== null && code !== null
+        ? {
+            temperature,
+            code,
+            day: current?.['is_day'] !== 0,
+            feels: num(current?.['apparent_temperature']),
+            humidity: num(current?.['relative_humidity_2m']),
+            wind: num(current?.['wind_speed_10m']),
+            windFrom: num(current?.['wind_direction_10m']),
+            gusts: num(current?.['wind_gusts_10m']),
+            dewPoint: num(current?.['dew_point_2m'])
+          }
+        : null,
+    hours: list(hourly['time'])
+      .map((time, i) => ({
+        time: localTime(time, offset) ?? NaN,
+        temperature: at(hourly['temperature_2m'], i) ?? NaN,
+        code: at(hourly['weather_code'], i) ?? NaN,
+        day: at(hourly['is_day'], i) !== 0,
+        rain: at(hourly['precipitation_probability'], i)
+      }))
+      .filter((hour) => [hour.time, hour.temperature, hour.code].every(Number.isFinite)),
+    days: list(daily['time'])
+      .map((date, i) => ({
+        date: String(date),
+        code: at(daily['weather_code'], i) ?? NaN,
+        max: at(daily['temperature_2m_max'], i) ?? NaN,
+        min: at(daily['temperature_2m_min'], i) ?? NaN,
+        sunrise: localTime(list(daily['sunrise'])[i], offset),
+        sunset: localTime(list(daily['sunset'])[i], offset),
+        uv: at(daily['uv_index_max'], i),
+        rain: at(daily['precipitation_probability_max'], i)
+      }))
+      .filter((day) => [day.code, day.max, day.min].every(Number.isFinite))
+  }
+}
+
 async function download(city: string): Promise<boolean> {
   const previous = feeds.get(city)
   try {
@@ -64,6 +122,7 @@ async function download(city: string): Promise<boolean> {
       feeds.set(city, {
         place: '',
         current: null,
+        hours: [],
         days: [],
         updatedAt: Date.now(),
         error: 'Ville introuvable'
@@ -72,34 +131,13 @@ async function download(city: string): Promise<boolean> {
     }
     const url =
       `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}` +
-      `&current=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min` +
-      `&timezone=auto&forecast_days=${DAYS}`
-    const json = await getJson(url)
-    const current = json['current'] as Record<string, unknown> | undefined
-    const daily = (json['daily'] ?? {}) as Record<string, unknown>
-    const dates = Array.isArray(daily['time']) ? (daily['time'] as unknown[]) : []
-    const codes = numbers(daily['weather_code'])
-    const max = numbers(daily['temperature_2m_max'])
-    const min = numbers(daily['temperature_2m_min'])
+      `&current=temperature_2m,weather_code,is_day,apparent_temperature,relative_humidity_2m,` +
+      `wind_speed_10m,wind_direction_10m,wind_gusts_10m,dew_point_2m` +
+      `&hourly=temperature_2m,weather_code,is_day,precipitation_probability` +
+      `&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,` +
+      `precipitation_probability_max&timezone=auto&forecast_days=${DAYS}`
     feeds.set(city, {
-      place: place.name,
-      current:
-        typeof current?.['temperature_2m'] === 'number' &&
-        typeof current['weather_code'] === 'number'
-          ? {
-              temperature: current['temperature_2m'],
-              code: current['weather_code'],
-              day: current['is_day'] !== 0
-            }
-          : null,
-      days: dates
-        .map((date, i) => ({
-          date: String(date),
-          code: codes[i] ?? NaN,
-          max: max[i] ?? NaN,
-          min: min[i] ?? NaN
-        }))
-        .filter((day) => [day.code, day.max, day.min].every(Number.isFinite)),
+      ...parseForecast(await getJson(url), place.name),
       updatedAt: Date.now(),
       error: null
     })
@@ -111,6 +149,7 @@ async function download(city: string): Promise<boolean> {
     feeds.set(city, {
       place: previous?.place ?? '',
       current: previous?.current ?? null,
+      hours: previous?.hours ?? [],
       days: previous?.days ?? [],
       updatedAt: previous?.updatedAt ?? null,
       error: 'Hors ligne'
@@ -149,5 +188,14 @@ export function onWeatherProfile(): void {
 export function weather(raw: unknown): WeatherFeed | null {
   const city = cityKey(raw)
   if (!city) return null
-  return feeds.get(city) ?? { place: '', current: null, days: [], updatedAt: null, error: null }
+  return (
+    feeds.get(city) ?? {
+      place: '',
+      current: null,
+      hours: [],
+      days: [],
+      updatedAt: null,
+      error: null
+    }
+  )
 }

@@ -2,9 +2,36 @@
 
 ## À venir
 
+### Nouveau
+
+- **Designs au choix** (mode édition, pastilles en haut de la carte), repris des maquettes :
+  - **Horloge** : « Journée » (secondes en accent, 24 barres des heures, semaine et jour de
+    l'année) et « Cadran » (les secondes font le tour).
+  - **Usage Claude** : « Jauge » (anneau de la session et du temps écoulé, ce qu'il reste) et
+    « Tableau » (session, 7 jours, histogramme, projection au rythme actuel). Offre à choisir
+    (Pro, Max 5x, Max 20x) : les limites sont estimées, Anthropic ne les publie pas en tokens.
+  - **Météo** : « Détails » (plus la carte grandit, plus elle en montre : heures, vent,
+    humidité, pluie, UV, lever et coucher, 5 jours) et « Soleil » (course du soleil, carte
+    teintée selon sa position, violette la nuit).
+  - **Habitudes** : « Aujourd'hui » (un rond à cocher par habitude, points des 7 jours) et
+    « Historique » (20 semaines, record, part des 30 derniers jours ; clic sur un jour pour le
+    cocher).
+  - **Son** : « Molette » (arc à tourner) et « Mélangeur » (volume en segments et volume de
+    chaque app qui joue du son, comme le mélangeur de Windows).
+- Chaque design a sa taille minimale : la carte s'agrandit d'elle-même quand on le choisit et
+  ne peut pas descendre en dessous.
+
 ### Amélioré
 
 - **Sons** : Bois (marimba feutré) devient l'ambiance par défaut.
+- **Musique, design « Adapté »** : tient dans une carte de 3 × 3 cases (4 × 4 avant) et suit la
+  taille de la carte : pochette, disque et onde grandissent, plus de paroles (Spotify) et de
+  titres « À suivre » (YT Music) quand il y a de la place.
+
+### Corrigé
+
+- Une carte au design exigeant (musique « Adapté ») pouvait grandir d'une case pour rien au
+  démarrage : la grille n'avait pas encore sa vraie largeur.
 
 ### Retiré
 

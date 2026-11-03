@@ -26,10 +26,13 @@
     source.wantQueue = true
     return () => (source.wantQueue = false)
   })
-  // Deux titres après celui en cours.
+  // Titres après celui en cours : autant que la place sous la barre en contient (50 px par
+  // titre, libellé compris), deux tant qu'elle n'est pas mesurée.
+  let queueHeight = $state(0)
+  const count = $derived(queueHeight ? Math.max(1, Math.floor((queueHeight - 16) / 50)) : 2)
   const next = $derived.by(() => {
     const at = source.queue.findIndex((item) => item.current)
-    return source.queue.slice(at + 1, at + 3)
+    return source.queue.slice(at + 1, at + 1 + count)
   })
 
   const progress = $derived(track.duration ? Math.min(1, track.time / track.duration) : 0)
@@ -187,7 +190,7 @@
   </div>
 
   {#if next.length}
-    <div class="queue">
+    <div class="queue" bind:clientHeight={queueHeight}>
       <span class="label">À suivre</span>
       {#each next as item (item.id)}
         <button
@@ -224,7 +227,7 @@
     flex-direction: column;
     gap: 14px;
     overflow: hidden;
-    --media: 140px;
+    --media: clamp(140px, min(30cqw, 100cqh - 400px), 220px);
   }
 
   .wash {
@@ -662,10 +665,12 @@
   }
 
   .queue {
+    flex: 1 1 0;
     display: flex;
     flex-direction: column;
     gap: 4px;
     min-height: 0;
+    overflow: hidden;
   }
 
   .item {
@@ -741,6 +746,47 @@
   @container (max-height: 420px) {
     .widget {
       --media: 120px;
+    }
+  }
+
+  /* Carte de 3 cases de large : disque, titre et notes côte à côte, commandes en dessous. */
+  @container (max-width: 320px) {
+    .widget {
+      --media: 96px;
+    }
+
+    header .label {
+      display: none;
+    }
+
+    .now {
+      display: grid;
+      grid-template-columns: var(--media) minmax(0, 1fr);
+      grid-template-areas: 'media names' 'media rate' 'controls controls';
+      gap: 6px 14px;
+    }
+
+    .media {
+      grid-area: media;
+    }
+
+    .side {
+      display: contents;
+    }
+
+    .names {
+      grid-area: names;
+      align-self: end;
+    }
+
+    .rate {
+      grid-area: rate;
+    }
+
+    .controls {
+      grid-area: controls;
+      justify-content: center;
+      margin-top: 8px;
     }
   }
 </style>

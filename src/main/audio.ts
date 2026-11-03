@@ -1,8 +1,9 @@
 // Volume et sortie audio de Windows, via l'outil natif audio.cs (src/main/native.ts) :
 // ≈ 5 ms par commande, lancé au premier usage seulement.
-import type { AudioState } from '../shared/api'
+import type { AudioApp, AudioState } from '../shared/api'
 import source from './audio.cs?raw'
 import { nativeTool } from './native'
+import { fileIcon } from './system'
 
 const tool = nativeTool(source, 'Photon.Audio')
 let last: AudioState | null = null
@@ -47,4 +48,35 @@ let reading: Promise<unknown> | null = null
 export function audioOutputs(): AudioState | null {
   reading ??= last ? null : audio().finally(() => (reading = null))
   return last
+}
+
+// Volume par app (mélangeur de Windows) sur la sortie par défaut. Le chemin de l'exe reste ici :
+// l'interface ne demande l'icône que par l'identifiant d'une app de la dernière liste.
+let apps: (AudioApp & { path: string })[] = []
+
+async function sendApps(command: string): Promise<AudioApp[] | null> {
+  try {
+    const raw = JSON.parse((await tool.send(command)) ?? 'null') as {
+      apps?: (AudioApp & { path: string })[]
+      error?: string
+    } | null
+    if (raw?.error) console.warn(`[photon] son des apps : ${raw.error}`)
+    if (!Array.isArray(raw?.apps)) return null
+    apps = raw.apps
+    return apps.map(({ id, name, volume, muted }) => ({ id, name, volume, muted }))
+  } catch {
+    return null
+  }
+}
+
+export const audioApps = (): Promise<AudioApp[] | null> => sendApps('apps')
+
+export const audioAppVolume = (id: unknown, volume: unknown): Promise<AudioApp[] | null> | null =>
+  apps.some((a) => a.id === id) && typeof volume === 'number' && Number.isFinite(volume)
+    ? sendApps(`appvolume ${id as string} ${Math.round(Math.min(100, Math.max(0, volume)))}`)
+    : null
+
+export async function audioAppIcon(id: unknown): Promise<string | null> {
+  const path = apps.find((a) => a.id === id)?.path
+  return path ? fileIcon(path) : null
 }

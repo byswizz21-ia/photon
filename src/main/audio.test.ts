@@ -10,6 +10,8 @@ let silent = false
 let current = 'a'
 const kills: (() => void)[] = []
 
+vi.mock('./system', () => ({ fileIcon: (path: string) => Promise.resolve(`icône de ${path}`) }))
+
 vi.mock('node:child_process', () => ({
   spawn: () => {
     spawned++
@@ -26,6 +28,13 @@ vi.mock('node:child_process', () => ({
         }
         sent.push(line)
         if (silent) continue
+        if (line.startsWith('app')) {
+          const apps = [
+            { id: 'spotify', name: 'Spotify', volume: 80, muted: false, path: 'C:\\s.exe' }
+          ]
+          stdout.write(`${JSON.stringify({ apps })}\n`)
+          continue
+        }
         if (line.startsWith('device ')) current = line.slice(7)
         const devices = [
           { id: 'a', name: 'Casque (USB)' },
@@ -38,7 +47,8 @@ vi.mock('node:child_process', () => ({
   }
 }))
 
-const { audio, audioDevice, audioMute, audioVolume } = await import('./audio')
+const { audio, audioAppIcon, audioApps, audioAppVolume, audioDevice, audioMute, audioVolume } =
+  await import('./audio')
 
 test('commandes validées, réponses dans l’ordre', async () => {
   const [first, second] = await Promise.all([audio(), audioVolume(150)])
@@ -60,4 +70,15 @@ test('outil arrêté : réponse null, relancé à la commande suivante', async (
   silent = false
   expect(await audio()).not.toBeNull()
   expect(spawned).toBe(2)
+})
+
+test('volume par app : seulement une app de la liste lue, chemin gardé côté main', async () => {
+  expect(audioAppVolume('spotify', 50)).toBeNull() // liste pas encore lue
+  expect(await audioApps()).toEqual([{ id: 'spotify', name: 'Spotify', volume: 80, muted: false }])
+  expect(audioAppVolume('discord; Remove-Item', 50)).toBeNull()
+  expect(audioAppVolume('spotify', Number.NaN)).toBeNull()
+  await audioAppVolume('spotify', 120)
+  expect(sent.at(-1)).toBe('appvolume spotify 100')
+  expect(await audioAppIcon('spotify')).toBe('icône de C:\\s.exe')
+  expect(await audioAppIcon('inconnue')).toBeNull()
 })

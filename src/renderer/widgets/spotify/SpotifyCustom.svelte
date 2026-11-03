@@ -35,6 +35,9 @@
     }
   })
   const line = $derived(lyrics ? lyrics.findLastIndex((l) => l.time <= track.time) : -1)
+  // Hauteur des paroles : 3 lignes au moins, plus si la carte est haute ; ligne en cours au milieu.
+  let lyricsHeight = $state(3 * LINE_H)
+  const middle = $derived(Math.floor(lyricsHeight / LINE_H / 2))
 
   const progress = $derived(track.duration ? Math.min(1, track.time / track.duration) : 0)
   const seek = (event: MouseEvent): void => {
@@ -78,8 +81,8 @@
   </div>
 
   {#if lyrics}
-    <div class="lyrics" aria-label="Paroles">
-      <div class="lines" style:transform="translateY({(1 - Math.max(line, 0)) * LINE_H}px)">
+    <div class="lyrics" aria-label="Paroles" bind:clientHeight={lyricsHeight}>
+      <div class="lines" style:transform="translateY({(middle - Math.max(line, 0)) * LINE_H}px)">
         {#each lyrics as l, i (i)}
           <p class:past={i < line} class:current={i === line}>{l.text}</p>
         {/each}
@@ -307,10 +310,12 @@
     min-height: 0;
   }
 
+  /* 116 px à la taille prévue, plus grande avec la carte. */
   .art {
     flex: none;
-    width: 116px;
-    height: 116px;
+    width: clamp(96px, min(26cqw, 100cqh - 300px), 200px);
+    height: auto;
+    aspect-ratio: 1;
     display: grid;
     place-items: center;
     border-radius: var(--radius-input);
@@ -356,8 +361,9 @@
 
   /* Paroles : trois lignes visibles, la ligne en cours au milieu, fondu en haut et en bas. */
   .lyrics {
-    flex: none;
-    height: 90px;
+    flex: 1 1 90px;
+    min-height: 90px;
+    max-height: 270px;
     overflow: hidden;
     mask-image: linear-gradient(transparent, #000 24%, #000 68%, transparent);
   }
@@ -553,14 +559,7 @@
     outline-offset: var(--focus-offset);
   }
 
-  /* Case basse : pochette plus petite, puis plus de paroles. */
-  @container (max-height: 420px) {
-    .art {
-      width: 96px;
-      height: 96px;
-    }
-  }
-
+  /* Case basse : plus de paroles. */
   /* Case étroite : bouton du son sans curseur. */
   @container (max-width: 459px) {
     .controls :global(input) {
@@ -571,6 +570,22 @@
   @container (max-height: 369px) {
     .lyrics {
       display: none;
+    }
+  }
+
+  /* Carte de 3 cases de large : commandes réparties sur toute la largeur, volume compris. */
+  @container (max-width: 320px) {
+    .controls {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .controls > span:first-child {
+      display: none;
+    }
+
+    .buttons {
+      gap: 2px;
     }
   }
 </style>

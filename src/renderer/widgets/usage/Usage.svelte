@@ -1,14 +1,17 @@
 <script lang="ts">
   // Tokens de Claude Code dans la fenêtre de 5 h en cours (et sa fin), aujourd'hui, sur 7 jours.
   // Relu toutes les 30 s fenêtre visible ; la 1re lecture parcourt les journaux (quelques s).
+  // En édition : design et offre (budgets des designs Jauge et Tableau).
   import type { ClaudeUsage } from '../../../shared/api'
+  import DesignPicker from '../../lib/DesignPicker.svelte'
   import { pollWhileVisible } from '../../lib/poll.svelte'
   import type { WidgetProps } from '../types'
-  import type { UsageSettings } from './manifest'
+  import { USAGE_DESIGNS, type UsageSettings } from './manifest'
+  import { compact, left, PLANS } from './plan'
+  import UsageBoard from './UsageBoard.svelte'
+  import UsageGauge from './UsageGauge.svelte'
 
-  // Aucun réglage : props déclarées pour le type seulement (voir System.svelte).
-  // eslint-disable-next-line no-empty-pattern
-  let {}: WidgetProps<UsageSettings> = $props()
+  let { settings, editing, save }: WidgetProps<UsageSettings> = $props()
 
   let usage = $state.raw<ClaudeUsage | null>(null)
   let now = $state(Date.now())
@@ -18,45 +21,62 @@
     now = Date.now()
   }, 30_000)
 
-  // 1 234 567 → « 1,2 M »
-  const compact = new Intl.NumberFormat('fr-FR', { notation: 'compact', maximumFractionDigits: 1 })
-
-  function left(at: number): string {
-    const minutes = Math.max(0, Math.ceil((at - now) / 60_000))
-    return minutes >= 60 ? `${Math.floor(minutes / 60)} h ${minutes % 60}` : `${minutes} min`
-  }
+  const fancy = $derived(settings.design === 'gauge' || settings.design === 'board')
 </script>
 
-<div class="widget">
-  <span class="label">Claude</span>
-  {#if !usage}
-    <p class="empty">Lecture des journaux…</p>
-  {:else if !usage.sources}
-    <p class="empty">Aucun journal de Claude Code trouvé</p>
-  {:else}
-    <div class="session">
-      <span class="value">{compact.format(usage.session)}</span>
-      <span class="unit">tokens</span>
-    </div>
-    <p class="sub">
-      {#if usage.resetsAt}
-        Session · {usage.messages} réponses · fin dans {left(usage.resetsAt)}
-      {:else}
-        Aucune session en cours
-      {/if}
-    </p>
-    <dl>
-      <div>
-        <dt>Aujourd'hui</dt>
-        <dd>{compact.format(usage.today)}</dd>
+{#if editing}
+  <div class="widget">
+    <DesignPicker
+      designs={USAGE_DESIGNS}
+      value={settings.design}
+      onpick={(design) => save({ ...settings, design })}
+    />
+    {#if fancy}
+      <span class="label">Offre Claude (limites estimées)</span>
+      <DesignPicker
+        designs={PLANS}
+        value={settings.plan}
+        label="Offre"
+        onpick={(plan) => save({ ...settings, plan })}
+      />
+    {/if}
+  </div>
+{:else if usage?.sources && settings.design === 'gauge'}
+  <UsageGauge {usage} {now} plan={settings.plan} />
+{:else if usage?.sources && settings.design === 'board'}
+  <UsageBoard {usage} {now} plan={settings.plan} />
+{:else}
+  <div class="widget">
+    <span class="label">Claude</span>
+    {#if !usage}
+      <p class="empty">Lecture des journaux…</p>
+    {:else if !usage.sources}
+      <p class="empty">Aucun journal de Claude Code trouvé</p>
+    {:else}
+      <div class="session">
+        <span class="value">{compact(usage.session)}</span>
+        <span class="unit">tokens</span>
       </div>
-      <div>
-        <dt>7 jours</dt>
-        <dd>{compact.format(usage.week)}</dd>
-      </div>
-    </dl>
-  {/if}
-</div>
+      <p class="sub">
+        {#if usage.resetsAt}
+          Session · {usage.messages} réponses · fin dans {left(usage.resetsAt, now)}
+        {:else}
+          Aucune session en cours
+        {/if}
+      </p>
+      <dl>
+        <div>
+          <dt>Aujourd'hui</dt>
+          <dd>{compact(usage.today)}</dd>
+        </div>
+        <div>
+          <dt>7 jours</dt>
+          <dd>{compact(usage.week)}</dd>
+        </div>
+      </dl>
+    {/if}
+  </div>
+{/if}
 
 <style>
   .widget {

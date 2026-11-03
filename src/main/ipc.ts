@@ -2,7 +2,15 @@
 import { clipboard, ipcMain, shell, type IpcMainEvent, type IpcMainInvokeEvent } from 'electron'
 import type { AppState } from '../shared/api'
 import type { Settings } from '../shared/model'
-import { audio, audioDevice, audioMute, audioVolume } from './audio'
+import {
+  audio,
+  audioAppIcon,
+  audioApps,
+  audioAppVolume,
+  audioDevice,
+  audioMute,
+  audioVolume
+} from './audio'
 import { awake, awakeStart, awakeStop, syncAwake } from './awake'
 import { eyes, eyesSet, syncEyes } from './eyes'
 import { notifyTest } from './notify'
@@ -220,6 +228,9 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:audioVolume', audioVolume) // valeurs validées dans audio.ts
   handle('photon:audioMute', audioMute)
   handle('photon:audioDevice', audioDevice)
+  handle('photon:audioApps', audioApps)
+  handle('photon:audioAppVolume', audioAppVolume)
+  handle('photon:audioAppIcon', audioAppIcon)
   handle('photon:claudeUsage', claudeUsage)
   handle('photon:clipboardHistory', clipboardHistory)
   on('photon:clipboardClear', clipboardClear)

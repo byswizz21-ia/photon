@@ -80,35 +80,40 @@
     saveProfile()
   }
 
+  // Largeur d'une case, suivie (fenêtre redimensionnée, écran changé). 0 : grille pas encore posée.
+  let cellWidth = $state(0)
+
   // Taille minimale d'une carte en cases : celle du manifest, ou plus si ses réglages demandent de
-  // la place en px (manifest.minSize), convertie avec la taille actuelle des cases.
+  // la place en px (manifest.minSize), convertie avec la taille actuelle des cases. Photon caché :
+  // la grille n'a pas encore sa vraie largeur (démarrage), le px attend l'affichage.
   function minCells(
     widget: WidgetInstance,
     manifest: WidgetManifest
   ): { minW: number; minH: number } {
     const { minW, minH } = manifest.size
     const px = manifest.minSize?.(mergeSettings(manifest.defaults, widget.settings))
-    if (!grid || !px) return { minW, minH }
+    if (!grid || !px || !app.visible || cellWidth <= 0) return { minW, minH }
     const density = app.theme.density
     return {
       minW: Math.min(
         grid.getColumn(),
-        Math.max(minW, cellsFor(px.width, grid.cellWidth(), MARGIN[density]))
+        Math.max(minW, cellsFor(px.width, cellWidth, MARGIN[density]))
       ),
       minH: Math.max(minH, cellsFor(px.height, CELL[density], MARGIN[density]))
     }
   }
 
   // Nouveau minimum : la carte grandit tout de suite si besoin et ne descend plus en dessous.
-  function fitMin(id: string, { minW, minH }: { minW: number; minH: number }): void {
-    const el = grid?.el.querySelector<GridItemHTMLElement>(`[data-id="${CSS.escape(id)}"]`)
+  // Partie de la taille enregistrée, sans l'écrire : un minimum gonflé un instant (fenêtre pas
+  // encore à sa taille) revient de lui-même. Le profil garde la taille choisie à la main.
+  function fitMin(widget: WidgetInstance, { minW, minH }: { minW: number; minH: number }): void {
+    const el = grid?.el.querySelector<GridItemHTMLElement>(`[data-id="${CSS.escape(widget.id)}"]`)
     const node = el?.gridstackNode
-    if (!grid || !el || !node || (node.minW === minW && node.minH === minH)) return
-    const w = Math.max(node.w ?? minW, minW)
-    const h = Math.max(node.h ?? minH, minH)
-    const grows = w !== node.w || h !== node.h
+    if (!grid || !el || !node) return
+    const w = Math.max(widget.w, minW)
+    const h = Math.max(widget.h, minH)
+    if (node.minW === minW && node.minH === minH && node.w === w && node.h === h) return
     grid.update(el, { minW, minH, w, h })
-    if (grows) persist()
   }
 
   // Objet neuf pour gridstack (il le modifie) : jamais l'état Svelte directement.
@@ -145,6 +150,8 @@
     // Les cartes se posent juste après (leurs propres attachements) : la suite attend le rendu.
     const ready = grid
     active = ready
+    const watch = new ResizeObserver(() => (cellWidth = ready?.cellWidth() ?? 0))
+    watch.observe(el)
     void tick().then(() => {
       if (!ready || grid !== ready) return
       untrack(() => el.querySelectorAll<HTMLElement>(':scope > .grid-stack-item').forEach(makeItem))
@@ -178,6 +185,7 @@
     })
     return () => {
       if (active === ready) active = undefined
+      watch.disconnect()
       grid?.destroy(false)
       grid = undefined
     }
@@ -217,14 +225,14 @@
     })
   })
 
-  // Réglage qui change la place demandée (design « Adapté » des lecteurs de musique) ou densité :
-  // minimum recalculé. Largeur de fenêtre changée ensuite : pas suivie, le widget s'adapte seul.
+  // Réglage qui change la place demandée (designs des widgets), densité, largeur des cases ou
+  // affichage : minimum recalculé, la carte grandit si elle est trop petite.
   $effect(() => {
     for (const widget of items) {
       const manifest = widgets[widget.type]
       if (!manifest?.minSize) continue
       const min = minCells(widget, manifest)
-      untrack(() => fitMin(widget.id, min))
+      untrack(() => fitMin(widget, min))
     }
   })
 </script>

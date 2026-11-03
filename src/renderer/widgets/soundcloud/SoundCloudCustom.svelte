@@ -224,10 +224,12 @@
     gap: 14px;
   }
 
+  /* 72 px à la taille prévue, plus grande avec la carte. */
   .art {
     flex: none;
-    width: 72px;
-    height: 72px;
+    width: clamp(72px, min(20cqw, 100cqh - 260px), 140px);
+    height: auto;
+    aspect-ratio: 1;
     display: grid;
     place-items: center;
     border-radius: var(--radius-input);
@@ -271,12 +273,12 @@
     letter-spacing: var(--tracking-title);
   }
 
-  /* Forme d'onde : prend la hauteur libre (96 px au plus). */
+  /* Forme d'onde : prend la hauteur libre (200 px au plus). */
   .wave {
     position: relative;
     flex: 1;
     min-height: 56px;
-    max-height: 96px;
+    max-height: 200px;
   }
 
   .seekable {

@@ -1,10 +1,13 @@
 <script lang="ts">
-  // Heure 24 h dont les chiffres défilent, date en français dessous. Relue chaque seconde,
-  // seulement quand Photon est affiché. En édition : case « Afficher les secondes ».
+  // Heure 24 h dont les chiffres défilent, date en français dessous. Relue 4 fois par seconde,
+  // seulement quand Photon est affiché. En édition : design, case « Afficher les secondes ».
+  import DesignPicker from '../../lib/DesignPicker.svelte'
   import { pollWhileVisible } from '../../lib/poll.svelte'
   import RollingNumber from '../../lib/RollingNumber.svelte'
   import type { WidgetProps } from '../types'
-  import type { ClockSettings } from './manifest'
+  import ClockDay from './ClockDay.svelte'
+  import ClockDial from './ClockDial.svelte'
+  import { CLOCK_DESIGNS, type ClockSettings } from './manifest'
 
   let { settings, editing, save }: WidgetProps<ClockSettings> = $props()
 
@@ -28,29 +31,42 @@
   const date = $derived(dateFormat.format(now).replace(/^./, (letter) => letter.toUpperCase()))
 </script>
 
-<div class="widget" class:editing>
-  <p class="time" class:seconds={settings.seconds} data-intro="spin">
-    <RollingNumber value={time} />
-  </p>
-  <p class="date" data-intro="date">{date}</p>
-  {#if editing}
-    <label class="field" data-no-drag>
-      <input
-        type="checkbox"
-        checked={settings.seconds}
-        onchange={(event) => save({ ...settings, seconds: event.currentTarget.checked })}
-      />
-      <span>Afficher les secondes</span>
-    </label>
-  {/if}
-</div>
+{#if editing}
+  <div class="options">
+    <DesignPicker
+      designs={CLOCK_DESIGNS}
+      value={settings.design}
+      onpick={(design) => save({ ...settings, design })}
+    />
+    {#if settings.design !== 'day' && settings.design !== 'dial'}
+      <label class="field" data-no-drag>
+        <input
+          type="checkbox"
+          checked={settings.seconds}
+          onchange={(event) => save({ ...settings, seconds: event.currentTarget.checked })}
+        />
+        <span>Afficher les secondes</span>
+      </label>
+    {/if}
+  </div>
+{:else if settings.design === 'day'}
+  <ClockDay {now} {date} />
+{:else if settings.design === 'dial'}
+  <ClockDial {now} {date} />
+{:else}
+  <div class="widget">
+    <p class="time" class:seconds={settings.seconds} data-intro="spin">
+      <RollingNumber value={time} />
+    </p>
+    <p class="date" data-intro="date">{date}</p>
+  </div>
+{/if}
 
 <style>
   .widget {
-    /* Place retirée à la hauteur de l'heure : date + écart, puis case à cocher + écart (édition). */
+    /* Place retirée à la hauteur de l'heure : date + écart. */
     --pad: clamp(14px, 6cqmin, 28px);
     --date-rows: 32px;
-    --edit-rows: 0px;
     box-sizing: border-box;
     height: 100%;
     padding: var(--pad);
@@ -60,8 +76,12 @@
     gap: 12px;
   }
 
-  .widget.editing {
-    --edit-rows: 36px;
+  .options {
+    box-sizing: border-box;
+    padding: clamp(10px, 6cqmin, 20px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 
   /* L'heure prend la plus petite des trois tailles : maquette, hauteur restante, largeur. */
@@ -70,7 +90,7 @@
     margin: 0;
     font-size: min(
       96px,
-      100cqh - 2 * var(--pad) - var(--date-rows) - var(--edit-rows),
+      100cqh - 2 * var(--pad) - var(--date-rows),
       (100cqw - 2 * var(--pad)) / var(--span)
     );
     font-weight: var(--weight-light);
@@ -93,16 +113,13 @@
     text-overflow: ellipsis;
   }
 
-  /* Carte trop basse : date et case « secondes » s'effacent, toute la place va à l'heure. */
+  /* Carte trop basse : la date s'efface, toute la place va à l'heure. */
   @container (max-height: 110px) {
-    .widget,
-    .widget.editing {
+    .widget {
       --date-rows: 0px;
-      --edit-rows: 0px;
     }
 
-    .date,
-    .widget .field {
+    .date {
       display: none;
     }
   }
