@@ -391,6 +391,12 @@ export interface Translation {
   error: string | null
 }
 
+// Widget Cerveau (src/main/brain.ts) : réponse JSON de Claude Code, validée ensuite par le widget.
+export interface BrainReply {
+  value: unknown // null en cas d'erreur
+  error: string | null
+}
+
 // Jeu offert (src/main/freegames.ts).
 export interface FreeGame {
   id: string
@@ -578,6 +584,7 @@ export interface PhotonApi {
   transitLines(): Promise<TransitLine[] | null> // null : réseau injoignable
   transitStops(line: string): Promise<TransitStop[] | null>
   footTeams(league: string): Promise<FootTeam[] | null>
+  brainAsk(prompt: string, schema: object): Promise<BrainReply> // Cerveau : sur clic seulement
   // Caches lus en fond (src/main/feeds.ts) : le widget passe ses réglages ; null : pas réglé
   freeGames(): Promise<Feed<FreeGame>>
   transit(settings: Record<string, unknown>): Promise<Feed<TransitDeparture> | null>

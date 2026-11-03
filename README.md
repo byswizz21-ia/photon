@@ -46,6 +46,7 @@ créé au démarrage puis seulement affiché ou caché : l'ouverture est instant
 | Raccourcis    | Lanceur, Dossiers, Presse-papiers, Projets Git, Outils dev, Pipette, Scripts, Captures récentes, Traduction, Tirage au sort                                                        |
 | Infos         | Météo, Cours (bourse et crypto), Actualités, Citations, Claude, Usage Claude, Micro-entreprise, Moyenne, Bus et tram (Divia), Matchs (foot, LoL, Valorant), Jeux gratuits, Sorties |
 | Jeux          | Échecs : problème du jour, entraînement, contre l'ordi (3 niveaux), à deux                                                                                                         |
+| Apprendre     | Cerveau : cartes de révision tirées d'un cours par Claude (répétition espacée), séance de muscu mentale du jour, coach d'apprentissage                                             |
 | Décor         | Image, GIF, Vidéo                                                                                                                                                                  |
 
 Nouveautés de chaque version : [CHANGELOG.md](CHANGELOG.md).
@@ -193,6 +194,8 @@ les unités `cqw` / `cqh`. Couleurs, rayons, ombres, tailles et durées : tokens
   en passant, promotion, mat, nulles), trop longues et piégeuses à recoder. Version figée : le bot
   (`widgets/chess/engine.ts`) utilise ses fonctions internes, `engine.test.ts` casse si elles changent.
 - Problèmes d'échecs : [Lichess](https://lichess.org) (API publique, base de problèmes CC0).
+- Répétition espacée : algorithme [FSRS-4.5](https://github.com/open-spaced-repetition/fsrs4anki)
+  (MIT), poids par défaut publiés.
 - Actualités : flux RSS de Google Actualités (usage personnel) ou de chaque site.
 
 Design doc : https://claude.ai/artifact/PozosXRE6sFL3Cmswz6uB1

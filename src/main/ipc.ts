@@ -13,6 +13,7 @@ import { shutdownCancel, shutdownStart, shutdownState, syncShutdown } from './sh
 import { importFile, pickFile } from './background'
 import { importUrl } from './download'
 import { batteries } from './batteries'
+import { brainAsk } from './brain'
 import { calendar, onProfileSaved } from './calendar'
 import {
   answerApproval,
@@ -280,6 +281,7 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:transitLines', transitLines)
   handle('photon:transitStops', transitStops) // identifiant de ligne validé
   handle('photon:footTeams', footTeams) // ligue validée
+  handle('photon:brainAsk', brainAsk) // demande et schéma bornés, sans outils
   handle('photon:freeGames', freeGames)
   handle('photon:transit', transit)
   handle('photon:matches', matches)

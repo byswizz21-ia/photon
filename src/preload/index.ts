@@ -121,6 +121,7 @@ const photon: PhotonApi = {
   transitLines: () => ipcRenderer.invoke('photon:transitLines'),
   transitStops: (line) => ipcRenderer.invoke('photon:transitStops', line),
   footTeams: (league) => ipcRenderer.invoke('photon:footTeams', league),
+  brainAsk: (prompt, schema) => ipcRenderer.invoke('photon:brainAsk', prompt, schema),
   freeGames: () => ipcRenderer.invoke('photon:freeGames'),
   transit: (settings) => ipcRenderer.invoke('photon:transit', settings),
   matches: (settings) => ipcRenderer.invoke('photon:matches', settings),
