@@ -127,7 +127,10 @@ const photon: PhotonApi = {
   freeGames: () => ipcRenderer.invoke('photon:freeGames'),
   transit: (settings) => ipcRenderer.invoke('photon:transit', settings),
   matches: (settings) => ipcRenderer.invoke('photon:matches', settings),
-  releases: (settings) => ipcRenderer.invoke('photon:releases', settings)
+  releases: (settings) => ipcRenderer.invoke('photon:releases', settings),
+  twitch: (settings) => ipcRenderer.invoke('photon:twitch', settings),
+  twitchLogin: () => ipcRenderer.send('photon:twitchLogin'),
+  twitchLogout: () => ipcRenderer.invoke('photon:twitchLogout')
 }
 
 contextBridge.exposeInMainWorld('photon', photon)

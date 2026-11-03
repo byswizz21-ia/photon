@@ -65,6 +65,7 @@ import { onWeatherProfile, weather } from './weather'
 import { hideWindow, logShown, ownsSender, resizeBar, setIntro } from './window'
 import { syncFeeds } from './feeds'
 import { freeGames } from './freegames'
+import { twitch, twitchLogin, twitchLogout } from './twitch'
 import { footTeams, matches } from './matches'
 import { releases } from './releases'
 import { screenshotCopy, screenshotDelete, screenshotDrag, screenshots } from './screenshots'
@@ -295,5 +296,11 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:transit', transit)
   handle('photon:matches', matches)
   handle('photon:releases', releases)
+  handle('photon:twitch', twitch)
+  on('photon:twitchLogin', () => {
+    hideWindow('connexion Twitch')
+    twitchLogin()
+  })
+  handle('photon:twitchLogout', twitchLogout)
   on('photon:toastLook', setToastLook)
 }

@@ -20,6 +20,9 @@
     chaque app qui joue du son, comme le mélangeur de Windows).
 - Chaque design a sa taille minimale : la carte s'agrandit d'elle-même quand on le choisit et
   ne peut pas descendre en dessous.
+- **Widget Twitch** : les streamers que tu suis qui sont en live (pseudo, jeu, titre, spectateurs,
+  durée ; aperçu du live sur une carte large). Connexion à Twitch dans une fenêtre Photon, ou
+  chaînes ajoutées à la main sans compte. Clic : le live dans le navigateur.
 
 ### Amélioré
 
