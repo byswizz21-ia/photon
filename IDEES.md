@@ -66,3 +66,29 @@ Idées proposées le 3 novembre 2026 et pas encore faites. Effort : facile (une 
 - **Abonnements / Budget** : relier les deux (les prélèvements comptent dans le budget).
 - **Captures** : renommer, ouvrir dans l'outil Capture pour annoter.
 - **Scripts** : ouvrir le dossier dans VS Code, relancer tout seul après un plantage.
+
+## Améliorations visuelles (revue des 55 widgets, 3 novembre)
+
+Photos prises à la taille par défaut, widgets vides, thème sombre. Rien n'est encore corrigé.
+
+**Vrais défauts**
+
+- **Échecs** : onglets (Du jour, Entraînement, Ordi, À deux) sur 2 lignes ; chiffres des rangées
+  par-dessus les pièces ; grand vide sous l'échiquier.
+- **Jours fériés** : la barre de défilement cache les compteurs (« 8 j » coupé).
+- **Cours** : mini-courbes mal alignées (leur largeur suit la longueur du prix).
+- **Moyenne** : « —— /20 » sans note ; le champ coefficient « 1 » n'a pas d'étiquette.
+- **Disque** : C: en grand, D: en petit avec une barre différente.
+
+**Cohérence**
+
+- Titre gris en majuscules absent : Météo, Compte à rebours, Citations, Bus et tram. Pomodoro :
+  titre au milieu de la carte.
+- Message de widget vide en haut à gauche (Agenda, Projets Git) au lieu de centré.
+- Aucun message quand c'est vide : To-do, Habitudes, Temps, Budget.
+
+**Tailles par défaut trop grandes** : Budget, Cours, Matchs, Fuseaux horaires, Pipette,
+Batteries, Anti-veille, Minuteur d'arrêt.
+
+**Détails** : Favoris (barre de défilement au milieu, icônes pixelisées) ; Ports et Processus
+(dernière ligne coupée) ; Minuteur d'arrêt (champ « 60 » au style différent des choix).
