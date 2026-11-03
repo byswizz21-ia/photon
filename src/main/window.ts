@@ -102,7 +102,10 @@ export function ownsSender(sender: WebContents): boolean {
 }
 
 // Applique le mode courant (réglages) à la fenêtre, puis la replace si elle est affichée.
+// Barre seule affichée : rien maintenant (un réglage changé l'aurait étirée en plein écran),
+// showWindow l'applique en la quittant.
 export function applyMode(): void {
+  if (mini && win.isVisible()) return
   const fullscreen = data.settings.mode === 'fullscreen'
   win.setResizable(!fullscreen)
   win.setSkipTaskbar(fullscreen)
@@ -176,7 +179,7 @@ export function showBar(
   win.setSkipTaskbar(true)
   win.setAlwaysOnTop(true)
   win.setMinimumSize(0, 0)
-  win.setBounds({
+  moveTo({
     x: area.x + Math.round((area.width - BAR_WIDTH) / 2),
     y: area.y + Math.round(area.height * 0.2),
     width: BAR_WIDTH,
@@ -221,11 +224,16 @@ export function logShown(): void {
 }
 
 function place(display: Display): void {
-  const target = data.settings.mode === 'fullscreen' ? display.bounds : windowBoundsOn(display)
-  win.setBounds(target)
-  // Entre deux écrans d'échelles différentes, Electron peut se tromper au premier essai.
-  if (!sameRect(win.getBounds(), target)) win.setBounds(target)
+  moveTo(data.settings.mode === 'fullscreen' ? display.bounds : windowBoundsOn(display))
   sendPlace()
+}
+
+// Entre deux écrans d'échelles différentes (100 % et 150 %), Electron calcule la taille avec
+// l'échelle de l'écran de départ au premier essai : la barre, venue du plein écran de l'autre
+// écran, débordait alors sur les deux. Second essai une fois la fenêtre sur le bon écran.
+function moveTo(target: Rectangle): void {
+  win.setBounds(target)
+  if (!sameRect(win.getBounds(), target)) win.setBounds(target)
 }
 
 // Flou réglable : où se trouve l'écran par rapport à la fenêtre, pour y caler sa capture.

@@ -3,6 +3,7 @@
   import XIcon from 'phosphor-svelte/lib/XIcon'
   import {
     BAR_SHORTCUTS,
+    DEFAULT_TINT,
     NOTIFY_SOURCES,
     SHORTCUTS,
     SOUND_PRESETS,
@@ -321,6 +322,14 @@
         {@render picker('Fin', bg.to, (to) => setGradient({ to }))}
       </div>
     {/if}
+    <div class="row">
+      {@render picker('Couleur du panneau', app.theme.tint, (tint) => patchTheme({ tint }))}
+      {#if app.theme.tint !== DEFAULT_TINT}
+        <button type="button" class="action" onclick={() => patchTheme({ tint: DEFAULT_TINT })}
+          >Par défaut</button
+        >
+      {/if}
+    </div>
   </section>
 
   <section>
@@ -438,6 +447,28 @@
         (id) => setting({ mode: id === 'window' ? 'window' : 'fullscreen' })
       )}
     </div>
+    {#if app.settings.mode === 'fullscreen'}
+      <label class="check">
+        <input
+          type="checkbox"
+          checked={app.theme.fill}
+          onchange={(event) => patchTheme({ fill: event.currentTarget.checked })}
+        />
+        <span>Remplir tout l'écran</span>
+        <small>Le panneau va jusqu'aux bords, sans marge autour</small>
+      </label>
+      {#if !app.theme.fill}
+        {@render range(
+          'Largeur du panneau',
+          app.theme.panelWidth,
+          0.5,
+          1,
+          0.01,
+          percent,
+          (panelWidth) => patchTheme({ panelWidth })
+        )}
+      {/if}
+    {/if}
     <label class="check">
       <input
         type="checkbox"

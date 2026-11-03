@@ -5,7 +5,7 @@
   import CommandBar from './bar/CommandBar.svelte'
   import AddMenu from './grid/AddMenu.svelte'
   import Catalog from './grid/Catalog.svelte'
-  import Grid from './grid/Grid.svelte'
+  import Grid, { cellAt } from './grid/Grid.svelte'
   import Intro from './intro/Intro.svelte'
   import { endIntro, intro, startIntro } from './intro/timeline.svelte'
   import Logo from './lib/Logo.svelte'
@@ -22,6 +22,7 @@
 
   let root: HTMLElement
   let gear = $state<HTMLButtonElement>()
+  let addMenu = $state<AddMenu>()
   let settingsOpen = $state(false)
   let catalogOpen = $state(false)
   let pressedVoid = false // le clic a commencé dans le vide (sinon : curseur glissé hors d'un contrôle)
@@ -152,6 +153,14 @@
 
   const isVoid = (event: Event): boolean => (event.target as HTMLElement).hasAttribute('data-void')
 
+  // Mode édition, clic droit dans un endroit libre du panneau : menu « Ajouter » sous la souris.
+  function onContextMenu(event: MouseEvent): void {
+    const target = event.target as HTMLElement
+    if (!app.editing || target.closest('.grid-stack-item, header, .menu')) return
+    event.preventDefault()
+    addMenu?.openAt(event.clientX, event.clientY, cellAt(event.clientX, event.clientY))
+  }
+
   // Clic dans le vide (fond, marges du panneau) : ferme les réglages, sinon Photon (plein écran, hors édition).
   function onClick(event: MouseEvent): void {
     if (!pressedVoid || !isVoid(event)) return
@@ -173,7 +182,9 @@
 <div
   class="root"
   class:fullscreen={fullscreen && !app.mini}
+  class:fill={fullscreen && !app.mini && app.theme.fill}
   class:mini={app.mini}
+  style:--panel-width="{app.theme.panelWidth * 100}%"
   class:live={liveBlur}
   bind:this={root}
   onpointerdown={(event) => (pressedVoid = isVoid(event))}
@@ -191,7 +202,8 @@
     </div>
     <div class="light" aria-hidden="true"></div>
     {#if intro.playing && fullscreen}<Intro layer="back" />{/if}
-    <main class="panel" class:intro={intro.playing} data-void>
+    <!-- Clic droit = raccourci souris : le bouton « Ajouter » reste là au clavier. -->
+    <main class="panel" class:intro={intro.playing} data-void oncontextmenu={onContextMenu}>
       {#if intro.playing && !fullscreen}<Intro layer="back" />{/if}
       <header class="bar" data-reveal class:drag={!fullscreen}>
         <Logo size={28} mode={claudeBusy ? 'thinking' : 'idle'} />
@@ -200,7 +212,7 @@
         <CommandBar onaction={runAction} />
         <div class="actions">
           {#if app.editing}
-            <AddMenu oncatalog={() => (catalogOpen = true)} />
+            <AddMenu bind:this={addMenu} oncatalog={() => (catalogOpen = true)} />
             <button type="button" class="action primary" onclick={() => (app.editing = false)}>
               <CheckIcon size={16} weight="bold" aria-hidden="true" />
               Terminé
@@ -352,13 +364,27 @@
 
   /* Plein écran : panneau de verre centré, qui floute (et sature) le fond d'écran derrière lui. */
   .fullscreen .panel {
-    width: min(1280px, calc(100% - 96px));
+    width: min(var(--panel-width), calc(100% - 96px));
     height: auto;
     max-height: calc(100% - 96px);
     margin: 48px auto;
     border-radius: var(--radius-panel);
     backdrop-filter: var(--panel-filter);
     box-shadow: var(--panel-shadow);
+  }
+
+  /* Plein écran, option « Remplir l'écran » : plus de marge ni de coins, le verre va jusqu'aux bords. */
+  .fill .panel {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  /* Pas de liseré ni d'ombre collés aux bords de l'écran. */
+  .fill .panel::after {
+    display: none;
   }
 
   /* Claude en mode Bypass : halo rouge sur tout le panneau tant qu'il est actif. */

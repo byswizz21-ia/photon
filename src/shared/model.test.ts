@@ -144,6 +144,20 @@ test('police du thème : défaut si absente, nom sans guillemet, bornes', () => 
   expect(parseTheme({ font: { weight: 120 } }).font.weight).toBe(100)
 })
 
+test('teinte et taille du panneau : défaut sur un ancien thème, bornes', () => {
+  expect(parseTheme({})).toMatchObject({ tint: '#090a0e', panelWidth: 0.7, fill: false })
+  expect(parseTheme({ tint: '#ABCDEF', panelWidth: 3, fill: true })).toMatchObject({
+    tint: '#ABCDEF',
+    panelWidth: 1,
+    fill: true
+  })
+  expect(parseTheme({ tint: 'red', panelWidth: 0.1, fill: 'oui' })).toMatchObject({
+    tint: '#090a0e',
+    panelWidth: 0.5,
+    fill: false
+  })
+})
+
 test('parseSettings : notifications activées par défaut, sources inconnues gardées', () => {
   expect(parseSettings({}).notifications).toEqual({ enabled: true, style: 'photon', sources: {} })
   expect(

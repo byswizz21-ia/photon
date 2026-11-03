@@ -1,12 +1,13 @@
 <script lang="ts">
   // Menu « Ajouter » du mode édition : recherche, widgets rangés par rubrique avec ce qu'ils font,
-  // et lien vers le catalogue qui les montre en aperçu.
+  // et lien vers le catalogue qui les montre en aperçu. Clic droit dans la grille (openAt) : le
+  // même menu, sous la souris, et le widget se pose sur la case visée.
   import MagnifyingGlassIcon from 'phosphor-svelte/lib/MagnifyingGlassIcon'
   import PlusIcon from 'phosphor-svelte/lib/PlusIcon'
   import SquaresFourIcon from 'phosphor-svelte/lib/SquaresFourIcon'
   import { groupWidgets, searchWidgets, type WidgetEntry } from '../widgets/catalog'
   import { widgets } from '../widgets/registry'
-  import { addWidget } from './Grid.svelte'
+  import { addWidget, type Cell } from './Grid.svelte'
 
   let { oncatalog }: { oncatalog: () => void } = $props()
 
@@ -20,23 +21,51 @@
   const results = $derived(searchWidgets(widgets, query))
   const searching = $derived(query.trim() !== '')
 
+  // Ouvert au clic droit : point visé (px) et case de la grille dessous.
+  let at = $state<{ x: number; y: number; cell: Cell | null } | null>(null)
+  // Position du menu ouvert au clic droit, par rapport au bouton « Ajouter ».
+  let spot = $state<{ left: number; top: number } | null>(null)
+
   // Hauteur de la liste : ce qui reste sous le bouton dans le panneau (qui couperait le menu).
   let room = $state(480)
 
+  const MENU_WIDTH = 376 // largeur du menu, bordure et marge comprises
+  const MENU_CHROME = 120 // recherche, lien du catalogue et marges, autour de la liste
+
   $effect(() => {
     if (!open || !box) return
-    const panel = box.closest('main')?.getBoundingClientRect().bottom ?? window.innerHeight
-    room = Math.max(160, Math.min(480, panel - box.getBoundingClientRect().bottom - 120))
+    const panel =
+      box.closest('main')?.getBoundingClientRect() ?? new DOMRect(0, 0, innerWidth, innerHeight)
+    const own = box.getBoundingClientRect()
+    if (at) {
+      // Sous la souris, gardé dans le panneau (qui le couperait).
+      room = Math.max(160, Math.min(480, panel.height - MENU_CHROME - 16))
+      const clamp = (v: number, min: number, max: number): number => Math.max(min, Math.min(v, max))
+      spot = {
+        left: clamp(at.x, panel.left + 8, panel.right - MENU_WIDTH - 8) - own.left,
+        top: clamp(at.y, panel.top + 8, panel.bottom - room - MENU_CHROME - 8) - own.top
+      }
+    } else {
+      spot = null
+      room = Math.max(160, Math.min(480, panel.bottom - own.bottom - MENU_CHROME))
+    }
     input?.focus()
   })
 
+  export function openAt(x: number, y: number, cell: Cell | null): void {
+    query = ''
+    at = { x, y, cell }
+    open = true
+  }
+
   function close(): void {
     open = false
+    at = null
     query = ''
   }
 
   function pick(type: string): void {
-    addWidget(type)
+    addWidget(type, at?.cell)
     close()
   }
 
@@ -76,13 +105,20 @@
     bind:this={trigger}
     aria-haspopup="dialog"
     aria-expanded={open}
-    onclick={() => (open ? close() : (open = true))}
+    onclick={() => (open && !at ? close() : ((at = null), (open = true)))}
   >
     <PlusIcon size={16} weight="bold" aria-hidden="true" />
     Ajouter
   </button>
   {#if open}
-    <div class="menu picker" role="dialog" aria-label="Ajouter un widget">
+    <div
+      class="menu picker"
+      role="dialog"
+      aria-label="Ajouter un widget"
+      style:left={spot && `${spot.left}px`}
+      style:top={spot && `${spot.top}px`}
+      style:right={spot && 'auto'}
+    >
       <label class="search">
         <MagnifyingGlassIcon size={16} aria-hidden="true" />
         <input

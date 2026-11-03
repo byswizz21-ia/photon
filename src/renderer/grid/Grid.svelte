@@ -2,7 +2,8 @@
   import { play } from '../sound.svelte'
   import { app } from '../state.svelte'
   import { widgets } from '../widgets/registry'
-  import { createInstance } from './layout'
+  import type { GridStack as Stack } from 'gridstack'
+  import { COLUMNS as GRID_COLUMNS, createInstance } from './layout'
 
   // Ids des widgets tout juste ajoutés : la grille leur trouve une place libre.
   // Registre interne, jamais affiché : pas besoin d'un Set réactif.
@@ -13,7 +14,26 @@
   export const CELL = { comfortable: 100, compact: 80 }
   export const MARGIN = { comfortable: 10, compact: 6 }
 
-  export function addWidget(type: string): void {
+  // Grille affichée (une seule à la fois) : pour viser une case au clic droit.
+  let active: Stack | undefined
+
+  export interface Cell {
+    x: number
+    y: number
+  }
+
+  // Case de la grille sous ce point de l'écran ; null hors de la grille ou en colonnes réduites
+  // (fenêtre étroite : les positions ne sont plus celles du profil).
+  export function cellAt(clientX: number, clientY: number): Cell | null {
+    if (!active || active.getColumn() !== GRID_COLUMNS) return null
+    const box = active.el.getBoundingClientRect()
+    const x = Math.floor((clientX - box.left) / active.cellWidth())
+    const y = Math.floor((clientY - box.top) / active.getCellHeight())
+    return x >= 0 && x < GRID_COLUMNS && y >= 0 ? { x, y } : null
+  }
+
+  // Sans case (ou case déjà prise) : la grille lui trouve la première place libre.
+  export function addWidget(type: string, cell: Cell | null = null): void {
     const manifest = Object.hasOwn(widgets, type) ? widgets[type] : undefined
     if (!manifest) return
     const instance = createInstance(
@@ -21,7 +41,11 @@
       manifest,
       app.profile.widgets.map((w) => w.id)
     )
-    placing.add(instance.id)
+    const x = cell ? Math.min(cell.x, GRID_COLUMNS - instance.w) : 0
+    if (cell && active?.isAreaEmpty(x, cell.y, instance.w, instance.h)) {
+      instance.x = x
+      instance.y = cell.y
+    } else placing.add(instance.id)
     app.profile.widgets.push(instance)
     play('add')
   }
@@ -120,6 +144,7 @@
       ) ?? undefined
     // Les cartes se posent juste après (leurs propres attachements) : la suite attend le rendu.
     const ready = grid
+    active = ready
     void tick().then(() => {
       if (!ready || grid !== ready) return
       untrack(() => el.querySelectorAll<HTMLElement>(':scope > .grid-stack-item').forEach(makeItem))
@@ -152,6 +177,7 @@
       ready.on('added', persist)
     })
     return () => {
+      if (active === ready) active = undefined
       grid?.destroy(false)
       grid = undefined
     }

@@ -99,6 +99,9 @@ export interface Theme {
   radius: number // px, arrondi des cartes
   density: Density
   font: FontSettings
+  tint: string // '#rrggbb', couleur du verre du panneau (fond derrière les widgets)
+  panelWidth: number // plein écran : largeur du panneau, 0,5 à 1 (part de l'écran)
+  fill: boolean // plein écran : le panneau remplit tout l'écran, sans marge
 }
 
 export interface WidgetInstance {
@@ -144,6 +147,7 @@ export const SHORTCUTS = ['Super+Alt+Space', 'Super+Shift+Space', 'Ctrl+Alt+Spac
 // Pas Ctrl+Espace : pris par les éditeurs de code et les claviers asiatiques.
 export const BAR_SHORTCUTS = ['Alt+Space', 'Super+Ctrl+Space', 'Ctrl+Shift+Space'] as const
 export const DEFAULT_ACCENT = '#7CC4FF'
+export const DEFAULT_TINT = '#090a0e'
 
 // 'Super+Alt+Space' → 'Win+Alt+Espace'
 export const shortcutLabel = (accelerator: string): string =>
@@ -183,7 +187,10 @@ export const defaultTheme = (): Theme => ({
   opacity: 0.5,
   radius: 24,
   density: 'comfortable',
-  font: { family: '', weight: 0, scale: 1 }
+  font: { family: '', weight: 0, scale: 1 },
+  tint: DEFAULT_TINT,
+  panelWidth: 0.7,
+  fill: false
 })
 
 export const defaultProfile = (): Profile => ({
@@ -336,7 +343,10 @@ export function parseTheme(raw: unknown): Theme {
     opacity: num(v.opacity, 0, 1, d.opacity),
     radius: int(v.radius, 0, 40, d.radius),
     density: oneOf(v.density, ['compact', 'comfortable'], d.density),
-    font: parseFont(v.font)
+    font: parseFont(v.font),
+    tint: isHex(v.tint) ? v.tint : d.tint,
+    panelWidth: num(v.panelWidth, 0.5, 1, d.panelWidth),
+    fill: v.fill === true
   }
 }
 
