@@ -40,6 +40,12 @@
   --danger-border-soft: rgb(255 77 94 / 0.45);
   --white: #fff; /* pastille du curseur, texte sur rouge ou sur pochette */
   --rise: #7ee2a8; /* cours en hausse */
+  --board-light: rgb(255 255 255 / 0.17); /* échiquier en verre : cases claires */
+  --board-dark: rgb(255 255 255 / 0.04);
+  --piece-white: #f6f7f9;
+  --piece-black: #0b0c10;
+  --piece-white-edge: rgb(0 0 0 / 0.55); /* contour : la pièce reste lisible sur toute case */
+  --piece-black-edge: rgb(255 255 255 / 0.5);
   --veil-dark: rgb(7 8 11 / 0.4); /* fond net assombri sous le panneau (plein écran) */
   --veil-art: rgb(0 0 0 / 0.45); /* bouton posé sur une pochette */
   --veil-deep: rgb(7 8 11 / 0.8); /* étiquette posée sur une forme d'onde */

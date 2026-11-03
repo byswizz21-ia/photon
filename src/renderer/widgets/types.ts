@@ -10,6 +10,7 @@ export const CATEGORIES = {
   info: 'Infos',
   organize: 'Organisation',
   media: 'Musique et médias',
+  games: 'Jeux',
   tools: 'Raccourcis et outils',
   system: 'Système',
   dev: 'Développement et IA'

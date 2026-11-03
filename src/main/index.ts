@@ -11,6 +11,8 @@ import { loadSearch } from './search/search'
 import { loadMusic } from './music'
 import { startWeather } from './weather'
 import { startMarkets } from './markets'
+import { startNews } from './news'
+import { startChess } from './chess'
 import { syncClipboard } from './clipboard'
 import { registerShortcut } from './shortcut'
 import { createTray, refreshTray } from './tray'
@@ -115,6 +117,8 @@ if (!app.requestSingleInstanceLock()) {
     startCalendars()
     startWeather()
     startMarkets()
+    startNews()
+    startChess()
     syncClipboard()
     loadMusic()
     startScreens()

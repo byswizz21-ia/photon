@@ -28,6 +28,8 @@ import { clipboardClear, clipboardHistory, syncClipboard } from './clipboard'
 import { gitOpen, gitStatus } from './git'
 import { createProfile, data, deleteProfile, saveProfile, saveTheme, switchProfile } from './data'
 import { markets, onMarketsProfile } from './markets'
+import { news, onNewsProfile, openNews } from './news'
+import { chessPuzzle, onChessProfile } from './chess'
 import {
   musicControl,
   musicPlay,
@@ -109,6 +111,8 @@ export function registerIpc(actions: IpcActions): void {
     onProfileSaved()
     onWeatherProfile()
     onMarketsProfile()
+    onNewsProfile()
+    onChessProfile()
     syncClipboard()
     syncMusic()
     syncEyes()
@@ -122,6 +126,8 @@ export function registerIpc(actions: IpcActions): void {
     onProfileSaved()
     onWeatherProfile()
     onMarketsProfile()
+    onNewsProfile()
+    onChessProfile()
     syncClipboard()
     syncMusic()
     syncEyes()
@@ -206,6 +212,13 @@ export function registerIpc(actions: IpcActions): void {
   on('photon:clipboardClear', clipboardClear)
   handle('photon:batteries', batteries)
   handle('photon:markets', markets) // symboles validés dans markets.ts
+  handle('photon:news', news) // sujets validés dans news.ts
+  handle('photon:newsOpen', async (link) => {
+    const opened = await openNews(link) // seulement un lien d'un flux déjà lu
+    if (opened) hideWindow('article ouvert')
+    return opened
+  })
+  handle('photon:chessPuzzle', chessPuzzle)
   handle('photon:processes', processes) // nom validé contre la dernière lecture, jamais un pid
   handle('photon:processIcon', processIcon)
   handle('photon:processClose', processClose)

@@ -35,15 +35,16 @@ créé au démarrage puis seulement affiché ou caché : l'ouverture est instant
 
 ## Widgets
 
-| Catégorie     | Widgets                                                                                    |
-| ------------- | ------------------------------------------------------------------------------------------ |
-| Système       | Système, Disques, Réseau, Processus, Batteries, Son, Ports, Anti-veille, Minuteur d'arrêt  |
-| Organisation  | Horloge, Fuseaux horaires, Agenda, Compte à rebours, Jours fériés, To-do, Notes, Habitudes |
-| Concentration | Pomodoro, Suivi du temps, Pause des yeux                                                   |
-| Musique       | Spotify, Deezer, SoundCloud, YT Music : design sobre ou « Adapté » au service, volume      |
-| Raccourcis    | Lanceur, Dossiers, Presse-papiers, Projets Git, Outils dev, Pipette                        |
-| Infos         | Météo, Cours (bourse et crypto), Claude, Usage Claude, Micro-entreprise, Moyenne           |
-| Décor         | Image, GIF, Vidéo                                                                          |
+| Catégorie     | Widgets                                                                                                 |
+| ------------- | ------------------------------------------------------------------------------------------------------- |
+| Système       | Système, Disques, Réseau, Processus, Batteries, Son, Ports, Anti-veille, Minuteur d'arrêt               |
+| Organisation  | Horloge, Fuseaux horaires, Agenda, Compte à rebours, Jours fériés, To-do, Notes, Habitudes              |
+| Concentration | Pomodoro, Suivi du temps, Pause des yeux                                                                |
+| Musique       | Spotify, Deezer, SoundCloud, YT Music : design sobre ou « Adapté » au service, volume                   |
+| Raccourcis    | Lanceur, Dossiers, Presse-papiers, Projets Git, Outils dev, Pipette                                     |
+| Infos         | Météo, Cours (bourse et crypto), Actualités, Citations, Claude, Usage Claude, Micro-entreprise, Moyenne |
+| Jeux          | Échecs : problème du jour, entraînement, contre l'ordi (3 niveaux), à deux                              |
+| Décor         | Image, GIF, Vidéo                                                                                       |
 
 Nouveautés de chaque version : [CHANGELOG.md](CHANGELOG.md).
 
@@ -182,5 +183,10 @@ les unités `cqw` / `cqh`. Couleurs, rayons, ombres, tailles et durées : tokens
 - Police [Satoshi](https://www.fontshare.com/fonts/satoshi) (Indian Type Foundry), licence ITF Free
   Font License : intégrée telle quelle, à ne pas modifier ni redistribuer seule.
 - Icônes [Phosphor](https://phosphoricons.com) (MIT).
+- [chess.js](https://github.com/jhlywa/chess.js) (BSD-2) : règles complètes des échecs (roque, prise
+  en passant, promotion, mat, nulles), trop longues et piégeuses à recoder. Version figée : le bot
+  (`widgets/chess/engine.ts`) utilise ses fonctions internes, `engine.test.ts` casse si elles changent.
+- Problèmes d'échecs : [Lichess](https://lichess.org) (API publique, base de problèmes CC0).
+- Actualités : flux RSS de Google Actualités (usage personnel) ou de chaque site.
 
 Design doc : https://claude.ai/artifact/PozosXRE6sFL3Cmswz6uB1

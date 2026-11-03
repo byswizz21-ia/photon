@@ -4,6 +4,14 @@
 
 ### Nouveau
 
+- **Actualités** : les derniers articles sur tes sujets (mots-clés lus sur Google Actualités, ou
+  l'adresse RSS d'un site), filtre par sujet, clic pour ouvrir l'article. Lus en fond toutes les
+  30 min, jamais à l'ouverture.
+- **Citations** : une citation par jour parmi les thèmes cochés (motivation, business, code,
+  philosophie, science, sport, art, humour) et tes propres citations ; « Une autre », « Copier ».
+- **Échecs** : problème du jour Lichess avec série de jours, entraînement (problèmes à la chaîne,
+  indice, solution), partie contre l'ordi (Facile, Moyen, Difficile ; Blancs, Noirs ou au hasard ;
+  annuler) ou à deux sur le même écran. Les parties en cours sont gardées.
 - **Notifications** : toutes passent par un même système, réglable dans Réglages ›
   Notifications (tout couper, ou source par source, et notification d'essai). L'avertissement
   avant un arrêt du PC part toujours.
