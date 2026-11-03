@@ -1,19 +1,26 @@
 <script lang="ts">
   // Une ligne par symbole : nom, courbe du jour, prix, variation depuis la veille.
-  // Mode édition : la liste des symboles (validée à Entrée ou en quittant le champ).
+  // Mode édition : design et liste des symboles (validée à Entrée ou en quittant le champ).
   import type { MarketFeed } from '../../../shared/api'
+  import DesignPicker from '../../lib/DesignPicker.svelte'
   import { pollWhileVisible } from '../../lib/poll.svelte'
   import type { WidgetProps } from '../types'
-  import type { MarketsSettings } from './manifest'
+  import { MARKETS_DESIGNS, type MarketsSettings } from './manifest'
+  import MarketBoard from './MarketBoard.svelte'
+  import MarketSpot from './MarketSpot.svelte'
 
   let { settings, editing, save }: WidgetProps<MarketsSettings> = $props()
 
   let feed = $state.raw<MarketFeed | null>(null)
+  let now = $state(Date.now())
 
   // Cache de Photon seulement : relu souvent, ne coûte rien.
   pollWhileVisible(async () => {
     feed = await window.photon.markets(settings.symbols)
+    now = Date.now()
   }, 5_000)
+
+  const ready = $derived(!editing && settings.symbols.trim() && feed?.quotes.length)
 
   const money = (value: number, currency: string): string =>
     new Intl.NumberFormat('fr-FR', {
@@ -33,42 +40,55 @@
   }
 </script>
 
-<div class="widget">
-  <span class="label">Cours</span>
-  {#if editing || !settings.symbols.trim()}
-    <label class="field">
-      Symboles Yahoo Finance
-      <input
-        value={settings.symbols}
-        placeholder="BTC-EUR, AAPL, ^FCHI"
-        maxlength="200"
-        onchange={(event) => save({ ...settings, symbols: event.currentTarget.value.trim() })}
-      />
-      <span class="hint">Crypto : BTC-EUR · action : AAPL, MC.PA · indice : ^FCHI</span>
-    </label>
-  {:else if !feed?.quotes.length && !feed?.missing.length}
-    <p class="empty">Lecture des cours…</p>
-  {:else}
-    <ul>
-      {#each feed.quotes as quote (quote.symbol)}
-        {@const pct = change(quote.price, quote.previous)}
-        <li class:down={pct < 0}>
-          <span class="name" title={quote.symbol}>{quote.name}</span>
-          {#if quote.points.length > 1}
-            <svg viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
-              <polyline points={line(quote.points)} />
-            </svg>
-          {/if}
-          <span class="price">{money(quote.price, quote.currency)}</span>
-          <span class="pct">{pct >= 0 ? '+' : ''}{pct.toFixed(2).replace('.', ',')} %</span>
-        </li>
-      {/each}
-    </ul>
-    {#if feed.missing.length}
-      <p class="empty">Introuvable : {feed.missing.join(', ')}</p>
+{#if ready && feed && settings.design === 'spot'}
+  <MarketSpot quotes={feed.quotes} {now} />
+{:else if ready && feed && settings.design === 'market'}
+  <MarketBoard {feed} {now} />
+{:else}
+  <div class="widget">
+    <span class="label">Cours</span>
+    {#if editing || !settings.symbols.trim()}
+      {#if editing}
+        <DesignPicker
+          designs={MARKETS_DESIGNS}
+          value={settings.design}
+          onpick={(design) => save({ ...settings, design })}
+        />
+      {/if}
+      <label class="field">
+        Symboles Yahoo Finance
+        <input
+          value={settings.symbols}
+          placeholder="BTC-EUR, AAPL, ^FCHI"
+          maxlength="200"
+          onchange={(event) => save({ ...settings, symbols: event.currentTarget.value.trim() })}
+        />
+        <span class="hint">Crypto : BTC-EUR · action : AAPL, MC.PA · indice : ^FCHI</span>
+      </label>
+    {:else if !feed?.quotes.length && !feed?.missing.length}
+      <p class="empty">Lecture des cours…</p>
+    {:else}
+      <ul>
+        {#each feed.quotes as quote (quote.symbol)}
+          {@const pct = change(quote.price, quote.previous)}
+          <li class:down={pct < 0}>
+            <span class="name" title={quote.symbol}>{quote.name}</span>
+            {#if quote.points.length > 1}
+              <svg viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
+                <polyline points={line(quote.points)} />
+              </svg>
+            {/if}
+            <span class="price">{money(quote.price, quote.currency)}</span>
+            <span class="pct">{pct >= 0 ? '+' : ''}{pct.toFixed(2).replace('.', ',')} %</span>
+          </li>
+        {/each}
+      </ul>
+      {#if feed.missing.length}
+        <p class="empty">Introuvable : {feed.missing.join(', ')}</p>
+      {/if}
     {/if}
-  {/if}
-</div>
+  </div>
+{/if}
 
 <style>
   .widget {

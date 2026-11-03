@@ -1,5 +1,17 @@
 # Mises à jour
 
+## À venir
+
+### Nouveau
+
+- **Cours** : deux designs au choix, repris des maquettes.
+  - « Vedette » (3 × 3) : un actif en grand, courbe sur 1 jour, 5 jours, 1 mois ou 1 an,
+    survol de la courbe pour lire le cours d'un moment, flèches ou molette pour changer d'actif,
+    place ouverte ou fermée.
+  - « Marché » (6 × 3) : la liste suivie à gauche, l'actif choisi à droite avec un graphique
+    détaillé (niveaux, dates, plus haut, plus bas, veille).
+- Noms plus courts (« Apple » au lieu de « Apple Inc. ») et courbe du jour plus fine (5 min).
+
 ## 1.3.0 · 3 novembre 2026
 
 ### Nouveau

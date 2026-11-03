@@ -262,13 +262,25 @@ export interface Battery {
 }
 
 // Cours (src/main/markets.ts) : cache lu en fond.
-export interface MarketQuote {
+export interface MarketSeries {
+  points: number[] // cours, du plus ancien au plus récent
+  times: number[] // ms, un par point
+}
+
+// Périodes des designs détaillés ; 1J = la journée (points / times du cours).
+export type MarketRange = '1J' | '5J' | '1M' | '1A'
+
+export interface MarketQuote extends MarketSeries {
   symbol: string // BTC-EUR, AAPL…
   name: string
   price: number
   previous: number // clôture de la veille (crypto : il y a 24 h)
   currency: string
-  points: number[] // cours de la journée, du plus ancien au plus récent
+  time: number // ms, heure du dernier cours
+  kind: 'crypto' | 'index' | 'stock'
+  exchange: string // « Paris », « NasdaqGS »
+  session: { start: number; end: number; offset: number } | null // séance (ms, décalage du fuseau de la place)
+  history: Partial<Record<Exclude<MarketRange, '1J'>, MarketSeries>> // designs détaillés seulement
 }
 
 // Symboles d'un widget Cours jamais réglé : partagés par le widget et le téléchargement en fond.
