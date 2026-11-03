@@ -6,6 +6,7 @@ import { data } from './data'
 import { isVisible } from './window'
 
 const TICK_MS = 10_000
+const ASKED_MS = 60 * 60_000 // clé demandée par un widget affiché : suivie encore 1 h
 const RETRY_MS = 3 * 60_000
 
 export interface FeedSource<T> {
@@ -32,14 +33,21 @@ export function backgroundFeed<T>(source: FeedSource<T>): {
   read(settings: unknown): Feed<T> | null
 } {
   const entries = new Map<string, Entry<T>>()
+  const asked = new Map<string, number>() // clé → dernière demande de l'interface
 
-  const keys = (): Set<string> =>
-    new Set(
-      data.profile.widgets
+  // Clés du profil, plus celles que l'interface demande : un widget jamais réglé a des réglages
+  // vides dans le profil, ses valeurs par défaut ne sont connues que de l'interface.
+  function keys(): Set<string> {
+    const now = Date.now()
+    for (const [key, at] of asked) if (now - at > ASKED_MS) asked.delete(key)
+    return new Set([
+      ...data.profile.widgets
         .filter((widget) => widget.type === source.type)
         .map((widget) => source.key(widget.settings))
-        .filter((key): key is string => key !== null)
-    )
+        .filter((key): key is string => key !== null),
+      ...asked.keys()
+    ])
+  }
 
   async function refresh(key: string, entry: Entry<T>): Promise<void> {
     entry.running = true
@@ -76,8 +84,15 @@ export function backgroundFeed<T>(source: FeedSource<T>): {
   sources.push(sync)
   return {
     read(settings) {
-      const key = typeof settings === 'object' && settings ? source.key(settings as Record<string, unknown>) : null
-      return key === null ? null : (entries.get(key)?.feed ?? empty())
+      const key =
+        typeof settings === 'object' && settings
+          ? source.key(settings as Record<string, unknown>)
+          : null
+      if (key === null) return null
+      const known = asked.has(key)
+      asked.set(key, Date.now())
+      if (!known && !entries.has(key)) sync() // nouveau réglage : lu tout de suite
+      return entries.get(key)?.feed ?? empty()
     }
   }
 }

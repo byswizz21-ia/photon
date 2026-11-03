@@ -121,13 +121,14 @@
         <input class="w-input" type="date" bind:value={start} onkeydown={onEnter} />
       </label>
       <div class="w-row">
-        <button type="button" class="action primary" disabled={!valid} onclick={add}>Ajouter</button>
+        <button type="button" class="action primary" disabled={!valid} onclick={add}>Ajouter</button
+        >
         <button type="button" class="action" onclick={() => (adding = false)}>Annuler</button>
       </div>
     </div>
   {:else if list.length}
     <p class="total">
-      {euros(perMonth)}<span> / mois</span>
+      {euros(perMonth, true)} <span>par mois</span>
     </p>
     <p class="w-hint">
       {euros(perMonth * 12)} par an · {euros(thisMonth)} encore prélevés ce mois-ci

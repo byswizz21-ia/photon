@@ -78,7 +78,13 @@ test('rappels : anniversaire demain, prélèvement demain, annuel 7 jours avant'
     { id: 'y', name: 'Domaine', amount: 1200, every: 'year' as const, start: '2025-12-07' },
     { id: 'n', name: 'Spotify', amount: 1199, every: 'month' as const, start: '2026-01-15' }
   ]
-  const input = { widgets: [], feed: () => null, time: { projects: [], entries: [], running: null }, people, subs }
+  const input = {
+    widgets: [],
+    feed: () => null,
+    time: { projects: [], entries: [], running: null },
+    people,
+    subs
+  }
   expect(dueReminders(input, now)).toEqual([]) // pas de widget : pas de rappel
   const titles = dueReminders(
     { ...input, widgets: [widget('birthdays'), widget('subscriptions')] },

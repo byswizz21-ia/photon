@@ -12,7 +12,11 @@ const person = (day: string, year: number | null = null): Parameters<typeof next
 test('prochain anniversaire : aujourd’hui, plus tard, l’an prochain, âge', () => {
   expect(nextBirthday(person('11-03', 2006), now)).toEqual({ date: '2026-11-03', days: 0, age: 20 })
   expect(nextBirthday(person('12-25'), now)).toEqual({ date: '2026-12-25', days: 52, age: null })
-  expect(nextBirthday(person('01-02', 2000), now)).toEqual({ date: '2027-01-02', days: 60, age: 27 })
+  expect(nextBirthday(person('01-02', 2000), now)).toEqual({
+    date: '2027-01-02',
+    days: 60,
+    age: 27
+  })
 })
 
 test('29 février : le 28 les années non bissextiles', () => {

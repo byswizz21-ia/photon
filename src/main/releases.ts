@@ -53,7 +53,9 @@ async function loadTmdb(kind: 'movie' | 'tv', key: string): Promise<Raw[]> {
 // Liste Steam : nom et vignette ; la date vient de la fiche de chaque jeu.
 async function loadGames(): Promise<Raw[]> {
   const json = obj(
-    await getJson(`${STEAM}/search/results/?filter=popularcomingsoon&json=1&cc=fr&l=french&count=${MAX_ITEMS}`)
+    await getJson(
+      `${STEAM}/search/results/?filter=popularcomingsoon&json=1&cc=fr&l=french&count=${MAX_ITEMS}`
+    )
   )
   const games = arr(json['items'])
     .map(obj)
@@ -81,7 +83,9 @@ async function load(key: string): Promise<Release[]> {
   const [kind, tmdbKey = ''] = key.split('|') as [ReleaseKind, string?]
   const raw = kind === 'game' ? await loadGames() : await loadTmdb(kind, tmdbKey)
   return Promise.all(
-    raw.slice(0, MAX_ITEMS).map(async ({ imageUrl, ...r }) => ({ ...r, image: await imageData(imageUrl) }))
+    raw
+      .slice(0, MAX_ITEMS)
+      .map(async ({ imageUrl, ...r }) => ({ ...r, image: await imageData(imageUrl) }))
   )
 }
 

@@ -4,6 +4,25 @@
 
 ### Nouveau
 
+- **13 widgets** :
+  - **Tirage au sort** : dés (1 à 6, de 4 à 100 faces), pile ou face, un nom dans une liste
+    (avec ou sans remise), un nombre entre deux bornes.
+  - **Anniversaires** : prochains anniversaires et âge atteint ; rappel la veille et le jour J.
+  - **Abonnements** : coût par mois et par an, prochain prélèvement de chacun ; rappel la veille
+    (et 7 jours avant un abonnement annuel).
+  - **Budget du mois** : plafond, dépenses par catégorie, reste à dépenser par jour.
+  - **Corbeille** : taille, vider (avec confirmation), ouvrir.
+  - **Captures récentes** : dernières captures d'écran, à glisser directement dans Discord ou
+    un mail, à copier ou jeter.
+  - **Scripts** : lance `npm run dev` (ou toute commande) dans un dossier, voyant, sortie,
+    bouton stop ; tout s'arrête quand Photon quitte.
+  - **Test micro** : vumètre, avis sur le niveau, enregistrement de 5 s réécouté aussitôt.
+  - **Traduction** : traduit pendant la frappe (MyMemory sans clé, DeepL avec une clé gratuite).
+  - **Jeux gratuits** : jeux offerts sur Epic Games (et ceux de la semaine suivante), Steam, GOG.
+  - **Bus et tram** : prochains passages en temps réel à un arrêt Divia (Dijon).
+  - **Matchs** : foot (ligue ou équipe), League of Legends, Valorant : en direct, à venir,
+    résultats.
+  - **Sorties** : jeux attendus sur Steam ; films et séries avec une clé TMDB gratuite.
 - **Notifications** : toutes passent par un même système, réglable dans Réglages ›
   Notifications (tout couper, ou source par source, et notification d'essai). L'avertissement
   avant un arrêt du PC part toujours.

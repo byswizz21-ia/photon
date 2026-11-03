@@ -42,7 +42,8 @@ export async function translate(text: unknown, to: unknown, key: unknown): Promi
   if (typeof to !== 'string' || !LANG.test(to)) return fail('Langue inconnue')
   const deeplKey = typeof key === 'string' ? key.trim().slice(0, 100) : ''
   const tooLong = deeplKey ? text.length > MAX_TEXT : Buffer.byteLength(text) > MAX_FREE
-  if (tooLong) return fail(deeplKey ? 'Texte trop long' : 'Trop long sans clé DeepL (≈ 450 caractères)')
+  if (tooLong)
+    return fail(deeplKey ? 'Texte trop long' : 'Trop long sans clé DeepL (≈ 450 caractères)')
   try {
     return deeplKey ? await deepl(text, to, deeplKey) : await myMemory(text, to)
   } catch (error) {

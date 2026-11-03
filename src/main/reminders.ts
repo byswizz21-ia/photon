@@ -139,7 +139,8 @@ function subscriptionReminders(subs: Subscription[], now: Date): Reminder[] {
 }
 
 // Données partagées : rappels seulement si le profil a le widget.
-const has = (input: ReminderInput, type: string): boolean => input.widgets.some((w) => w.type === type)
+const has = (input: ReminderInput, type: string): boolean =>
+  input.widgets.some((w) => w.type === type)
 
 // Rappels dus à l'instant `now` (pur, testé) ; le dédoublonnage se fait par clé.
 export function dueReminders(input: ReminderInput, now: Date): Reminder[] {

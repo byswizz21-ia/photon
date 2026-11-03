@@ -151,12 +151,20 @@ const decode = (html: string): string =>
 export function eta(text: string): number | null {
   const units: Record<string, number> = { w: 604_800_000, d: 86_400_000, h: 3_600_000, m: 60_000 }
   const parts = [...text.matchAll(/(\d+)\s*([wdhm])/g)]
-  return parts.length ? parts.reduce((ms, [, n, u]) => ms + Number(n) * units[u as string]!, 0) : null
+  return parts.length
+    ? parts.reduce((ms, [, n, u]) => ms + Number(n) * units[u as string]!, 0)
+    : null
 }
 
 // Heure affichée par vlr.gg (fuseau du visiteur, déduit de son adresse) : vérifiée contre le délai
 // « dans 1d 4h » ; trop loin (fuseau mal deviné), on garde le délai.
-function vlrStart(day: string, time: string, wait: number | null, now: number, done: boolean): number {
+function vlrStart(
+  day: string,
+  time: string,
+  wait: number | null,
+  now: number,
+  done: boolean
+): number {
   const guess = Date.parse(`${day} ${time.replace(/\s*(AM|PM)$/i, ' $1')}`)
   const fromEta = wait === null ? NaN : done ? now - wait : now + wait
   if (Number.isNaN(guess)) return Number.isNaN(fromEta) ? now : fromEta
@@ -166,22 +174,28 @@ function vlrStart(day: string, time: string, wait: number | null, now: number, d
 export function parseVlr(html: string, now: number): Raw[] {
   const matches: Raw[] = []
   let day = ''
-  const tokens = html.split(/(?=<div class="wf-label mod-large">)|(?=<a href="\/\d+\/[^"]*" class="wf-module-item match-item)/)
+  const tokens = html.split(
+    /(?=<div class="wf-label mod-large">)|(?=<a href="\/\d+\/[^"]*" class="wf-module-item match-item)/
+  )
   for (const token of tokens) {
     if (token.startsWith('<div class="wf-label mod-large">')) {
-      day = decode(token.slice(0, token.indexOf('</div>'))).replace(/\b(Today|Yesterday)\b/, '').trim()
+      day = decode(token.slice(0, token.indexOf('</div>')))
+        .replace(/\b(Today|Yesterday)\b/, '')
+        .trim()
       continue
     }
     const id = /^<a href="\/(\d+)\/([^"]*)"/.exec(token)
     if (!id) continue
     const item = token.slice(0, token.indexOf('</a>') + 4)
-    const names = [...item.matchAll(/match-item-vs-team-name">([\s\S]*?)<\/div>\s*<\/div>/g)].map((m) =>
-      decode(m[1] ?? '')
+    const names = [...item.matchAll(/match-item-vs-team-name">([\s\S]*?)<\/div>\s*<\/div>/g)].map(
+      (m) => decode(m[1] ?? '')
     )
-    const scores = [...item.matchAll(/match-item-vs-team-score[^"]*">([\s\S]*?)<\/div>/g)].map((m) => {
-      const n = Number.parseInt(decode(m[1] ?? ''), 10)
-      return Number.isNaN(n) ? null : n
-    })
+    const scores = [...item.matchAll(/match-item-vs-team-score[^"]*">([\s\S]*?)<\/div>/g)].map(
+      (m) => {
+        const n = Number.parseInt(decode(m[1] ?? ''), 10)
+        return Number.isNaN(n) ? null : n
+      }
+    )
     const status = /ml-status">([^<]*)/.exec(item)?.[1]?.trim().toLowerCase() ?? ''
     const state: Match['state'] =
       status === 'live' ? 'live' : status === 'completed' ? 'done' : 'upcoming'
@@ -189,8 +203,11 @@ export function parseVlr(html: string, now: number): Raw[] {
     const wait = eta(/ml-eta[^"]*">([^<]*)/.exec(item)?.[1] ?? '')
     const series = decode(/match-item-event-series[^"]*">([\s\S]*?)<\/div>/.exec(item)?.[1] ?? '')
     const event = decode(
-      (/match-item-event text-of">([\s\S]*?)<\/div>\s*<div class="match-item-icon/.exec(item)?.[1] ?? '')
-        .replace(/<div class="match-item-event-series[\s\S]*?<\/div>/, '')
+      (
+        /match-item-event text-of">([\s\S]*?)<\/div>\s*<div class="match-item-icon/.exec(
+          item
+        )?.[1] ?? ''
+      ).replace(/<div class="match-item-event-series[\s\S]*?<\/div>/, '')
     )
     if (names.length !== 2) continue
     const side = (i: number): Raw['home'] => ({
@@ -230,8 +247,12 @@ export function pick(matches: Raw[], filter: string): Raw[] {
   const by = (state: Match['state']): Raw[] => unique.filter((m) => m.state === state)
   return [
     ...by('live'),
-    ...by('upcoming').sort((a, b) => a.start - b.start).slice(0, MAX_NEXT),
-    ...by('done').sort((a, b) => b.start - a.start).slice(0, MAX_DONE)
+    ...by('upcoming')
+      .sort((a, b) => a.start - b.start)
+      .slice(0, MAX_NEXT),
+    ...by('done')
+      .sort((a, b) => b.start - a.start)
+      .slice(0, MAX_DONE)
   ]
 }
 
@@ -239,7 +260,8 @@ async function load(key: string): Promise<Match[]> {
   const [sport, a = '', b = ''] = key.split('|')
   let raw: Raw[]
   if (sport === 'foot') raw = await loadFoot(a, b)
-  else if (sport === 'lol') raw = parseLol(await getJson(LOL_SCHEDULE, { headers: { 'x-api-key': LOL_KEY } }))
+  else if (sport === 'lol')
+    raw = parseLol(await getJson(LOL_SCHEDULE, { headers: { 'x-api-key': LOL_KEY } }))
   else {
     const [next, done] = await Promise.all([
       getText(`${VLR}/matches`),

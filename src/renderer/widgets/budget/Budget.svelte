@@ -9,7 +9,15 @@
   import { pollWhileVisible } from '../../lib/poll.svelte'
   import { profileKey, shared } from '../../lib/shared.svelte'
   import type { WidgetProps } from '../types'
-  import { byCategory, CATEGORIES, inMonth, parseBudget, perDay, sum, type Category } from './budget'
+  import {
+    byCategory,
+    CATEGORIES,
+    inMonth,
+    parseBudget,
+    perDay,
+    sum,
+    type Category
+  } from './budget'
   import type { BudgetSettings } from './manifest'
 
   let { settings, editing, save }: WidgetProps<BudgetSettings> = $props()
@@ -90,7 +98,7 @@
   {/if}
 
   <div class="top">
-    <p class="spent">{euros(spent)}<span> dépensés</span></p>
+    <p class="spent">{euros(spent)} <span>dépensés</span></p>
     {#if limit}
       <p class="left" class:over={left < 0}>
         {left < 0 ? `${euros(-left)} de trop` : `reste ${euros(left)}`}
@@ -98,11 +106,18 @@
     {/if}
   </div>
   {#if limit}
-    <div class="gauge" role="meter" aria-valuenow={spent} aria-valuemax={limit} aria-label="Budget utilisé">
+    <div
+      class="gauge"
+      role="meter"
+      aria-valuenow={spent}
+      aria-valuemax={limit}
+      aria-label="Budget utilisé"
+    >
       <div class="fill" class:over={left < 0} style:transform="scaleX({ratio})"></div>
     </div>
     <p class="w-hint">
-      {#if left > 0}≈ {euros(perDay(left, now))} par jour jusqu'à la fin du mois{:else}Plafond atteint{/if}
+      {#if left > 0}≈ {euros(perDay(left, now))} par jour jusqu'à la fin du mois{:else}Plafond
+        atteint{/if}
     </p>
   {/if}
 
@@ -111,7 +126,8 @@
       {#each categories as c (c.category)}
         <li>
           <span>{CATEGORIES[c.category]}</span>
-          <span class="bar" style:transform="scaleX({c.amount / (categories[0]?.amount ?? 1)})"></span>
+          <span class="bar" style:transform="scaleX({c.amount / (categories[0]?.amount ?? 1)})"
+          ></span>
           <span class="amount">{euros(c.amount)}</span>
         </li>
       {/each}

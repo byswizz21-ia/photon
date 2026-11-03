@@ -60,7 +60,9 @@ export const sum = (expenses: Expense[]): number => expenses.reduce((t, e) => t 
 export function byCategory(expenses: Expense[]): { category: Category; amount: number }[] {
   const totals = new Map<Category, number>()
   for (const e of expenses) totals.set(e.category, (totals.get(e.category) ?? 0) + e.amount)
-  return [...totals].map(([category, amount]) => ({ category, amount })).sort((a, b) => b.amount - a.amount)
+  return [...totals]
+    .map(([category, amount]) => ({ category, amount }))
+    .sort((a, b) => b.amount - a.amount)
 }
 
 // Ce qu'on peut encore dépenser par jour jusqu'à la fin du mois, aujourd'hui compris.

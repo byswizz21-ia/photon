@@ -10,9 +10,11 @@ const MAX_SHOTS = 12
 const THUMB = { width: 360, height: 220 }
 const EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.gif', '.bmp'])
 
-let listed = new Set<string>()
-// Dossier inchangé (sa date bouge à chaque fichier ajouté ou retiré) : liste précédente.
-let last: { folder: string; changed: number; shots: Screenshot[] } | null = null
+// Dernière liste de chaque dossier (deux widgets peuvent suivre deux dossiers). Dossier inchangé
+// (sa date bouge à chaque fichier ajouté ou retiré) : liste précédente.
+const lists = new Map<string, { changed: number; shots: Screenshot[] }>()
+const listed = (path: unknown): path is string =>
+  typeof path === 'string' && [...lists.values()].some((l) => l.shots.some((s) => s.path === path))
 const thumbs = new Map<string, Promise<string>>() // clé : chemin + date
 
 // Dossier de Windows (Win+Impr. écran, outil Capture) : Images\Captures d'écran (« Screenshots »).
@@ -36,14 +38,18 @@ export async function screenshots(raw: unknown): Promise<Screenshot[]> {
   const folder = typeof raw === 'string' && isAbsolute(raw) ? raw : defaultFolder()
   try {
     const changed = (await stat(folder)).mtimeMs
-    if (last?.folder !== folder || last.changed !== changed) {
+    const last = lists.get(folder)
+    if (last?.changed !== changed) {
       const names = (await readdir(folder, { withFileTypes: true }))
         .filter((entry) => entry.isFile() && EXTENSIONS.has(extname(entry.name).toLowerCase()))
         .map((entry) => entry.name)
       const files = await Promise.all(
         names.map(async (name) => {
           const path = join(folder, name)
-          const at = await stat(path).then((s) => s.mtimeMs, () => 0)
+          const at = await stat(path).then(
+            (s) => s.mtimeMs,
+            () => 0
+          )
           return { path, name, at }
         })
       )
@@ -51,25 +57,24 @@ export async function screenshots(raw: unknown): Promise<Screenshot[]> {
       const shots = await Promise.all(
         newest.map(async (file) => ({ ...file, thumb: await thumbnail(file.path, file.at) }))
       )
-      last = { folder, changed, shots }
+      lists.set(folder, { changed, shots })
     }
-    listed = new Set(last.shots.map((shot) => shot.path))
-    return last.shots
+    return lists.get(folder)?.shots ?? []
   } catch {
-    listed = new Set()
+    lists.delete(folder)
     return [] // dossier absent : aucune capture encore faite
   }
 }
 
 // Glisser-déposer vers Discord, un mail, l'Explorateur… pendant le dragstart de l'interface.
 export function screenshotDrag(sender: WebContents, path: unknown): void {
-  if (typeof path !== 'string' || !listed.has(path)) return
+  if (!listed(path)) return
   const icon = nativeImage.createFromPath(path).resize({ width: 96 })
   sender.startDrag({ file: path, icon: icon.isEmpty() ? nativeImage.createEmpty() : icon })
 }
 
 export async function screenshotCopy(path: unknown): Promise<boolean> {
-  if (typeof path !== 'string' || !listed.has(path)) return false
+  if (!listed(path)) return false
   const image = nativeImage.createFromPath(path)
   if (image.isEmpty()) return false
   const png = new Blob([new Uint8Array(image.toPNG())], { type: 'image/png' })
@@ -78,11 +83,10 @@ export async function screenshotCopy(path: unknown): Promise<boolean> {
 }
 
 export async function screenshotDelete(path: unknown): Promise<boolean> {
-  if (typeof path !== 'string' || !listed.has(path)) return false
+  if (!listed(path)) return false
   try {
     await shell.trashItem(path)
-    listed.delete(path)
-    last = null
+    lists.clear() // relu au prochain passage
     return true
   } catch {
     return false

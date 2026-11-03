@@ -35,15 +35,15 @@ créé au démarrage puis seulement affiché ou caché : l'ouverture est instant
 
 ## Widgets
 
-| Catégorie     | Widgets                                                                                    |
-| ------------- | ------------------------------------------------------------------------------------------ |
-| Système       | Système, Disques, Réseau, Processus, Batteries, Son, Ports, Anti-veille, Minuteur d'arrêt  |
-| Organisation  | Horloge, Fuseaux horaires, Agenda, Compte à rebours, Jours fériés, To-do, Notes, Habitudes |
-| Concentration | Pomodoro, Suivi du temps, Pause des yeux                                                   |
-| Musique       | Spotify, Deezer, SoundCloud, YT Music : design sobre ou « Adapté » au service, volume      |
-| Raccourcis    | Lanceur, Dossiers, Presse-papiers, Projets Git, Outils dev, Pipette                        |
-| Infos         | Météo, Cours (bourse et crypto), Claude, Usage Claude, Micro-entreprise, Moyenne           |
-| Décor         | Image, GIF, Vidéo                                                                          |
+| Catégorie     | Widgets                                                                                                                                                     |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Système       | Système, Disques, Réseau, Processus, Batteries, Son, Ports, Anti-veille, Minuteur d'arrêt, Corbeille, Test micro                                            |
+| Organisation  | Horloge, Fuseaux horaires, Agenda, Compte à rebours, Jours fériés, To-do, Notes, Habitudes, Anniversaires, Abonnements, Budget du mois                      |
+| Concentration | Pomodoro, Suivi du temps, Pause des yeux                                                                                                                    |
+| Musique       | Spotify, Deezer, SoundCloud, YT Music : design sobre ou « Adapté » au service, volume                                                                       |
+| Raccourcis    | Lanceur, Dossiers, Presse-papiers, Projets Git, Outils dev, Pipette, Scripts, Captures récentes, Traduction, Tirage au sort                                 |
+| Infos         | Météo, Cours (bourse et crypto), Claude, Usage Claude, Micro-entreprise, Moyenne, Bus et tram (Divia), Matchs (foot, LoL, Valorant), Jeux gratuits, Sorties |
+| Décor         | Image, GIF, Vidéo                                                                                                                                           |
 
 Nouveautés de chaque version : [CHANGELOG.md](CHANGELOG.md).
 

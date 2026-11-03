@@ -110,7 +110,8 @@ const photon: PhotonApi = {
   screenshotCopy: (path) => ipcRenderer.invoke('photon:screenshotCopy', path),
   screenshotDelete: (path) => ipcRenderer.invoke('photon:screenshotDelete', path),
   scripts: (ids) => ipcRenderer.invoke('photon:scripts', ids),
-  scriptStart: (id, folder, command) => ipcRenderer.invoke('photon:scriptStart', id, folder, command),
+  scriptStart: (id, folder, command) =>
+    ipcRenderer.invoke('photon:scriptStart', id, folder, command),
   scriptStop: (id) => ipcRenderer.invoke('photon:scriptStop', id),
   translate: (text, to, deeplKey) => ipcRenderer.invoke('photon:translate', text, to, deeplKey),
   transitLines: () => ipcRenderer.invoke('photon:transitLines'),

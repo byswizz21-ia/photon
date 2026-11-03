@@ -10,7 +10,12 @@ const e = (date: string, amount: number, category: Expense['category'] = 'food')
 })
 
 test('total du mois et par catégorie', () => {
-  const all = [e('2026-10-31', 500), e('2026-11-01', 1200), e('2026-11-03', 800, 'fun'), e('2026-11-03', 300)]
+  const all = [
+    e('2026-10-31', 500),
+    e('2026-11-01', 1200),
+    e('2026-11-03', 800, 'fun'),
+    e('2026-11-03', 300)
+  ]
   const month = inMonth(all, '2026-11')
   expect(sum(month)).toBe(2300)
   expect(byCategory(month)).toEqual([

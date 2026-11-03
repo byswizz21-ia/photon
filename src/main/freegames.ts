@@ -1,6 +1,6 @@
 // Jeux offerts (widget Jeux gratuits) : Epic Games par son API publique (ceux de la semaine et de
 // la suivante), Steam et GOG par GamerPower (gratuit, sans clé). Lus en fond toutes les 3 h.
-import type { FreeGame } from '../shared/api'
+import type { Feed, FreeGame } from '../shared/api'
 import { backgroundFeed } from './feeds'
 import { arr, getJson, httpsHref, imageData, obj, str } from './web'
 
@@ -44,7 +44,9 @@ export function parseEpic(json: unknown): Raw[] {
         id: `epic:${str(game['id'])}`,
         title: str(game['title']),
         store: 'Epic Games',
-        url: slug ? `https://store.epicgames.com/fr/p/${slug}` : 'https://store.epicgames.com/fr/free-games',
+        url: slug
+          ? `https://store.epicgames.com/fr/p/${slug}`
+          : 'https://store.epicgames.com/fr/free-games',
         imageUrl: image ? `${image}?h=180&w=320&resize=1` : '',
         until: Number.isNaN(offer.end) ? null : offer.end,
         upcoming: next !== null
@@ -55,7 +57,10 @@ export function parseEpic(json: unknown): Raw[] {
 
 // « Dwarven Realms (Steam) Key Giveaway » → « Dwarven Realms ».
 const cleanTitle = (title: string): string =>
-  title.replace(/\s*\((?:Steam|GOG)\)/i, '').replace(/\s*(?:Key\s+)?Giveaway$/i, '').trim()
+  title
+    .replace(/\s*\((?:Steam|GOG)\)/i, '')
+    .replace(/\s*(?:Key\s+)?Giveaway$/i, '')
+    .trim()
 
 export function parseGamerPower(json: unknown, store: string): Raw[] {
   return arr(json).flatMap((raw): Raw[] => {
@@ -98,4 +103,6 @@ const feed = backgroundFeed<FreeGame>({
   every: () => EVERY_MS
 })
 
-export const freeGames = (): ReturnType<typeof feed.read> => feed.read({})
+// Une seule clé (« all ») : jamais null.
+export const freeGames = (): Feed<FreeGame> =>
+  feed.read({}) ?? { items: [], updatedAt: null, error: null }

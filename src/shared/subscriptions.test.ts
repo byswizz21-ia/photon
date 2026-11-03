@@ -34,6 +34,8 @@ test('fichier abîmé : on garde ce qui est lisible', () => {
   expect(parseSubscriptions(null)).toEqual({ subs: [] })
   const ok = sub('month', '2026-01-15')
   expect(
-    parseSubscriptions({ subs: [ok, { ...ok, id: 'b', amount: -3 }, { ...ok, id: 'c', every: 'jour' }] })
+    parseSubscriptions({
+      subs: [ok, { ...ok, id: 'b', amount: -3 }, { ...ok, id: 'c', every: 'jour' }]
+    })
   ).toEqual({ subs: [ok] })
 })

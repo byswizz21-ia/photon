@@ -71,7 +71,14 @@ async function navitia(path: string, query: Record<string, string>): Promise<unk
 export function navitiaTime(raw: string): number | null {
   const m = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})$/.exec(raw)
   if (!m) return null
-  const [y, mo, d, h, mi, s] = m.slice(1).map(Number) as [number, number, number, number, number, number]
+  const [y, mo, d, h, mi, s] = m.slice(1).map(Number) as [
+    number,
+    number,
+    number,
+    number,
+    number,
+    number
+  ]
   return new Date(y, mo - 1, d, h, mi, s).getTime()
 }
 

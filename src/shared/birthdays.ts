@@ -43,7 +43,9 @@ const pad = (n: number): string => String(n).padStart(2, '0')
 function dateIn(day: string, year: number): string {
   const [month, date] = day.split('-').map(Number) as [number, number]
   const leap = new Date(year, 1, 29).getDate() === 29
-  return month === 2 && date === 29 && !leap ? `${year}-02-28` : `${year}-${pad(month)}-${pad(date)}`
+  return month === 2 && date === 29 && !leap
+    ? `${year}-02-28`
+    : `${year}-${pad(month)}-${pad(date)}`
 }
 
 export interface NextBirthday {
@@ -70,7 +72,10 @@ export const upcoming = (people: Person[], now: Date): (Person & NextBirthday)[]
   people.map((p) => ({ ...p, ...nextBirthday(p, now) })).sort((a, b) => a.days - b.days)
 
 // Saisie « 14/03 » ou « 14/03/1999 » (ou avec - et .) → jour et année ; null si invalide.
-export function parseDayInput(text: string, now: Date): { day: string; year: number | null } | null {
+export function parseDayInput(
+  text: string,
+  now: Date
+): { day: string; year: number | null } | null {
   const m = /^\s*(\d{1,2})[/.-](\d{1,2})(?:[/.-](\d{4}))?\s*$/.exec(text)
   if (!m) return null
   const day = `${pad(Number(m[2]))}-${pad(Number(m[1]))}`
