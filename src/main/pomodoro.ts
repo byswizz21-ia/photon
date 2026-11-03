@@ -17,20 +17,12 @@ export const setReminders = (on: boolean): void => {
   reminders = on
 }
 
-const xml = (text: string): string => text.replace(/[<>&"]/g, (c) => `&#${c.charCodeAt(0)};`)
-
-// Rappel : passe « Ne pas déranger » (réglage par défaut de Windows 11) et reste affiché
-// jusqu'au clic sur OK.
-const reminderXml = (title: string, body: string): string =>
-  `<toast scenario="reminder"><visual><binding template="ToastGeneric"><text>${xml(title)}</text>` +
-  `<text>${xml(body)}</text></binding></visual><actions>` +
-  `<action content="OK" arguments="dismiss" activationType="system"/></actions></toast>`
-
 const minutes = (v: unknown, fallback: number): number =>
   typeof v === 'number' && Number.isFinite(v) ? Math.min(Math.max(Math.round(v), 1), 180) : fallback
 
 function ring(title: string, body: string): void {
-  notify('pomodoro', reminders ? { title, toastXml: reminderXml(title, body) } : { title, body })
+  // Profil Focus : rappel qui reste à l'écran et passe « Ne pas déranger ».
+  notify('pomodoro', { title, body, sticky: reminders })
 }
 
 function run(phase: 'focus' | 'pause', total: number, left = total): void {

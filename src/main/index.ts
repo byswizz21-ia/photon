@@ -32,6 +32,7 @@ import { startAuto } from './auto'
 import { startReminders } from './reminders'
 import { startFeeds } from './feeds'
 import { stopScripts } from './scripts'
+import { createToasts } from './toast'
 
 // Argument passé par le lancement au démarrage de Windows : rester caché dans la zone de notif.
 const HIDDEN_ARG = '--hidden'
@@ -104,6 +105,7 @@ if (!app.requestSingleInstanceLock()) {
     registerIpc({ ready: onRendererReady, updateSettings })
     const win = createWindow().on('hide', leaveBypass) // Bypass ne survit pas à la fermeture
     startBackdrop(win)
+    createToasts() // cachée, prête pour la première notification
     // Branché après la fenêtre : un 2e lancement pendant le démarrage ne trouve pas de fenêtre vide.
     app.on('second-instance', showWindow)
     activeShortcut = registerShortcut('photon', data.settings.shortcut, SHORTCUTS, toggleWindow)

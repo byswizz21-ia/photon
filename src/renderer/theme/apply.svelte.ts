@@ -48,7 +48,7 @@ const DEFAULT_FONT = "'Satoshi', system-ui, sans-serif" // = --font-sans de toke
 // eslint-disable-next-line svelte/prefer-svelte-reactivity
 const loadedFonts = new Set<string>()
 
-function fontStack(family: string): string {
+export function fontStack(family: string): string {
   if (!family) return DEFAULT_FONT
   if (!family.startsWith(FONT_FILE)) return `"${family}", ${DEFAULT_FONT}`
   const name = family.slice(FONT_FILE.length)
@@ -104,5 +104,14 @@ export function useTheme(): void {
     style.setProperty('--font-sans', fontStack(theme.font.family))
     style.setProperty('--weight-shift', String(theme.font.weight))
     style.setProperty('--font-scale', String(theme.font.scale))
+    // Notifications : thème choisi (accent prêté par la musique exclu).
+    window.photon.toastLook({
+      accent: resolvedAccent(),
+      onAccent: onAccent(resolvedAccent()),
+      radius: theme.radius,
+      font: theme.font.family,
+      weight: theme.font.weight,
+      scale: theme.font.scale
+    })
   })
 }

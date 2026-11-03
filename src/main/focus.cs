@@ -3,6 +3,8 @@
 // (utilisé par WinDndToggle, traywise…). Une commande par ligne, une réponse par ligne :
 //   get              → profil actuel, ex. Microsoft.QuietHoursProfile.Unrestricted (DND coupé)
 //   set <profil>     → ok
+//   quiet            → fullscreen (jeu, présentation, écran verrouillé), dnd (Ne pas déranger)
+//                      ou none : où afficher une notification de Photon (src/main/notify.ts)
 // Profils : Unrestricted (coupé), PriorityOnly (prioritaires seulement), AlarmsOnly.
 using System;
 using System.Runtime.InteropServices;
@@ -16,6 +18,24 @@ namespace Photon {
   }
 
   public static class Dnd {
+    [DllImport("shell32.dll")]
+    static extern int SHQueryUserNotificationState(out int state);
+
+    // QUNS : 1 absent (verrouillé, économiseur), 2 plein écran, 3 Direct3D plein écran,
+    // 4 présentation, 5 libre, 6 heures calmes, 7 app plein écran.
+    static string Quiet() {
+      int state;
+      if (SHQueryUserNotificationState(out state) == 0) {
+        if (state == 1 || state == 2 || state == 3 || state == 4 || state == 7) return "fullscreen";
+        if (state == 6) return "dnd";
+      }
+      IntPtr text;
+      if (Settings().GetUserSelectedProfile(out text) != 0) return "none";
+      string profile = Marshal.PtrToStringUni(text);
+      Marshal.FreeCoTaskMem(text);
+      return profile.EndsWith(".Unrestricted") ? "none" : "dnd";
+    }
+
     static IQuietHoursSettings Settings() {
       var type = Type.GetTypeFromCLSID(new Guid("F53321FA-34F8-4B7F-B9A3-361877CB94CF"));
       return (IQuietHoursSettings)Activator.CreateInstance(type);
@@ -32,6 +52,7 @@ namespace Photon {
           Marshal.FreeCoTaskMem(text);
           return profile;
         }
+        if (line == "quiet") return Quiet();
         if (line.StartsWith("set ")) {
           int hr = Settings().SetUserSelectedProfile(line.Substring(4));
           return hr == 0 ? "ok" : "error " + hr.ToString("x8");

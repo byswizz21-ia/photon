@@ -107,6 +107,7 @@ test('intro : pas encore vue par défaut, seul true compte', () => {
 test('sons : activés par défaut, volume borné, champ invalide → défaut', () => {
   expect(parseSettings({}).sound).toEqual({
     enabled: true,
+    preset: 'glass',
     volume: 0.5,
     window: true,
     clicks: true,
@@ -114,11 +115,18 @@ test('sons : activés par défaut, volume borné, champ invalide → défaut', (
   })
   expect(parseSettings({ sound: { enabled: false, volume: 3, clicks: 'non' } }).sound).toEqual({
     enabled: false,
+    preset: 'glass',
     volume: 1,
     window: true,
     clicks: true,
     grid: true
   })
+})
+
+test('ambiance sonore : connue gardée, inconnue → Verre', () => {
+  expect(parseSettings({ sound: { preset: 'piano' } }).sound.preset).toBe('piano')
+  expect(parseSettings({ sound: { preset: 'toString' } }).sound.preset).toBe('glass')
+  expect(parseSettings({ sound: { preset: 4 } }).sound.preset).toBe('glass')
 })
 
 test("fond « Lumineux » conservé, type inconnu → fond d'écran", () => {
@@ -136,10 +144,19 @@ test('police du thème : défaut si absente, nom sans guillemet, bornes', () => 
 })
 
 test('parseSettings : notifications activées par défaut, sources inconnues gardées', () => {
-  expect(parseSettings({}).notifications).toEqual({ enabled: true, sources: {} })
+  expect(parseSettings({}).notifications).toEqual({ enabled: true, style: 'photon', sources: {} })
   expect(
     parseSettings({
       notifications: { enabled: false, sources: { music: false, futur: true, x: 1 } }
     }).notifications
-  ).toEqual({ enabled: false, sources: { music: false, futur: true } })
+  ).toEqual({ enabled: false, style: 'photon', sources: { music: false, futur: true } })
+})
+
+test('parseSettings : style des notifications, Photon sauf « windows » explicite', () => {
+  const style = (v: unknown): unknown =>
+    parseSettings({ notifications: { style: v } }).notifications.style
+  expect(style('windows')).toBe('windows')
+  expect(style('photon')).toBe('photon')
+  expect(style('autre')).toBe('photon')
+  expect(style(undefined)).toBe('photon')
 })

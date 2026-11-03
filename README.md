@@ -27,7 +27,7 @@ créé au démarrage puis seulement affiché ou caché : l'ouverture est instant
 - **Thèmes** : fond d'écran, image, dégradé ou scène lumineuse ; accent extrait du fond ; flou,
   opacité, arrondi (tous les coins le suivent), densité et police réglables, par profil ou pour
   tous.
-- **Sons** : sound design discret, généré à la volée, réglable ou coupé.
+- **Sons** : sound design discret, sept ambiances au choix (Réglages › Sons), réglable ou coupé.
 - **Menu « Ajouter »** : widgets par rubrique, recherche, et catalogue avec aperçu en direct.
 - **Plein écran ou fenêtre**, au choix de l'écran, avec flou en direct en mode fenêtre.
 - **Animation d'ouverture** à la toute première ouverture (passable d'un clic ou d'une touche,
@@ -182,5 +182,9 @@ les unités `cqw` / `cqh`. Couleurs, rayons, ombres, tailles et durées : tokens
 - Police [Satoshi](https://www.fontshare.com/fonts/satoshi) (Indian Type Foundry), licence ITF Free
   Font License : intégrée telle quelle, à ne pas modifier ni redistribuer seule.
 - Icônes [Phosphor](https://phosphoricons.com) (MIT).
+- Sons des ambiances Onde, Piano et Industriel : kits [SND](https://snd.dev) de Dentsu (Yasuhiro
+  Tsuchiya, Ayako Taniguchi…), gratuits pour un usage commercial ou non. Ils ne doivent être ni
+  redistribués seuls ni utilisés comme logo sonore. Ici, ils sont découpés et normalisés.
+- Sons de l'ambiance Tactile : [Kenney](https://kenney.nl/assets/interface-sounds) (CC0).
 
 Design doc : https://claude.ai/artifact/PozosXRE6sFL3Cmswz6uB1

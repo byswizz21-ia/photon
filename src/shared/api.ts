@@ -1,5 +1,5 @@
 // Contrat du pont : seules ces fonctions passent entre l'interface et Windows (window.photon).
-import type { Profile, ProfileInfo, Settings, Theme } from './model'
+import type { Profile, ProfileInfo, Settings, SoundPreset, Theme } from './model'
 
 export interface AppState {
   settings: Settings
@@ -520,6 +520,7 @@ export interface PhotonApi {
   pickColor(): Promise<string | null> // « #rrggbb » cliqué à l'écran ; null : annulé
   eyesSet(on: boolean, minutes: number): Promise<EyesState> // 5 à 120 min
   notifyTest(): void // notification d'essai (Réglages › Notifications)
+  toastLook(look: ToastLook): void // thème courant, pour la fenêtre des notifications
   // Thème
   pickFile(kind: FileKind): Promise<string | null> // boîte de dialogue ; null si annulée
   // Copie chez Photon ; nom pour photon://images|videos|fonts/<nom>, null si refusé
@@ -551,8 +552,42 @@ export interface PhotonApi {
   releases(settings: Record<string, unknown>): Promise<Feed<Release> | null>
 }
 
+// Fenêtre des notifications de Photon (src/main/toast.ts, src/renderer/toast/).
+export interface Toast {
+  id: number
+  source: string // NotifySource, 'always' ou 'test' : choisit l'icône et l'étiquette
+  title: string
+  body: string
+  image: string | null // data: URL (pochette)
+  actions: string[] // boutons, dans l'ordre
+  sticky: boolean // reste jusqu'au clic (rappel, arrêt du PC)
+  sound: number // volume du tintement, 0 = muet
+  preset: SoundPreset // ambiance sonore de Photon
+  still: boolean // « Réduire les animations »
+}
+
+// Thème résolu par l'interface (accent « auto » compris), repris par les notifications.
+export interface ToastLook {
+  accent: string
+  onAccent: string
+  radius: number
+  font: string // famille du thème ('' = Satoshi, « file:… » = importée)
+  weight: number
+  scale: number
+}
+
+export interface ToastApi {
+  onShow(callback: (toast: Toast) => void): () => void
+  onLook(callback: (look: ToastLook) => void): () => void
+  click(id: number, action: number): void // action -1 : la carte elle-même
+  close(id: number): void // fermée, ou temps écoulé
+  hover(inside: boolean): void // souris sur une carte : la fenêtre capte les clics
+  empty(): void // plus aucune carte : la fenêtre se cache
+}
+
 declare global {
   interface Window {
     photon: PhotonApi
+    toasts: ToastApi // fenêtre des notifications seulement
   }
 }

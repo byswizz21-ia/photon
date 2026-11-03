@@ -29,7 +29,7 @@ export interface Settings {
   introSeen: boolean // animation de première ouverture déjà vue (ou passée)
 }
 
-// Notifications Windows de Photon, par source : [nom, quand elle arrive]. L'avertissement du
+// Notifications de Photon, par source : [nom, quand elle arrive]. L'avertissement du
 // minuteur d'arrêt n'est pas listé : il part toujours (sinon le PC s'éteindrait sans prévenir).
 export const NOTIFY_SOURCES = {
   calendar: ['Agenda', 'Avant chaque événement (délai réglé dans le widget)'],
@@ -46,14 +46,32 @@ export const NOTIFY_SOURCES = {
 } as const
 export type NotifySource = keyof typeof NOTIFY_SOURCES
 
+export type NotifyStyle = 'photon' | 'windows' // cartes de Photon, ou notifications de Windows
+
 export interface NotifySettings {
   enabled: boolean
+  style: NotifyStyle
   sources: Record<string, boolean> // source absente = activée ; inconnues gardées (retour en arrière)
 }
 
 // Sons de l'interface (src/renderer/sound.svelte.ts), par famille.
+// Ambiances sonores : [nom, caractère]. Les trois premières sont synthétisées, les autres
+// jouent des fichiers (src/renderer/sounds/).
+export const SOUND_PRESETS = {
+  glass: ['Verre', 'Cloches de verre, claires'],
+  wood: ['Bois', 'Marimba feutré, chaleureux'],
+  air: ['Souffle', 'De l’air, presque rien'],
+  sine: ['Onde', 'Sinusoïdes pures, très courtes'],
+  piano: ['Piano', 'Notes de piano, amples'],
+  industrial: ['Industriel', 'Métal et mécanique, précis'],
+  tactile: ['Tactile', 'Clics et touches, comme un vrai bouton']
+} as const
+
+export type SoundPreset = keyof typeof SOUND_PRESETS
+
 export interface SoundSettings {
   enabled: boolean
+  preset: SoundPreset
   volume: number // 0..1, volume propre à Photon (celui de Windows n'est jamais touché)
   window: boolean // ouverture et fermeture de Photon
   clicks: boolean // boutons, cases, réglages, profils
@@ -147,12 +165,13 @@ export const defaultSettings = (): Settings => ({
   autoProfiles: false,
   liveBlur: false,
   sound: defaultSound(),
-  notifications: { enabled: true, sources: {} },
+  notifications: { enabled: true, style: 'photon', sources: {} },
   introSeen: false
 })
 
 export const defaultSound = (): SoundSettings => ({
   enabled: true,
+  preset: 'glass',
   volume: 0.5,
   window: true,
   clicks: true,
@@ -233,6 +252,10 @@ function parseSound(v: unknown): SoundSettings {
     typeof value === 'boolean' ? value : fallback
   return {
     enabled: flag(v.enabled, d.enabled),
+    preset:
+      typeof v.preset === 'string' && Object.hasOwn(SOUND_PRESETS, v.preset)
+        ? (v.preset as SoundPreset)
+        : d.preset,
     volume: num(v.volume, 0, 1, d.volume),
     window: flag(v.window, d.window),
     clicks: flag(v.clicks, d.clicks),
@@ -241,13 +264,17 @@ function parseSound(v: unknown): SoundSettings {
 }
 
 function parseNotify(v: unknown): NotifySettings {
-  if (!isObject(v)) return { enabled: true, sources: {} }
+  if (!isObject(v)) return { enabled: true, style: 'photon', sources: {} }
   const sources = isObject(v.sources)
     ? Object.fromEntries(
         Object.entries(v.sources).filter(([key, on]) => isName(key) && typeof on === 'boolean')
       )
     : {}
-  return { enabled: v.enabled !== false, sources: sources as Record<string, boolean> }
+  return {
+    enabled: v.enabled !== false,
+    style: v.style === 'windows' ? 'windows' : 'photon',
+    sources: sources as Record<string, boolean>
+  }
 }
 
 export function parseSettings(raw: unknown): Settings {

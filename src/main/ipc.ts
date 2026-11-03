@@ -6,6 +6,7 @@ import { audio, audioDevice, audioMute, audioVolume } from './audio'
 import { awake, awakeStart, awakeStop, syncAwake } from './awake'
 import { eyes, eyesSet, syncEyes } from './eyes'
 import { notifyTest } from './notify'
+import { setToastLook } from './toast'
 import { pickColor } from './colorpicker'
 import { portClose, ports } from './ports'
 import { shutdownCancel, shutdownStart, shutdownState, syncShutdown } from './shutdown'
@@ -270,4 +271,5 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:transit', transit)
   handle('photon:matches', matches)
   handle('photon:releases', releases)
+  on('photon:toastLook', setToastLook)
 }

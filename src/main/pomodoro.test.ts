@@ -1,17 +1,9 @@
 import { afterAll, expect, test, vi } from 'vitest'
 
 const shown: string[] = []
-vi.mock('electron', () => ({
-  Notification: class {
-    static isSupported = (): boolean => true
-    constructor(private options: { title: string }) {}
-    on(): void {}
-    show(): void {
-      shown.push(this.options.title)
-    }
-  }
+vi.mock('./notify', () => ({
+  notify: (_source: string, options: { title: string }) => shown.push(options.title)
 }))
-vi.mock('./window', () => ({ showWindow: () => {} }))
 vi.useFakeTimers()
 afterAll(() => vi.useRealTimers())
 
