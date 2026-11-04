@@ -38,6 +38,20 @@ async function apply(on: boolean): Promise<void> {
   }
 }
 
+// Mépris (widget Sorts, barre) : bascule « Ne pas déranger » de Windows, dans la file des
+// bascules du Focus. true : activé, false : coupé ; null : outil indisponible.
+export function dndToggle(): Promise<boolean | null> {
+  const next = queue.then(async () => {
+    const current = await tool.send('get')
+    if (!current || !PROFILE.test(current)) return null
+    const on = current !== DND_ON
+    await setDnd(on ? DND_ON : DND_OFF)
+    return on
+  })
+  queue = next.then(() => undefined)
+  return next
+}
+
 // Moment pour une notification : jeu ou présentation en plein écran, Ne pas déranger, ou libre.
 // null : outil indisponible (on fait comme si l'écran était libre).
 export type Quiet = 'fullscreen' | 'dnd' | null

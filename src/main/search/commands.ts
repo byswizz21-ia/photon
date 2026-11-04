@@ -3,7 +3,9 @@
 import { spawn } from 'node:child_process'
 import { audioOutputs, audioDevice, toggleMute } from '../audio'
 import { MUSIC_SERVICES, type MusicCommand, type MusicService } from '../../shared/api'
+import { dndToggle } from '../focus'
 import { currentMusic, musicAvailable, musicControl, openMusic } from '../music'
+import { processPurge } from '../processes'
 import { pomodoroCommand } from '../pomodoro'
 
 export interface Command {
@@ -100,7 +102,7 @@ export const COMMANDS: readonly Command[] = [
   system(
     'shutdown',
     'Éteindre le PC',
-    'eteindre arreter shutdown',
+    'eteindre arreter shutdown peur au-dela de la mort urgot',
     true,
     start('shutdown.exe', ['/s', '/t', '0'])
   ),
@@ -114,9 +116,24 @@ export const COMMANDS: readonly Command[] = [
   system(
     'recycle',
     'Vider la corbeille',
-    'corbeille poubelle recycle',
+    'corbeille poubelle recycle torpille corrosive urgot',
     true,
     powershell('Clear-RecycleBin -Force -ErrorAction SilentlyContinue')
+  ),
+  // Sorts d'Urgot (widget Sorts) : Géhenne et Mépris.
+  system(
+    'purge',
+    'Géhenne : fermer les apps gourmandes',
+    'purge purger gehenne apps gourmandes processus urgot',
+    true,
+    () => void processPurge()
+  ),
+  system(
+    'dnd',
+    'Mépris : basculer « Ne pas déranger »',
+    'mepris ne pas deranger notifications silence dnd urgot',
+    false,
+    () => void dndToggle()
   ),
   music('music-toggle', 'Lecture / pause de la musique', 'musique play pause', 'toggle'),
   music('music-next', 'Morceau suivant', 'musique suivant next skip', 'next'),

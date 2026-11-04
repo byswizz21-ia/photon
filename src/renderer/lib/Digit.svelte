@@ -41,7 +41,10 @@
     will-change: transform;
   }
 
+  /* Centré : avec une police aux chiffres proportionnels (Chakra Petch), un « 1 » étroit ne
+     laisse pas un trou à sa droite dans la colonne du chiffre le plus large. */
   .strip span {
     height: 1em;
+    text-align: center;
   }
 </style>

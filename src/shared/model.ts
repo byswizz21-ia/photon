@@ -80,7 +80,11 @@ export type Background =
   | { type: 'wallpaper' }
   | { type: 'image'; path: string }
   | { type: 'gradient'; from: string; to: string }
-  | { type: 'glow' } // scène colorée de Photon (Background.svelte)
+  | { type: 'glow'; scene?: GlowScene } // scène colorée de Photon (Background.svelte)
+
+// Variantes de la scène « Lumineux » ; absente = scène bleu nuit de Photon.
+export const GLOW_SCENES = ['urgot'] as const
+export type GlowScene = (typeof GLOW_SCENES)[number]
 
 export type Density = 'compact' | 'comfortable'
 
@@ -102,6 +106,7 @@ export interface Theme {
   tint: string // '#rrggbb', couleur du verre du panneau (fond derrière les widgets)
   panelWidth: number // plein écran : largeur du panneau, 0,5 à 1 (part de l'écran)
   fill: boolean // plein écran : le panneau remplit tout l'écran, sans marge
+  glowSecondary: string // '#rrggbb', 2e halo (coin opposé à l'accent), --glow-secondary
 }
 
 export interface WidgetInstance {
@@ -148,6 +153,7 @@ export const SHORTCUTS = ['Super+Alt+Space', 'Super+Shift+Space', 'Ctrl+Alt+Spac
 export const BAR_SHORTCUTS = ['Alt+Space', 'Super+Ctrl+Space', 'Ctrl+Shift+Space'] as const
 export const DEFAULT_ACCENT = '#7CC4FF'
 export const DEFAULT_TINT = '#090a0e'
+export const DEFAULT_GLOW = '#7a5cff' // = --glow-secondary de tokens.css
 
 // 'Super+Alt+Space' → 'Win+Alt+Espace'
 export const shortcutLabel = (accelerator: string): string =>
@@ -190,7 +196,8 @@ export const defaultTheme = (): Theme => ({
   font: { family: '', weight: 0, scale: 1 },
   tint: DEFAULT_TINT,
   panelWidth: 0.7,
-  fill: false
+  fill: false,
+  glowSecondary: DEFAULT_GLOW
 })
 
 export const defaultProfile = (): Profile => ({
@@ -314,7 +321,10 @@ function parseBackground(v: unknown): Background {
     if (v.type === 'gradient' && isHex(v.from) && isHex(v.to)) {
       return { type: 'gradient', from: v.from, to: v.to }
     }
-    if (v.type === 'glow') return { type: 'glow' }
+    if (v.type === 'glow') {
+      const scene = GLOW_SCENES.find((name) => name === v.scene)
+      return scene ? { type: 'glow', scene } : { type: 'glow' }
+    }
   }
   return { type: 'wallpaper' }
 }
@@ -346,7 +356,8 @@ export function parseTheme(raw: unknown): Theme {
     font: parseFont(v.font),
     tint: isHex(v.tint) ? v.tint : d.tint,
     panelWidth: num(v.panelWidth, 0.5, 1, d.panelWidth),
-    fill: v.fill === true
+    fill: v.fill === true,
+    glowSecondary: isHex(v.glowSecondary) ? v.glowSecondary : d.glowSecondary
   }
 }
 

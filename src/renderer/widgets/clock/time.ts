@@ -14,3 +14,8 @@ export const dayOfYear = (date: Date): number =>
       Date.UTC(date.getFullYear(), 0, 1)) /
       86_400_000
   ) + 1
+
+// Design « Jambes » : 6 jambes, une de plus allumée toutes les 10 secondes (0 à 5 : la dernière).
+export const LEGS = 6
+export const litLeg = (seconds: number): number =>
+  Math.min(LEGS - 1, Math.max(0, Math.floor(seconds / 10)))

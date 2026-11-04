@@ -52,14 +52,14 @@ import {
 } from './music'
 import { lyrics } from './lyrics'
 import { pomodoro, pomodoroControl } from './pomodoro'
-import { processClose, processes, processIcon } from './processes'
+import { processClose, processes, processIcon, processPurge } from './processes'
 import { recentFiles } from './search/files'
 import { openResult, resultIcon, search } from './search/search'
 import { sharedLoad, sharedSave } from './shared'
 import { cpuRam, disks, fileIcon, launch, network, pickApps, pickFolders } from './system'
 import { temperatures } from './temperatures'
 import { displayList } from './screens'
-import { syncFocus } from './focus'
+import { dndToggle, syncFocus } from './focus'
 import { pickAutoApps } from './auto'
 import { claudeUsage } from './usage'
 import { onWeatherProfile, weather } from './weather'
@@ -248,6 +248,8 @@ export function registerIpc(actions: IpcActions): void {
   handle('photon:processes', processes) // nom validé contre la dernière lecture, jamais un pid
   handle('photon:processIcon', processIcon)
   handle('photon:processClose', processClose)
+  handle('photon:processPurge', processPurge)
+  handle('photon:dndToggle', dndToggle)
   handle('photon:gitStatus', gitStatus) // chemins absolus locaux seulement
   handle('photon:gitOpen', async (path) => {
     const opened = await gitOpen(path)

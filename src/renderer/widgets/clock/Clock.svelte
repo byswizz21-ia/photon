@@ -7,6 +7,7 @@
   import type { WidgetProps } from '../types'
   import ClockDay from './ClockDay.svelte'
   import ClockDial from './ClockDial.svelte'
+  import ClockLegs from './ClockLegs.svelte'
   import { CLOCK_DESIGNS, type ClockSettings } from './manifest'
 
   let { settings, editing, save }: WidgetProps<ClockSettings> = $props()
@@ -38,7 +39,7 @@
       value={settings.design}
       onpick={(design) => save({ ...settings, design })}
     />
-    {#if settings.design !== 'day' && settings.design !== 'dial'}
+    {#if settings.design !== 'day' && settings.design !== 'dial' && settings.design !== 'legs'}
       <label class="field" data-no-drag>
         <input
           type="checkbox"
@@ -53,6 +54,12 @@
   <ClockDay {now} {date} />
 {:else if settings.design === 'dial'}
   <ClockDial {now} {date} />
+{:else if settings.design === 'legs'}
+  <ClockLegs
+    time="{two(now.getHours())}:{two(now.getMinutes())}"
+    {date}
+    seconds={now.getSeconds()}
+  />
 {:else}
   <div class="widget">
     <p class="time" class:seconds={settings.seconds} data-intro="spin">

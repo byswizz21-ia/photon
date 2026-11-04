@@ -135,6 +135,20 @@ test("fond « Lumineux » conservé, type inconnu → fond d'écran", () => {
   expect(parseTheme({ background: { type: 'nope' } }).background).toEqual({ type: 'wallpaper' })
 })
 
+test('scène Urgot gardée, scène inconnue → scène de Photon', () => {
+  const urgot = { type: 'glow', scene: 'urgot' }
+  expect(parseTheme({ background: urgot }).background).toEqual(urgot)
+  expect(parseTheme({ background: { type: 'glow', scene: 'nope' } }).background).toEqual({
+    type: 'glow'
+  })
+})
+
+test('lueur secondaire : violet de Photon par défaut, couleur hex sinon', () => {
+  expect(parseTheme({}).glowSecondary).toBe('#7a5cff')
+  expect(parseTheme({ glowSecondary: '#d4672a' }).glowSecondary).toBe('#d4672a')
+  expect(parseTheme({ glowSecondary: 'red' }).glowSecondary).toBe('#7a5cff')
+})
+
 test('police du thème : défaut si absente, nom sans guillemet, bornes', () => {
   expect(parseTheme({}).font).toEqual({ family: '', weight: 0, scale: 1 })
   expect(

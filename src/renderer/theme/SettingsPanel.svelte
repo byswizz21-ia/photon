@@ -3,6 +3,7 @@
   import XIcon from 'phosphor-svelte/lib/XIcon'
   import {
     BAR_SHORTCUTS,
+    DEFAULT_GLOW,
     DEFAULT_TINT,
     NOTIFY_SOURCES,
     SHORTCUTS,
@@ -17,6 +18,7 @@
     type Theme
   } from '../../shared/model'
   import type { DisplayInfo } from '../../shared/api'
+  import { THEME_PRESETS } from '../../shared/themes'
   import { play, type SoundName } from '../sound.svelte'
   import { app, reducedMotion, saveTheme } from '../state.svelte'
   import { importedFamily, importedFontName, resolvedAccent } from './apply.svelte'
@@ -105,6 +107,15 @@
     saveTheme()
   }
 
+  // Thème prêt : remplace l'apparence, garde la mise en page (largeur, densité, plein écran).
+  function applyPreset(id: string): void {
+    const preset = THEME_PRESETS[id]?.theme()
+    if (!preset) return
+    const { panelWidth, fill, density } = app.theme
+    tab = preset.background.type
+    patchTheme({ ...preset, panelWidth, fill, density })
+  }
+
   function setGradient(patch: Partial<typeof lastGradient>): void {
     lastGradient = { ...lastGradient, ...patch }
     patchTheme({ background: { type: 'gradient', ...lastGradient } })
@@ -177,13 +188,20 @@
 
   void loadFonts()
 
-  // Menu : police de Photon, police du thème (importée, ou Windows absente de la liste), installées.
-  const fontOptions = $derived([
+  // Polices fournies avec Photon (assets/fonts, déclarées dans app.css).
+  const BUNDLED = [
     ['', 'Satoshi (police de Photon)'],
-    ...(font.family && !installed.includes(font.family)
+    ['Chakra Petch', 'Chakra Petch (thème Urgot)']
+  ]
+
+  // Menu : polices fournies, police du thème (importée, ou Windows absente de la liste), installées.
+  const bundled = (family: string): boolean => BUNDLED.some(([name]) => name === family)
+  const fontOptions = $derived([
+    ...BUNDLED,
+    ...(!bundled(font.family) && !installed.includes(font.family)
       ? [[font.family, imported ? `${imported} (importée)` : font.family]]
       : []),
-    ...installed.map((family) => [family, family])
+    ...installed.filter((family) => !bundled(family)).map((family) => [family, family])
   ])
 
   async function importFont(): Promise<void> {
@@ -307,6 +325,17 @@
   </header>
 
   <section>
+    <h3>Thème prêt</h3>
+    <div class="row">
+      {#each Object.entries(THEME_PRESETS) as [id, preset] (id)}
+        <button type="button" class="action" onclick={() => applyPreset(id)}
+          >Thème {preset.name}</button
+        >
+      {/each}
+    </div>
+  </section>
+
+  <section>
     <h3>Fond</h3>
     {@render segmented('Type de fond', 'background', TABS, tab, pickTab)}
     {#if tab === 'image'}
@@ -327,6 +356,18 @@
       {#if app.theme.tint !== DEFAULT_TINT}
         <button type="button" class="action" onclick={() => patchTheme({ tint: DEFAULT_TINT })}
           >Par défaut</button
+        >
+      {/if}
+    </div>
+    <div class="row">
+      {@render picker('Lueur secondaire', app.theme.glowSecondary, (glowSecondary) =>
+        patchTheme({ glowSecondary })
+      )}
+      {#if app.theme.glowSecondary !== DEFAULT_GLOW}
+        <button
+          type="button"
+          class="action"
+          onclick={() => patchTheme({ glowSecondary: DEFAULT_GLOW })}>Par défaut</button
         >
       {/if}
     </div>

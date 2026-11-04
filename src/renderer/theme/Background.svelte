@@ -1,5 +1,6 @@
 <script lang="ts">
-  // Calque de fond (plein écran) : fond d'écran Windows, image, dégradé ou scène « Lumineux »,
+  // Calque de fond (plein écran) : fond d'écran Windows, image, dégradé ou scène « Lumineux »
+  // (variante Urgot comprise),
   // flouté par le panneau. Si l'image ne charge pas, le calque disparaît : on voit le flou
   // acrylic de Windows et le voile.
   import { app } from '../state.svelte'
@@ -10,7 +11,7 @@
 </script>
 
 {#if bg.type === 'glow'}
-  <div class="layer glow">
+  <div class="layer glow" class:urgot={bg.scene === 'urgot'}>
     <span class="orb blue"></span>
     <span class="orb orange"></span>
     <span class="orb violet"></span>
@@ -47,6 +48,17 @@
     background:
       repeating-linear-gradient(120deg, var(--scene-stripe) 0 1px, transparent 1px 28px),
       linear-gradient(135deg, var(--scene-from), var(--scene-mid) 45%, var(--scene-to));
+  }
+
+  /* Scène « Urgot » : mêmes formes, couleurs de Zaun. */
+  .urgot {
+    --scene-from: var(--urgot-scene-from);
+    --scene-mid: var(--urgot-scene-mid);
+    --scene-to: var(--urgot-scene-to);
+    --scene-stripe: var(--urgot-scene-stripe);
+    --orb-blue: var(--urgot-orb-a);
+    --orb-orange: var(--urgot-orb-b);
+    --orb-violet: var(--urgot-orb-c);
   }
 
   .orb {

@@ -1,5 +1,21 @@
 # Mises à jour
 
+## 1.3.0-urgot · 4 novembre 2026 (version perso, branche `urgot`)
+
+### Nouveau
+
+- **Thème Urgot** (Réglages › Thème prêt) : accent chimtech, lueur rouille, verre teinté,
+  arrondi 8 px, police Chakra Petch, scène « Lumineux » aux couleurs de Zaun.
+- **Lueur secondaire** réglable par thème (Réglages › Fond).
+- **Sorts** : A vide la corbeille, Z ferme les apps gourmandes, E bascule « Ne pas déranger »,
+  R éteint le PC dans 60 s (2e appui pour confirmer, 3e pour annuler). Recharge sur chaque sort.
+- **Géhenne** : les programmes les plus gourmands, × pour les purger (2e clic pour confirmer).
+- **Disques** : design « Exécution » (barre de vie, rouge et « Exécutable » sous le seuil).
+- **Horloge** : design « Jambes » (6 segments, un de plus toutes les 10 secondes).
+- **Image** : titre en option posé en bas (surtitre, titre, sous-titre).
+- **Barre** : « purge », « géhenne », « torpille », « peur », « mépris » trouvent les sorts.
+- **Modèle de profil Urgot** : nouveau profil › Urgot, thème attaché.
+
 ## À venir
 
 ### Nouveau

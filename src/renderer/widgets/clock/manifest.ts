@@ -1,5 +1,6 @@
 // Horloge : heure 24 h en grand (les chiffres défilent) et date du jour. Designs : classique,
-// « Journée » (secondes, heures écoulées) et « Cadran » (les secondes font le tour).
+// « Journée » (secondes, heures écoulées), « Cadran » (les secondes font le tour) et « Jambes »
+// (thème Urgot : 6 segments, un de plus toutes les 10 secondes).
 import ClockIcon from 'phosphor-svelte/lib/ClockIcon'
 import { cardPx } from '../../lib/DesignPicker.svelte'
 import type { WidgetManifest } from '../types'
@@ -10,7 +11,8 @@ export type ClockSettings = { seconds: boolean; design: string }
 export const CLOCK_DESIGNS = [
   ['classic', 'Classique'],
   ['day', 'Journée'],
-  ['dial', 'Cadran']
+  ['dial', 'Cadran'],
+  ['legs', 'Jambes']
 ] as const
 
 const manifest: WidgetManifest<ClockSettings> = {

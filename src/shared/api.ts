@@ -606,6 +606,8 @@ export interface PhotonApi {
   processes(sort: 'cpu' | 'ram'): Promise<ProcessGroup[] | null> // 10 premiers ; null : outil absent
   processIcon(name: string): Promise<string | null>
   processClose(name: string): Promise<boolean> // fenêtres fermées comme la croix, sinon arrêt
+  processPurge(): Promise<string[]> // Géhenne : apps fermées (≥ 5 % de CPU, 3 au plus, jamais protégées)
+  dndToggle(): Promise<boolean | null> // Mépris : « Ne pas déranger » activé ou coupé ; null : outil absent
   gitStatus(paths: string[]): Promise<GitRepo[]> // aucun appel réseau
   gitOpen(path: string): Promise<boolean> // ouvre dans VS Code puis cache Photon
   awake(): Promise<AwakeState>

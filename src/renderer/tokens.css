@@ -28,6 +28,14 @@
   --orb-blue: #2c5fd0;
   --orb-orange: #d9742f;
   --orb-violet: #8a3fd0;
+  /* Scène « Urgot » (thème Urgot) : chimtech de Zaun, vert acide et rouille */
+  --urgot-scene-from: #1f3a12;
+  --urgot-scene-mid: #0b120a;
+  --urgot-scene-to: #3a1a0c;
+  --urgot-scene-stripe: rgb(180 242 74 / 0.05);
+  --urgot-orb-a: #5c9e1c;
+  --urgot-orb-b: #b4521f;
+  --urgot-orb-c: #8a9a16;
 
   /* Danger : suppression, Bypass, erreurs */
   --danger: #ff4d5e;

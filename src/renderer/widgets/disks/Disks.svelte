@@ -1,11 +1,14 @@
 <script lang="ts">
   // Espace libre des lecteurs : le premier en vedette, les autres en lignes compactes dessous.
-  // En mode édition, une case à cocher par lecteur choisit ceux qui s'affichent.
+  // En mode édition : design, seuil (design « Exécution »), une case par lecteur affiché.
   import type { Disk } from '../../../shared/api'
+  import DesignPicker from '../../lib/DesignPicker.svelte'
   import { pollWhileVisible } from '../../lib/poll.svelte'
   import RollingNumber from '../../lib/RollingNumber.svelte'
   import type { WidgetProps } from '../types'
-  import type { DisksSettings } from './manifest'
+  import { format, threshold, THRESHOLD, usedShare } from './disk'
+  import DisksExecute from './DisksExecute.svelte'
+  import { DISK_DESIGNS, type DisksSettings } from './manifest'
 
   let { settings, editing, save }: WidgetProps<DisksSettings> = $props()
 
@@ -31,21 +34,7 @@
   const featured = $derived(selected[0])
   const others = $derived(selected.slice(1))
 
-  const GB = 1024 ** 3
-
-  // Go entier comme l'Explorateur (1 Go = 1024³ octets) ; à partir de 1000 Go, des To à virgule.
-  // Sous 1 Go (disque presque plein), des Mo plutôt qu'un « 0 Go » trompeur.
-  function format(bytes: number): { value: string; unit: string } {
-    if (bytes < GB) return { value: String(Math.floor(bytes / 1024 ** 2)), unit: 'Mo' }
-    const go = Math.floor(bytes / GB)
-    if (go < 1000) return { value: String(go), unit: 'Go' }
-    return { value: (go / 1024).toFixed(1).replace('.', ','), unit: 'To' }
-  }
-
-  // Part utilisée (0 à 1) : la barre se remplit de ce qui est occupé.
-  function usedShare(disk: Disk): number {
-    return disk.total > 0 ? Math.min(1, Math.max(0, 1 - disk.free / disk.total)) : 0
-  }
+  const limit = $derived(threshold(settings.threshold))
 
   // Chargement : tiret et barre vide. Lecteur choisi débranché, liste vide ou erreur : message discret.
   const view = $derived.by(() => {
@@ -61,7 +50,7 @@
   function toggle(mount: string, on: boolean): void {
     const next = selected.map((disk) => disk.mount).filter((m) => m !== mount)
     if (on) next.push(mount)
-    save({ drives: next.length === present.length ? [] : next })
+    save({ ...settings, drives: next.length === present.length ? [] : next })
   }
 </script>
 
@@ -71,44 +60,69 @@
   </div>
 {/snippet}
 
-<div class="widget">
-  <span class="label">Disque</span>
-  {#if editing && present.length > 0}
-    <!-- data-no-drag : gridstack ne déplace pas la carte quand on appuie sur une case -->
-    <div class="drives" role="group" aria-label="Lecteurs affichés" data-no-drag>
-      {#each present as disk (disk.mount)}
-        {@const on = selected.includes(disk)}
-        <label>
+{#if !editing && settings.design === 'execute'}
+  <DisksExecute disks={selected} loaded={disks !== undefined} {limit} />
+{:else}
+  <div class="widget">
+    {#if editing}
+      <DesignPicker
+        designs={DISK_DESIGNS}
+        value={settings.design}
+        onpick={(design) => save({ ...settings, design })}
+      />
+      {#if settings.design === 'execute'}
+        <label class="limit" data-no-drag>
+          <span>Seuil d'exécution : {limit} %</span>
           <input
-            type="checkbox"
-            checked={on}
-            disabled={on && selected.length === 1}
-            onchange={(event) => toggle(disk.mount, event.currentTarget.checked)}
+            type="range"
+            min={THRESHOLD.min}
+            max={THRESHOLD.max}
+            step={THRESHOLD.step}
+            value={limit}
+            oninput={(event) => save({ ...settings, threshold: event.currentTarget.valueAsNumber })}
           />
-          {disk.mount}
         </label>
-      {/each}
-    </div>
-  {:else}
-    <div class="main">
-      <span class="value"><RollingNumber value={view.value} /></span>
-      <span class="caption" class:faint={!featured}>{view.caption}</span>
-    </div>
-    {@render bar(view.used)}
-    {#if others.length > 0}
-      <ul class="others">
-        {#each others as disk (disk.mount)}
-          {@const free = format(disk.free)}
-          <li class="row">
-            <span class="letter">{disk.mount}</span>
-            <span class="free"><RollingNumber value={free.value} /> {free.unit}</span>
-            {@render bar(usedShare(disk))}
-          </li>
-        {/each}
-      </ul>
+      {/if}
+    {:else}
+      <span class="label">Disque</span>
     {/if}
-  {/if}
-</div>
+    {#if editing && present.length > 0}
+      <!-- data-no-drag : gridstack ne déplace pas la carte quand on appuie sur une case -->
+      <div class="drives" role="group" aria-label="Lecteurs affichés" data-no-drag>
+        {#each present as disk (disk.mount)}
+          {@const on = selected.includes(disk)}
+          <label>
+            <input
+              type="checkbox"
+              checked={on}
+              disabled={on && selected.length === 1}
+              onchange={(event) => toggle(disk.mount, event.currentTarget.checked)}
+            />
+            {disk.mount}
+          </label>
+        {/each}
+      </div>
+    {:else}
+      <div class="main">
+        <span class="value"><RollingNumber value={view.value} /></span>
+        <span class="caption" class:faint={!featured}>{view.caption}</span>
+      </div>
+      {@render bar(view.used)}
+      {#if others.length > 0}
+        <ul class="others">
+          {#each others as disk (disk.mount)}
+            {@const free = format(disk.free)}
+            <li class="row">
+              <span class="letter">{disk.mount}</span>
+              <span class="free"><RollingNumber value={free.value} /> {free.unit}</span>
+              {@render bar(usedShare(disk))}
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    {/if}
+  </div>
+{/if}
 
 <style>
   .widget {
@@ -229,6 +243,19 @@
     gap: 6px;
     font-size: var(--text-13);
     cursor: pointer;
+  }
+
+  .limit {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: var(--text-12);
+    color: var(--text-muted);
+  }
+
+  .limit input {
+    margin: 0;
+    accent-color: var(--accent);
   }
 
   .drives input {

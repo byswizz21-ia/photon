@@ -7,6 +7,42 @@
   font-display: block;
 }
 
+/* Chakra Petch (thème Urgot), OFL : assets/fonts/ChakraPetch-OFL.txt. Statique : 5 graisses. */
+@font-face {
+  font-family: 'Chakra Petch';
+  src: url('../../assets/fonts/ChakraPetch-300.woff2') format('woff2');
+  font-weight: 300;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Chakra Petch';
+  src: url('../../assets/fonts/ChakraPetch-400.woff2') format('woff2');
+  font-weight: 400;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Chakra Petch';
+  src: url('../../assets/fonts/ChakraPetch-500.woff2') format('woff2');
+  font-weight: 500;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Chakra Petch';
+  src: url('../../assets/fonts/ChakraPetch-600.woff2') format('woff2');
+  font-weight: 600;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Chakra Petch';
+  src: url('../../assets/fonts/ChakraPetch-700.woff2') format('woff2');
+  font-weight: 700;
+  font-display: block;
+}
+
 /* Base : Photon est sombre uniquement. */
 :root {
   font-family: var(--font-sans);
@@ -209,6 +245,24 @@ textarea.w-input {
 .w-chip.selected {
   background: var(--surface-accent-soft);
   color: var(--accent);
+}
+
+/* Touche de clavier (sorts du thème Urgot). */
+.w-kbd {
+  box-sizing: border-box;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-kbd);
+  background: var(--white-8);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-11);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
 }
 
 /* Petit bouton rond (supprimer une ligne, copier…). */

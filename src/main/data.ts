@@ -17,6 +17,7 @@ import {
   type Settings
 } from '../shared/model'
 import { TEMPLATES } from '../shared/templates'
+import { THEME_PRESETS } from '../shared/themes'
 import { pending, readJson, writeJson } from './store'
 
 const file = (...parts: string[]): string => join(app.getPath('userData'), ...parts)
@@ -113,11 +114,12 @@ export async function createProfile(source: unknown): Promise<boolean> {
         ? { name: 'Nouveau profil', theme: null, widgets: [] }
         : template && {
             name: template.name,
-            theme: null,
+            theme: template.theme ?? null,
             focus: template.focus === true,
             widgets: template.widgets()
           }
   if (!base) return false
+  await ensurePresetTheme(template?.theme)
   // Modèles et profil vierge sont au format actuel : aucune conversion à leur appliquer.
   const profile = parseProfile({ version: PROFILE_VERSION, ...base, createdAt: Date.now() })
   let n = profile.createdAt
@@ -126,6 +128,18 @@ export async function createProfile(source: unknown): Promise<boolean> {
   await writeJson(profileFile(id), profile, parseProfile)
   data.profiles = [...data.profiles, info(id, profile)]
   return switchProfile(id)
+}
+
+// Thème prêt d'un modèle : écrit dans themes/ s'il n'existe pas (jamais écrasé : les réglages
+// faits depuis sont gardés).
+async function ensurePresetTheme(name: string | undefined): Promise<void> {
+  const preset = name && Object.hasOwn(THEME_PRESETS, name) ? THEME_PRESETS[name] : undefined
+  if (!name || !preset) return
+  const exists = await fs.access(themeFile(name)).then(
+    () => true,
+    () => false
+  )
+  if (!exists) await writeJson(themeFile(name), preset.theme(), parseTheme)
 }
 
 // Supprime le profil actif (jamais le dernier) et bascule sur un autre. Le fichier est mis de

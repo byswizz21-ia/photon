@@ -180,6 +180,26 @@ export async function processClose(name: unknown): Promise<boolean> {
   return pids.length > 0 && closePids(pids, name)
 }
 
+// Géhenne (widget Sorts, barre) : les apps les plus gourmandes en CPU, jamais un nom protégé.
+// ponytail: seuil fixe, l'app au premier plan (jeu) peut être visée ; liste d'exclusions si besoin.
+export const HUNGRY_CPU = 5 // %
+export const MAX_PURGE = 3
+
+export const hungry = (list: ProcessGroup[]): ProcessGroup[] =>
+  list
+    .filter((g) => g.closable && g.cpu >= HUNGRY_CPU)
+    .sort((a, b) => b.cpu - a.cpu)
+    .slice(0, MAX_PURGE)
+
+// Ferme les apps gourmandes ; noms lisibles de celles fermées.
+export async function processPurge(): Promise<string[]> {
+  const closed: string[] = []
+  for (const group of hungry((await processes('cpu')) ?? [])) {
+    if (await processClose(group.name)) closed.push(group.label)
+  }
+  return closed
+}
+
 // Fenêtres fermées comme la croix, sinon arrêt. Les appelants ont vérifié closable().
 export async function closePids(pids: number[], name: string): Promise<boolean> {
   const reply = await tool.send(`close ${pids.join(',')}`)

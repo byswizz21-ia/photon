@@ -102,6 +102,7 @@ export function useTheme(): void {
     style.setProperty('--radius', `${theme.radius}px`)
     style.setProperty('--blur', `${theme.blur}px`)
     style.setProperty('--tint', theme.tint)
+    style.setProperty('--glow-secondary', theme.glowSecondary)
     style.setProperty('--font-sans', fontStack(theme.font.family))
     style.setProperty('--weight-shift', String(theme.font.weight))
     style.setProperty('--font-scale', String(theme.font.scale))

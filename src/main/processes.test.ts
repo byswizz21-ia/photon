@@ -2,7 +2,7 @@ import { expect, test, vi } from 'vitest'
 
 vi.mock('./system', () => ({ fileIcon: vi.fn() }))
 vi.mock('./native', () => ({ nativeTool: () => ({ send: vi.fn(), start: vi.fn() }) }))
-const { closable, groups, parseList, withLabels } = await import('./processes')
+const { closable, groups, hungry, parseList, withLabels } = await import('./processes')
 
 test('liste native : lignes valides gardées, le reste ignoré', () => {
   const snap = parseList('[[10,"chrome",1000,500],[11,"x"],"oups",[12,"lsass",-1,20]]', 5)
@@ -28,6 +28,20 @@ test('pid réutilisé par un autre programme : pas de CPU', () => {
   const before = parseList('[[1,"old",1000,0]]', 0)!
   const after = parseList('[[1,"new",5000,0]]', 1000)!
   expect(groups(before, after, 1).every((g) => g.cpu === 0)).toBe(true)
+})
+
+test('Géhenne : 3 plus gourmands au-dessus de 5 %, jamais un processus protégé', () => {
+  const g = (name: string, cpu: number) => ({
+    name,
+    label: name,
+    count: 1,
+    cpu,
+    memory: 0,
+    closable: closable(name)
+  })
+  const list = [g('svchost', 90), g('a', 6), g('b', 40), g('c', 4.9), g('d', 12), g('e', 8)]
+  expect(hungry(list).map((p) => p.name)).toEqual(['b', 'd', 'e'])
+  expect(hungry([g('Photon', 80), g('lsass', 50), g('chrome', 2)])).toEqual([])
 })
 
 test('Windows et Photon jamais fermables', () => {

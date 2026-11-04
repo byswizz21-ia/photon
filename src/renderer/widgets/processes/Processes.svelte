@@ -5,6 +5,7 @@
   import CpuIcon from 'phosphor-svelte/lib/CpuIcon'
   import XIcon from 'phosphor-svelte/lib/XIcon'
   import type { ProcessGroup } from '../../../shared/api'
+  import { bytes, percent } from '../../lib/format'
   import { pollWhileVisible } from '../../lib/poll.svelte'
   import type { WidgetProps } from '../types'
   import type { ProcessesSettings } from './manifest'
@@ -55,18 +56,6 @@
     await window.photon.processClose(name)
     setTimeout(() => void read(), 800) // le temps que le programme se ferme
   }
-
-  const units = ['o', 'Ko', 'Mo', 'Go']
-  function bytes(n: number): string {
-    let i = 0
-    while (n >= 1024 && i < units.length - 1) {
-      n /= 1024
-      i++
-    }
-    return `${n.toLocaleString('fr-FR', { maximumFractionDigits: n < 10 && i > 1 ? 1 : 0 })} ${units[i]}`
-  }
-  const percent = (n: number): string =>
-    `${n.toLocaleString('fr-FR', { maximumFractionDigits: n < 10 ? 1 : 0 })} %`
 
   // Barre relative au premier de la liste.
   const top = $derived(Math.max(1, ...(list ?? []).map((p) => (sort === 'cpu' ? p.cpu : p.memory))))

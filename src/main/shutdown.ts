@@ -91,7 +91,11 @@ function shutdownCancelQuiet(): void {
 
 export const shutdownState = (): ShutdownState => ({ ...state })
 
-// Profil enregistré ou changé : sans widget Minuteur d'arrêt pour l'annuler, le minuteur s'arrête.
+// Profil enregistré ou changé : sans widget pour l'annuler (Minuteur d'arrêt, ou Sorts et sa
+// touche R), le minuteur s'arrête.
+const CANCELLERS = ['shutdown', 'spells']
 export function syncShutdown(): void {
-  if (state.action && !data.profile.widgets.some((w) => w.type === 'shutdown')) shutdownCancel()
+  if (state.action && !data.profile.widgets.some((w) => CANCELLERS.includes(w.type))) {
+    shutdownCancel()
+  }
 }
