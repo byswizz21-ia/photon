@@ -13,7 +13,8 @@ export interface WidgetGroup {
   entries: WidgetEntry[]
 }
 
-const simple = (text: string): string => text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+export const simple = (text: string): string =>
+  text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
 
 const byName = (a: WidgetEntry, b: WidgetEntry): number =>
   a.manifest.name.localeCompare(b.manifest.name, 'fr')

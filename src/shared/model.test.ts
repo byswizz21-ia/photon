@@ -40,6 +40,27 @@ describe('parseProfile', () => {
     expect(migrateProfile({ version: 2, log: [] }, steps)).toEqual({ log: [], version: 2 })
   })
 
+  test('1 → 2 : seule la première carte Notes garde l’ancienne note', () => {
+    const note = (id: string, settings: Record<string, unknown>) => ({
+      id,
+      type: 'notes',
+      x: 0,
+      y: 0,
+      w: 3,
+      h: 3,
+      settings
+    })
+    const profile = parseProfile({
+      version: 1,
+      widgets: [note('own', { own: true }), note('a', {}), note('b', { size: 'l' })]
+    })
+    expect(profile.widgets.map((w) => w.settings)).toEqual([
+      { own: true },
+      { note: 'main' },
+      { size: 'l' }
+    ])
+  })
+
   test("profil d'une version plus récente : numéro et champs inconnus gardés", () => {
     const future = {
       version: PROFILE_VERSION + 3,

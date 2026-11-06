@@ -1,5 +1,19 @@
 # Mises à jour
 
+## À venir
+
+### Amélioré
+
+- **Notes** : chaque carte a sa propre note, on peut en mettre plusieurs sur un profil.
+  - Titre, bouton copier, mots et date de modification en bas.
+  - **Carnet** (icône en haut à droite) : toutes les notes, de tous les profils, la plus récente
+    en haut. Ouvrir une note dans la carte, en créer une, en supprimer une (2e clic pour
+    confirmer), chercher dès 6 notes. Supprimer une carte ne supprime pas sa note.
+  - Listes : Entrée continue « - », « 1. » ou « [ ] » ; Entrée sur une puce vide la retire.
+  - Réglages (mode édition) : taille du texte, police (Sans, Serif, Mono), mots et date en bas,
+    correcteur orthographique.
+  - La note d'avant reste dans la carte Notes déjà en place.
+
 ## 1.4.0 · 6 novembre 2026
 
 ### Nouveau

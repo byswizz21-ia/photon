@@ -399,7 +399,21 @@ export function parseAuto(v: unknown): AutoRules {
 // l'étape parcourt p.widgets et remplace type 'gif' par 'animation'.
 type Migration = (profile: Json) => Json
 const MIGRATIONS: Migration[] = [
-  (p) => p // 0 → 1 : profils d'avant la numérotation, même format
+  (p) => p, // 0 → 1 : profils d'avant la numérotation, même format
+  // 1 → 2 : une note par carte Notes. La première carte du profil garde l'ancienne note
+  // (« main » du carnet) ; les autres, qui la partageaient, en reçoivent une nouvelle.
+  (p) => {
+    if (!Array.isArray(p.widgets)) return p
+    let kept = false
+    const widgets = p.widgets.map((w: unknown) => {
+      if (!isObject(w) || w.type !== 'notes') return w
+      const settings = isObject(w.settings) ? w.settings : {}
+      if (kept || settings.own === true || typeof settings.note === 'string') return w
+      kept = true
+      return { ...w, settings: { ...settings, note: 'main' } }
+    })
+    return { ...p, widgets }
+  }
 ]
 export const PROFILE_VERSION = MIGRATIONS.length
 
