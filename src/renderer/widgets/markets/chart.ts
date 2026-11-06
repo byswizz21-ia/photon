@@ -96,6 +96,36 @@ export interface Status {
 
 const midnight = (t: number): number => new Date(t).setHours(0, 0, 0, 0)
 
+const zoneFormats = new Map<string, Intl.DateTimeFormat>()
+
+// Décalage (ms) du fuseau `zone` à l'instant t ; fuseau inconnu : 0.
+function zoneOffset(zone: string, t: number): number {
+  try {
+    let format = zoneFormats.get(zone)
+    if (!format) {
+      const n = 'numeric'
+      format = new Intl.DateTimeFormat('en-US', {
+        timeZone: zone,
+        hourCycle: 'h23',
+        ...{ year: n, month: n, day: n, hour: n, minute: n, second: n }
+      })
+      zoneFormats.set(zone, format)
+    }
+    const part = (type: string): number =>
+      Number(format?.formatToParts(t).find((p) => p.type === type)?.value)
+    const wall = Date.UTC(
+      part('year'),
+      part('month') - 1,
+      part('day'),
+      part('hour'),
+      part('minute')
+    )
+    return wall - Math.floor(t / 60_000) * 60_000
+  } catch {
+    return 0
+  }
+}
+
 // Place ouverte ou fermée, d'après la séance donnée par Yahoo (heures locales de Hugo).
 // ponytail: jours fériés ignorés (« ouvre demain » un 25 décembre), Yahoo n'en donne pas la liste.
 export function status(q: MarketQuote, now: number): Status {
@@ -107,10 +137,13 @@ export function status(q: MarketQuote, now: number): Status {
     const mid = `Clôture ${hm(s.end)}`
     return { open: true, short: 'En séance', mid, long: `${q.exchange} · ${mid.toLowerCase()}` }
   }
-  // Prochaine ouverture : même heure, jour ouvré suivant (jour de la semaine de la place).
-  let next = s.start
+  // Prochaine ouverture : même heure locale de la place, jour ouvré suivant (changement d'heure
+  // compris quand Yahoo donne le fuseau).
   const weekend = (t: number): boolean => [0, 6].includes(new Date(t + s.offset).getUTCDay())
-  while (next <= now || weekend(next)) next += DAY
+  const sameHour = (t: number): number =>
+    s.zone ? t + zoneOffset(s.zone, s.start) - zoneOffset(s.zone, t) : t
+  let next = s.start
+  for (let day = 1; next <= now || weekend(next); day++) next = sameHour(s.start + day * DAY)
   const days = Math.round((midnight(next) - midnight(now)) / DAY)
   const when = days === 0 ? "aujourd'hui" : days === 1 ? 'demain' : weekday.format(next)
   const mid = `Ouvre ${when} ${hm(next)}`

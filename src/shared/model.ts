@@ -27,6 +27,7 @@ export interface Settings {
   sound: SoundSettings
   notifications: NotifySettings
   introSeen: boolean // animation de première ouverture déjà vue (ou passée)
+  favorites: string[] // types de widgets en favori (étoile), en tête du menu « Ajouter »
 }
 
 // Notifications de Photon, par source : [nom, quand elle arrive]. L'avertissement du
@@ -168,7 +169,8 @@ export const defaultSettings = (): Settings => ({
   liveBlur: false,
   sound: defaultSound(),
   notifications: { enabled: true, style: 'photon', sources: {} },
-  introSeen: false
+  introSeen: false,
+  favorites: []
 })
 
 export const defaultSound = (): SoundSettings => ({
@@ -303,7 +305,11 @@ export function parseSettings(raw: unknown): Settings {
     liveBlur: v.liveBlur === true,
     sound: parseSound(v.sound),
     notifications: parseNotify(v.notifications),
-    introSeen: v.introSeen === true
+    introSeen: v.introSeen === true,
+    // Types inconnus gardés (widget d'une version plus récente) ; doublons retirés.
+    favorites: Array.isArray(v.favorites)
+      ? [...new Set(v.favorites.filter(isName))].slice(0, 200)
+      : []
   }
 }
 

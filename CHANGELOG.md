@@ -1,6 +1,6 @@
 # Mises à jour
 
-## À venir
+## 1.4.0 · 6 novembre 2026
 
 ### Nouveau
 
@@ -11,6 +11,10 @@
   - « Marché » (6 × 3) : la liste suivie à gauche, l'actif choisi à droite avec un graphique
     détaillé (niveaux, dates, plus haut, plus bas, veille).
 - Noms plus courts (« Apple » au lieu de « Apple Inc. ») et courbe du jour plus fine (5 min).
+- **Widgets favoris** : une étoile sur chaque widget du menu « Ajouter » et du catalogue. Les
+  favoris passent en tête, dans une rubrique « Favoris », pour tous les profils.
+- Cours : les symboles introuvables sont signalés dans les trois designs, l'heure d'ouverture
+  reste juste au changement d'heure, et l'actif choisi ne change plus quand un cours arrive.
 
 ## 1.3.0 · 3 novembre 2026
 

@@ -5,7 +5,14 @@
   import MagnifyingGlassIcon from 'phosphor-svelte/lib/MagnifyingGlassIcon'
   import PlusIcon from 'phosphor-svelte/lib/PlusIcon'
   import SquaresFourIcon from 'phosphor-svelte/lib/SquaresFourIcon'
-  import { groupWidgets, searchWidgets, type WidgetEntry } from '../widgets/catalog'
+  import FavoriteStar from '../lib/FavoriteStar.svelte'
+  import { app } from '../state.svelte'
+  import {
+    favoriteWidgets,
+    groupWidgets,
+    searchWidgets,
+    type WidgetEntry
+  } from '../widgets/catalog'
   import { widgets } from '../widgets/registry'
   import { addWidget, type Cell } from './Grid.svelte'
 
@@ -20,6 +27,7 @@
   const groups = groupWidgets(widgets) // fixe : tous les widgets sont chargés d'avance
   const results = $derived(searchWidgets(widgets, query))
   const searching = $derived(query.trim() !== '')
+  const favorites = $derived(favoriteWidgets(widgets, app.settings.favorites))
 
   // Ouvert au clic droit : point visé (px) et case de la grille dessous.
   let at = $state<{ x: number; y: number; cell: Cell | null } | null>(null)
@@ -95,6 +103,7 @@
         <span class="desc">{entry.manifest.description}</span>
       </span>
     </button>
+    <FavoriteStar type={entry.type} name={entry.manifest.name} />
   </li>
 {/snippet}
 
@@ -142,6 +151,14 @@
             <p class="empty">Aucun widget ne correspond.</p>
           {/if}
         {:else}
+          {#if favorites.length}
+            <section aria-label="Favoris">
+              <h3>Favoris</h3>
+              <ul>
+                {#each favorites as entry (entry.type)}{@render row(entry)}{/each}
+              </ul>
+            </section>
+          {/if}
           {#each groups as group (group.category)}
             <section aria-label={group.label}>
               <h3>{group.label}</h3>
@@ -219,6 +236,14 @@
     list-style: none;
   }
 
+  li {
+    position: relative; /* étoile des favoris, centrée sur la ligne */
+  }
+
+  li > :global(.star) {
+    top: 12px;
+  }
+
   h3 {
     margin: 10px 12px 4px;
     font-size: var(--text-11);
@@ -230,7 +255,7 @@
 
   .item {
     min-height: 52px;
-    padding: 6px 12px;
+    padding: 6px 36px 6px 12px;
   }
 
   .text {

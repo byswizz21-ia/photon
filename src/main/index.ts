@@ -71,6 +71,9 @@ function enableLaunchAtLogin(): void {
   }
 }
 
+// Réglages qui changent la fenêtre elle-même.
+const WINDOW_KEYS: readonly (keyof Settings)[] = ['mode', 'alwaysOnTop', 'liveBlur', 'screen']
+
 // Réglages modifiés (zone de notif ou interface) : sauvegarde puis application partout.
 async function updateSettings(patch: Partial<Settings>): Promise<Settings> {
   const previousShortcut = data.settings.shortcut
@@ -82,7 +85,8 @@ async function updateSettings(patch: Partial<Settings>): Promise<Settings> {
   if (settings.barShortcut !== previousBar) {
     registerShortcut('bar', settings.barShortcut, BAR_SHORTCUTS, toggleBar)
   }
-  applyMode()
+  // Favoris, sons, notifications… : la fenêtre ne bouge pas (applyMode la replacerait).
+  if (WINDOW_KEYS.some((key) => key in patch)) applyMode()
   refreshTray(activeShortcut)
   send('photon:settings', settings)
   return settings

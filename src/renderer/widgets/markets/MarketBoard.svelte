@@ -9,12 +9,18 @@
 
   let { feed, now }: { feed: MarketFeed; now: number } = $props()
 
-  let index = $state(0)
+  // Actif choisi retenu par symbole : la liste grandit quand un cours arrive en retard.
+  let symbol = $state('')
   let range = $state<MarketRange>('1J')
   let hover = $state<number | null>(null)
 
   const quotes = $derived(feed.quotes)
-  const current = $derived(Math.min(index, quotes.length - 1))
+  const current = $derived(
+    Math.max(
+      0,
+      quotes.findIndex((q) => q.symbol === symbol)
+    )
+  )
   const quote = $derived(quotes[current] as MarketQuote)
   const line = $derived(seriesOf(quote, range))
   const base = $derived(line ? baseOf(quote, range, line) : quote.previous)
@@ -66,7 +72,7 @@
             class:on={i === current}
             class:down={change(q) < 0}
             title={q.symbol}
-            onclick={() => ((index = i), (hover = null))}
+            onclick={() => ((symbol = q.symbol), (hover = null))}
           >
             <span class="who"><span>{q.name}</span><small>{q.symbol}</small></span>
             {#if q.points.length > 1}
@@ -81,6 +87,7 @@
         </li>
       {/each}
     </ul>
+    {#if feed.missing.length}<p class="updated">Introuvable : {feed.missing.join(', ')}</p>{/if}
   </div>
 
   <div class="detail">
@@ -109,7 +116,9 @@
         {/each}
       </dl>
     {:else}
-      <p class="w-message">Lecture de l'historique…</p>
+      <p class="w-message">
+        {range === '1J' ? 'Pas encore de cours aujourd’hui.' : 'Lecture de l’historique…'}
+      </p>
     {/if}
   </div>
 </div>

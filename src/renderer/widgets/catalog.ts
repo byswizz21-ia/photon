@@ -43,3 +43,12 @@ export function searchWidgets(all: Record<string, WidgetManifest>, query: string
     })
     .sort((a, b) => Number(inName(b)) - Number(inName(a)) || byName(a, b))
 }
+
+// Favoris connus de cette version, par nom (un type inconnu reste dans les réglages mais pas ici).
+export const favoriteWidgets = (
+  all: Record<string, WidgetManifest>,
+  favorites: readonly string[]
+): WidgetEntry[] =>
+  entriesOf(all)
+    .filter((entry) => favorites.includes(entry.type))
+    .sort(byName)

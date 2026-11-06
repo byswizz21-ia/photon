@@ -104,6 +104,15 @@ test('intro : pas encore vue par défaut, seul true compte', () => {
   expect(parseSettings({ introSeen: true }).introSeen).toBe(true)
 })
 
+test('favoris : vides par défaut, noms valides gardés (même inconnus), doublons retirés', () => {
+  expect(parseSettings({}).favorites).toEqual([])
+  expect(parseSettings({ favorites: 'clock' }).favorites).toEqual([])
+  expect(parseSettings({ favorites: ['clock', 'futur', 'clock', '../x', 4] }).favorites).toEqual([
+    'clock',
+    'futur'
+  ])
+})
+
 test('sons : activés par défaut, volume borné, champ invalide → défaut', () => {
   expect(parseSettings({}).sound).toEqual({
     enabled: true,

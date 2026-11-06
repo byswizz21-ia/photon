@@ -9,19 +9,26 @@
   import Price from './Price.svelte'
   import Ranges from './Ranges.svelte'
 
-  let { quotes, now }: { quotes: MarketQuote[]; now: number } = $props()
+  let { quotes, missing, now }: { quotes: MarketQuote[]; missing: string[]; now: number } = $props()
 
-  let index = $state(0)
+  // Actif choisi retenu par symbole : la liste grandit quand un cours arrive en retard.
+  let symbol = $state('')
   let range = $state<MarketRange>('1J')
   let hover = $state<number | null>(null)
 
-  const quote = $derived(quotes[Math.min(index, quotes.length - 1)] as MarketQuote)
+  const current = $derived(
+    Math.max(
+      0,
+      quotes.findIndex((q) => q.symbol === symbol)
+    )
+  )
+  const quote = $derived(quotes[current] as MarketQuote)
   const line = $derived(seriesOf(quote, range))
   const base = $derived(line ? baseOf(quote, range, line) : quote.previous)
   const market = $derived(status(quote, now))
 
   function step(by: number): void {
-    index = (Math.min(index, quotes.length - 1) + by + quotes.length) % quotes.length
+    symbol = quotes[(current + by + quotes.length) % quotes.length]?.symbol ?? ''
     hover = null
   }
 
@@ -44,11 +51,14 @@
     >
   </div>
   <p class="name">{quote.name}<span>{quote.symbol}</span></p>
+  {#if missing.length}<p class="missing">Introuvable : {missing.join(', ')}</p>{/if}
   <Price {quote} {line} {range} {base} {hover} />
   {#if line}
     <Chart {line} {base} previous={range === '1J' ? quote.previous : null} bind:hover />
   {:else}
-    <p class="w-message">Lecture de l'historique…</p>
+    <p class="w-message">
+      {range === '1J' ? 'Pas encore de cours aujourd’hui.' : 'Lecture de l’historique…'}
+    </p>
   {/if}
   <div class="bottom">
     <Ranges value={range} onpick={(r) => ((range = r), (hover = null))} />
@@ -57,7 +67,7 @@
         <button type="button" class="w-icon" aria-label="Précédent" onclick={() => step(-1)}
           ><CaretLeftIcon size={12} weight="bold" /></button
         >
-        <span>{Math.min(index, quotes.length - 1) + 1} / {quotes.length}</span>
+        <span>{current + 1} / {quotes.length}</span>
         <button type="button" class="w-icon" aria-label="Suivant" onclick={() => step(1)}
           ><CaretRightIcon size={12} weight="bold" /></button
         >
@@ -100,6 +110,12 @@
   .dot.open {
     background: var(--rise);
     box-shadow: 0 0 8px var(--rise);
+  }
+
+  .missing {
+    margin: 0 0 4px;
+    font-size: var(--text-11);
+    color: var(--text-faint);
   }
 
   .name {

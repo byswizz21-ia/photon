@@ -99,7 +99,8 @@ const EDITABLE: readonly string[] = [
   'liveBlur',
   'sound',
   'notifications',
-  'introSeen'
+  'introSeen',
+  'favorites'
 ]
 
 const editable = (patch: unknown): Partial<Settings> =>

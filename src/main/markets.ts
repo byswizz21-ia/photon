@@ -79,7 +79,13 @@ function session(meta: Record<string, unknown> | undefined): MarketQuote['sessio
     Record<string, Record<string, unknown>> | undefined
   const { start, end, gmtoffset } = period?.['regular'] ?? {}
   if (typeof start !== 'number' || typeof end !== 'number') return null
-  return { start: start * 1000, end: end * 1000, offset: Number(gmtoffset ?? 0) * 1000 }
+  const zone = meta?.['exchangeTimezoneName']
+  return {
+    start: start * 1000,
+    end: end * 1000,
+    offset: Number(gmtoffset ?? 0) * 1000,
+    ...(typeof zone === 'string' && zone.length < 64 ? { zone } : {})
+  }
 }
 
 // « Bitcoin EUR » → « Bitcoin », « Apple Inc. » → « Apple », « NVIDIA Corporation » → « NVIDIA ».
@@ -136,7 +142,7 @@ async function downloadHistory(symbol: string): Promise<void> {
       }
     })
   )
-  // Tout illisible : nouvel essai dans une minute plutôt que dans une heure.
+  // Tout illisible : nouvel essai au prochain rafraîchissement plutôt que dans une heure.
   const at = Object.keys(ranges).length ? Date.now() : Date.now() - HISTORY_MS + RETRY_MS
   history.set(symbol, { at, ranges })
 }
@@ -163,10 +169,8 @@ async function refreshAll(): Promise<void> {
   const old = watchedSymbols(true).filter(
     (s) => Date.now() - (history.get(s)?.at ?? 0) > HISTORY_MS
   )
-  const [results] = await Promise.all([
-    Promise.all(symbols.map(download)),
-    Promise.all(old.map(downloadHistory))
-  ])
+  old.forEach(loadHistory) // à part : un historique lent ne retarde pas les cours
+  const results = await Promise.all(symbols.map(download))
   if (results.some(Boolean)) updatedAt = Date.now()
   timer = setTimeout(() => void refreshAll(), results.every(Boolean) ? REFRESH_MS : RETRY_MS)
 }
@@ -186,12 +190,15 @@ export function onMarketsProfile(): void {
     void download(symbol).finally(() => pending.delete(symbol))
   }
   // Design détaillé choisi : son historique tout de suite.
-  for (const symbol of watchedSymbols(true)) {
-    const key = `history:${symbol}`
-    if (history.has(symbol) || pending.has(key)) continue
-    pending.add(key)
-    void downloadHistory(symbol).finally(() => pending.delete(key))
-  }
+  for (const symbol of watchedSymbols(true)) if (!history.has(symbol)) loadHistory(symbol)
+}
+
+// Historique d'un symbole, une seule lecture à la fois (profil changé et rafraîchissement).
+function loadHistory(symbol: string): void {
+  const key = `history:${symbol}`
+  if (pending.has(key)) return
+  pending.add(key)
+  void downloadHistory(symbol).finally(() => pending.delete(key))
 }
 
 // Cache seulement : les symboles du widget, dans son ordre, ceux pas encore lus absents.

@@ -5,7 +5,13 @@
   import PlusIcon from 'phosphor-svelte/lib/PlusIcon'
   import XIcon from 'phosphor-svelte/lib/XIcon'
   import { app } from '../state.svelte'
-  import { groupWidgets, searchWidgets, type WidgetEntry } from '../widgets/catalog'
+  import FavoriteStar from '../lib/FavoriteStar.svelte'
+  import {
+    favoriteWidgets,
+    groupWidgets,
+    searchWidgets,
+    type WidgetEntry
+  } from '../widgets/catalog'
   import { widgets } from '../widgets/registry'
   import { CATEGORIES } from '../widgets/types'
   import { addWidget, CELL, MARGIN } from './Grid.svelte'
@@ -22,8 +28,13 @@
   let detail = $state<HTMLElement>()
 
   const results = $derived(searchWidgets(widgets, query))
+  const favorites = $derived(favoriteWidgets(widgets, app.settings.favorites))
   const shown = $derived(
-    query.trim() ? [{ category: 'search', label: 'Résultats', entries: results }] : groups
+    query.trim()
+      ? [{ category: 'search', label: 'Résultats', entries: results }]
+      : favorites.length
+        ? [{ category: 'favorites', label: 'Favoris', entries: favorites }, ...groups]
+        : groups
   )
   const manifest = $derived(widgets[selected])
   const instance = $derived(manifest ? createInstance(selected, manifest, []) : null)
@@ -67,6 +78,7 @@
       <span class="name">{entry.manifest.name}</span>
       <span class="desc">{entry.manifest.description}</span>
     </button>
+    <FavoriteStar type={entry.type} name={entry.manifest.name} />
   </li>
 {/snippet}
 
@@ -251,6 +263,10 @@
     color: var(--text-faint);
   }
 
+  li {
+    position: relative; /* étoile des favoris */
+  }
+
   ul {
     margin: 0;
     padding: 0;
@@ -268,7 +284,7 @@
     grid-template-columns: auto 1fr;
     align-items: center;
     gap: 4px 10px;
-    padding: 12px;
+    padding: 12px 36px 12px 12px;
     border: 1px solid var(--line);
     border-radius: var(--radius-tile);
     background: var(--white-4);

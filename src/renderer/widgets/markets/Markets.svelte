@@ -41,7 +41,7 @@
 </script>
 
 {#if ready && feed && settings.design === 'spot'}
-  <MarketSpot quotes={feed.quotes} {now} />
+  <MarketSpot quotes={feed.quotes} missing={feed.missing} {now} />
 {:else if ready && feed && settings.design === 'market'}
   <MarketBoard {feed} {now} />
 {:else}

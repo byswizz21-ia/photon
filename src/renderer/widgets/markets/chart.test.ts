@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import type { MarketQuote } from '../../../shared/api'
-import { money, percent, plot, seriesOf, status } from './chart'
+import { hm, money, percent, plot, seriesOf, status } from './chart'
 
 // Mardi 3 novembre 2026, séance de Paris 9 h – 17 h 30 (heure locale du test).
 const at = (day: number, h: number, m = 0): number => new Date(2026, 10, day, h, m).getTime()
@@ -48,4 +48,13 @@ test('textes en français', () => {
   expect(percent(-1.234)).toBe('−1,23 %')
   expect(money(58420, 'EUR')).toBe('58 420 €')
   expect(money(12.5, '', 58420)).toBe('13')
+})
+
+test('séance : prochaine ouverture à la même heure locale après le changement d’heure', () => {
+  // Vendredi 23 octobre 2026, Paris 9 h CEST (7 h UTC) ; heure d'hiver le dimanche 25.
+  const start = Date.UTC(2026, 9, 23, 7)
+  const end = Date.UTC(2026, 9, 23, 15, 30)
+  const paris = quote({ session: { start, end, offset: 7_200_000, zone: 'Europe/Paris' } })
+  const monday = Date.UTC(2026, 9, 26, 8) // 9 h CET
+  expect(status(paris, Date.UTC(2026, 9, 24, 10)).mid).toContain(hm(monday))
 })

@@ -1,7 +1,13 @@
 // État global de l'interface, partagé par l'app, la grille, le thème et les widgets.
 import { prefersReducedMotion } from 'svelte/motion'
 import type { AppState } from '../shared/api'
-import { defaultProfile, defaultSettings, defaultTheme, type ProfileInfo } from '../shared/model'
+import {
+  defaultProfile,
+  defaultSettings,
+  defaultTheme,
+  type ProfileInfo,
+  type Settings
+} from '../shared/model'
 
 export const app = $state({
   visible: false, // fenêtre affichée : les widgets ne lisent le système que dans cet état
@@ -61,4 +67,25 @@ export async function changeProfile(request: () => Promise<AppState | null>): Pr
 
 export function switchProfile(id: string): void {
   if (id !== app.settings.activeProfile) void changeProfile(() => window.photon.switchProfile(id))
+}
+
+let favoriteSaves = 0 // étoiles cliquées dont l'enregistrement n'est pas encore revenu
+
+// Réglages envoyés par Windows. Étoiles en cours d'enregistrement : la liste locale est la plus
+// récente (une réponse plus ancienne éteindrait une étoile qu'on vient d'allumer).
+export function receiveSettings(settings: Settings): void {
+  app.settings = favoriteSaves ? { ...settings, favorites: app.settings.favorites } : settings
+}
+
+// Étoile d'un widget du menu « Ajouter » : affichée tout de suite, enregistrée ensuite.
+export function toggleFavorite(type: string): void {
+  const { favorites } = app.settings
+  app.settings.favorites = favorites.includes(type)
+    ? favorites.filter((t) => t !== type)
+    : [...favorites, type]
+  favoriteSaves++
+  window.photon
+    .saveSettings({ favorites: $state.snapshot(app.settings.favorites) })
+    .catch((error: unknown) => console.warn(`[photon] favoris non enregistrés : ${String(error)}`))
+    .finally(() => favoriteSaves--)
 }

@@ -279,7 +279,8 @@ export interface MarketQuote extends MarketSeries {
   time: number // ms, heure du dernier cours
   kind: 'crypto' | 'index' | 'stock'
   exchange: string // « Paris », « NasdaqGS »
-  session: { start: number; end: number; offset: number } | null // séance (ms, décalage du fuseau de la place)
+  // Séance (ms), décalage et fuseau de la place (« Europe/Paris », pour le changement d'heure).
+  session: { start: number; end: number; offset: number; zone?: string } | null
   history: Partial<Record<Exclude<MarketRange, '1J'>, MarketSeries>> // designs détaillés seulement
 }
 

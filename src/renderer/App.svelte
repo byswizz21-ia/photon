@@ -13,7 +13,14 @@
   import Profiles from './profiles/Profiles.svelte'
   import { reveal } from './reveal'
   import { clickSound, play, preloadSounds, soundOnChange } from './sound.svelte'
-  import { app, flushProfile, flushTheme, reducedMotion, switchProfile } from './state.svelte'
+  import {
+    app,
+    flushProfile,
+    flushTheme,
+    receiveSettings,
+    reducedMotion,
+    switchProfile
+  } from './state.svelte'
   import { useTheme } from './theme/apply.svelte'
   import Background from './theme/Background.svelte'
   import LiveBackdrop from './theme/LiveBackdrop.svelte'
@@ -58,7 +65,7 @@
       flushTheme()
       flushShared()
     })
-    const offSettings = window.photon.onSettings((settings) => (app.settings = settings))
+    const offSettings = window.photon.onSettings(receiveSettings)
     const offSkip = window.photon.onSkipIntro(endIntro) // raccourci global pendant l'intro
     const offSwitch = window.photon.onSwitchTo(switchProfile) // bascule auto
     const offPlace = window.photon.onPlace((next) => (place = next))

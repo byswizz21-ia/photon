@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { groupWidgets, searchWidgets } from './catalog'
+import { favoriteWidgets, groupWidgets, searchWidgets } from './catalog'
 import type { WidgetCategory, WidgetManifest } from './types'
 
 const widget = (name: string, category: WidgetCategory, description = ''): WidgetManifest =>
@@ -27,4 +27,12 @@ test('recherche : sans accents, nom avant description, rubrique trouvée', () =>
   expect(searchWidgets(all, 'musique').map((e) => e.type)).toEqual(['volume'])
   expect(searchWidgets(all, 'o').map((e) => e.type)).toEqual(['clock', 'volume', 'todo', 'agenda'])
   expect(searchWidgets(all, '  ')).toEqual([])
+})
+
+test('favoris : triés par nom, type inconnu ignoré', () => {
+  expect(favoriteWidgets(all, ['volume', 'old', 'agenda']).map((e) => e.type)).toEqual([
+    'agenda',
+    'volume'
+  ])
+  expect(favoriteWidgets(all, [])).toEqual([])
 })
